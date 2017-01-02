@@ -30,7 +30,10 @@ public:
     explicit Domain(
         std::string&& ownerPublicKey,
         std::string&& name
-    );
+    ):
+        ownerPublicKey(ownerPublicKey),
+        name(name)
+    {}
 
     explicit Domain():
         ownerPublicKey(""),
@@ -41,4 +44,3 @@ public:
 };  // namespace domain
 
 #endif  // CORE_DOMAIN_OBJECTS_DOMAIN_HPP_
-

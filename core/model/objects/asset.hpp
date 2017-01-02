@@ -39,22 +39,31 @@ public:
         precision(-1)
     {}
 
-
     explicit Asset(
         std::string&& domain,
         std::string&&  name,
         unsigned long long&& value,
         unsigned int&& precision
-    );
+    ):
+        domain(domain),
+        name(name),
+        value(value),
+        precision(precision)
+    {}
 
     explicit Asset(
-        std::string&&  name,
+        std::string&& name,
         unsigned long long&& value
-    );
+    ):
+        domain(""),
+        name(name),
+        value(value),
+        precision(-1)
+    {}
+
 
 };
 
 };  // namespace asset
 
 #endif  // CORE_DOMAIN_OBJECTS_ASSET_HPP_
-

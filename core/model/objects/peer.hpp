@@ -1,5 +1,6 @@
 /*
 Copyright Soramitsu Co., Ltd. 2016 All Rights Reserved.
+http://soramitsu.co.jp
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,16 +15,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "domain.hpp"
+#ifndef CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+#define CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+
+#include <string>
+#include <memory>
 
 namespace object {
 
-Domain::Domain(
-    std::string&& ownerPublicKey,
-    std::string&& name
-):
-    ownerPublicKey(ownerPublicKey),
-    name(name)
-{}
+class Peer{
 
-};  // namespace domain
+public:
+    std::string ip;
+    std::string publicKey;
+
+};
+
+};  // namespace object
+
+#endif  // CORE_DOMAIN_OBJECTS_MESSAGE_HPP_

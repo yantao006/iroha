@@ -28,10 +28,11 @@ class Message{
 public:
     std::string text;
 
-    explicit Message(std::string&& text);
+    explicit Message(std::string text):
+       text(std::move(text))
+    {}
 };
 
 };  // namespace message
 
 #endif  // CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
-
