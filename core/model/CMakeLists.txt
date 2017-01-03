@@ -1,4 +1,3 @@
-add_subdirectory(objects)
 add_subdirectory(commands)
 
 ADD_LIBRARY(transaction STATIC
@@ -7,7 +6,6 @@ ADD_LIBRARY(transaction STATIC
 
 target_link_libraries(transaction
   commands
-  objects
   datetime
   hash
 )

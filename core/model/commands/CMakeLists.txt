@@ -7,7 +7,6 @@ ADD_LIBRARY(commands STATIC
 )
 
 target_link_libraries(commands
-  objects
   domain_repository
   logger
 )

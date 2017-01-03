@@ -20,6 +20,5 @@ target_link_libraries(validator
   signature
   transaction
   commands
-  objects
 )
 
