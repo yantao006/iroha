@@ -28,9 +28,7 @@ class Message{
 public:
     std::string text;
 
-    explicit Message(std::string text):
-       text(std::move(text))
-    {}
+    explicit Message(std::string text);
 };
 
 };  // namespace message

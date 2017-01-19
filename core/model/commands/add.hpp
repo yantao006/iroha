@@ -19,11 +19,14 @@ limitations under the License.
 
 #include <utility>
 #include "../../repository/domain/account_repository.hpp"
+#include "../../repository/domain/asset_repository.hpp"
+
+#include "command.hpp"
 
 namespace command {
 
 template <typename T>
-class Add: public T {
+class Add: public T, public Command {
   public:
 
     template<typename... Args>
@@ -36,9 +39,6 @@ class Add: public T {
     constexpr auto getCommandName() const{
         return "Add";
     }
-
-    void execution();
-
 };
 
 };  // namespace command
