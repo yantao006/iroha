@@ -22,7 +22,7 @@ limitations under the License.
 #include <memory>
 #include <functional>
 
-#include "../../infra/protobuf/event.grpc.pb.h"
+#include "../../../flatbuf/api_generated.h"
 #include "../consensus_event.hpp"
 
 namespace connection {
@@ -37,16 +37,16 @@ namespace connection {
 
     bool send(
         const std::string& ip,
-        const Event::ConsensusEvent& msg)
+        const iroha::ConsensusEvent& msg)
     ;
 
     bool sendAll(
-        const Event::ConsensusEvent& msg
+        const iroha::ConsensusEvent& msg
     );
 
     bool receive(const std::function<void(
         const std::string&,
-        Event::ConsensusEvent&)
+        iroha::ConsensusEvent&)
     >& callback);
 
 

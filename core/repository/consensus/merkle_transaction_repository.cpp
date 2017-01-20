@@ -24,12 +24,12 @@ limitations under the License.
 #include "../../util/logger.hpp"
 #include "../../crypto/hash.hpp"
 
-#include "../../infra/protobuf/event.grpc.pb.h"
+#include "../../../flatbuf/api_generated.h"
 
 namespace merkle_transaction_repository {
 
     //TODO: change bool to throw an exception instead
-    bool commit(const Event::ConsensusEvent& event) {
+    bool commit(const iroha::ConsensusEvent& event) {
         std::vector<std::tuple<std::string, std::string>> batchCommit
           = {
                 std::make_tuple("last_insertion", pevent->transaction().hash()),
@@ -50,7 +50,7 @@ namespace merkle_transaction_repository {
     }
 
 
-    std::string calculateNewRootHash(const Event::ConsensusEvent& event,
+    std::string calculateNewRootHash(const iroha::ConsensusEvent& event,
                                      std::vector<std::tuple<std::string, std::string>> &batchCommit) {
 
         std::string lastInsertion = repository::world_state_repository::find("last_insertion");

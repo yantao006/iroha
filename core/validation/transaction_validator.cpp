@@ -17,23 +17,9 @@ limitations under the License.
 
 namespace transaction_validator {
 
-    template<typename T>
-    using Transaction = transaction::Transaction<T>;
-    template<typename T>
-    using ConsensusEvent = event::ConsensusEvent<T>;
-    template<typename T>
-    using Add = command::Add<T>;
-    template<typename T>
-    using Transfer = command::Transfer<T>;
-
-    template<>
-    bool isValid<Event::ConsensusEvent>(
-        const std::unique_ptr<Event::ConsensusEvent>& tx
-    ){
-        // Write domain logic
-        return true;
+    int getNumberOfVeliedEventSignature(const EventSignatures& esig,const std::string& hash){
+        for(auto es = esig.begin(); es != esig.end(); es++){
+          signature::verify(es->signature()->str(), hash, es->publicKey()->str());
+        }
     }
-
-
-
 };

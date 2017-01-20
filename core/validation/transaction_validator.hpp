@@ -18,23 +18,15 @@ limitations under the License.
 #define CORE_VALIDATION_TRANSACTIONVALIDATOR_HPP_
 
 #include "../consensus/consensus_event.hpp"
-#include "../infra/protobuf/event.grpc.pb.h"
-
-#include "../model/commands/add.hpp"
-#include "../model/commands/transfer.hpp"
-#include "../model/commands/update.hpp"
-
-#include "../model/objects/account.hpp"
-#include "../model/objects/asset.hpp"
-#include "../model/objects/domain.hpp"
-
+#include "../../flatbuf/api_generated.h"
+#include "../crypto/signature.hpp"
 
 #include <memory>
 #include <type_traits>
 
 namespace transaction_validator {
 
-    using transaction::Transaction;
+    using EventSignatures = flatbuffers::Vector<flatbuffers::Offset<iroha::EventSignature>>;
 
     template<typename T>
     bool isValid(const std::unique_ptr<T>& tx);
@@ -44,6 +36,8 @@ namespace transaction_validator {
 
     template<typename T>
     bool validForType(const std::unique_ptr<T>& tx);
+
+    int getNumberOfVeliedEventSignature(const EventSignatures& esig, const std::string& hash);
 
 };  // namespace transaction_validator
 

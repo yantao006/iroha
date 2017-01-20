@@ -24,10 +24,6 @@ limitations under the License.
 
 #include "../util/logger.hpp"
 #include "../repository/consensus/merkle_transaction_repository.hpp"
-#include "../crypto/hash.hpp"
-#include "../crypto/signature.hpp"
-
-#include "../infra/protobuf/convertor.hpp"
 
 #include "../validation/transaction_validator.hpp"
 #include "../service/peer_service.hpp"
@@ -52,7 +48,7 @@ limitations under the License.
 */
 namespace sumeragi {
 
-    using event::ConsensusEvent;
+    using iroha::ConsensusEvent;
     using transaction::Transaction;
     using namespace command;
     using namespace object;
@@ -74,20 +70,12 @@ namespace sumeragi {
 
     namespace detail {
 
-        std::uint32_t getNumValidSignatures(const Event::ConsensusEvent& event) {
-            std::uint32_t sum = 0;
-            for (auto&& esig: event.eventsignatures()) {
-                if (signature::verify(esig.signature(), event.transaction().hash(), esig.publickey())) {
-                    sum++;
-                }
-            }
-            return sum;
+        std::uint32_t getNumValidSignatures(const iroha::ConsensusEvent& event) {
+            return transaction_validator::getNumberOfVeliedEventSignature(*event.eventSignatures(), "a");
         }
 
-        void addSignature(Event::ConsensusEvent& event, const std::string& publicKey, const std::string& signature) {
-            Event::EventSignature sig;
-            sig.set_signature(signature);
-            sig.set_publickey(publicKey);
+        void addSignature(iroha::ConsensusEvent& event, const std::string& publicKey, const std::string& signature) {
+            auto signature = flatbuffer::offset::factory<iroha::EventSignature>(publicKey, signature);
             event.add_eventsignatures()->CopyFrom(sig);
         }
 
@@ -250,7 +238,7 @@ namespace sumeragi {
     }
 
 
-    void processTransaction(Event::ConsensusEvent& event) {
+    void processTransaction(iroha::ConsensusEvent& event) {
 
         logger::info("sumeragi")    <<  "processTransaction";
         //if (!transaction_validator::isValid(event->getTx())) {
@@ -398,7 +386,7 @@ namespace sumeragi {
     * | 0 |--| 1 |--| 2 |--| 3 |--| 4 |--| 5 |
     * |---|  |---|  |---|  |---|  |---|  |---|.
     */
-    void panic(const Event::ConsensusEvent& event) {
+    void panic(const iroha::ConsensusEvent& event) {
         context->panicCount++; // TODO: reset this later
         auto broadcastStart = 2 * context->maxFaulty + 1 + context->maxFaulty * context->panicCount;
         auto broadcastEnd   = broadcastStart + context->maxFaulty;

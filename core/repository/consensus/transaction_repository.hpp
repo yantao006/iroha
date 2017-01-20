@@ -19,18 +19,19 @@ See the License for the specific language governing permissions and
 #define IROHA_TRANSACTION_REPOSITORY_HPP
 
 #include "../../model/transaction.hpp"
-#include "../../infra/protobuf/convertor.hpp"
+#include "../../../flatbuf/api_generated.h"
+
 
 namespace repository{
     namespace transaction {
 
-        void add(const std::string &key,const Event::ConsensusEvent& strTx);
+        void add(const std::string &key,const iroha::Transaction& strTx);
 
-        std::vector<Event::Transaction> findAll();
+        std::vector<iroha::Transaction> findAll();
 
-        Event::Transaction find(std::string key);
+        iroha::Transaction find(std::string key);
 
-        std::vector<Event::Transaction> findByAssetName(std::string name);
+        std::vector<iroha::Transaction> findByAssetName(std::string name);
 
     }
 }
