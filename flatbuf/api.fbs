@@ -1,0 +1,105 @@
+namespace iroha;
+
+attribute "priority";
+
+table BaseObject{
+   text: string;
+   integer: int;
+   boolean: bool;
+
+   name: string (required);
+}
+
+table SimpleAsset{
+  name:   string;
+  domain: Domain (required);
+
+  object: BaseObject;
+
+  smartContractName: string;
+}
+table Asset{
+  name:   string;
+  domain: Domain (required);
+
+  objects: [BaseObject];
+
+  smartContractName: string;
+}
+
+table Domain{
+  ownerPublicKey: string;
+  name: string;
+}
+table Account{
+  publicKey: string;
+  Assets: [Asset];
+}
+table Peer{
+  publicKey: string;
+  address: string;
+}
+union Object  { SimpleAsset, Asset, Domain, Account, Peer }
+
+union Command { Add, Transfer, Update, Remove, Batch, Unbatch, Contract }
+
+table Add{
+  object: Object (required);
+}
+table Transfer{
+  receiver: string (required);
+  object:   Object (required);
+}
+table Update{
+  object: Object (required);
+}
+table Remove{
+  object: Object (required);
+}
+table Batch{
+  alias: string (required);
+  // This is bad... and I should write it, because
+  // vector of union types not supported (wrap in table first).
+  // I want to write commands: [Command];
+  commands: [string];
+}
+table Unbatch{
+  alias: string (required);
+}
+table Contract{
+  object:        Object (required);
+  command:       string;
+  contractName:  string (required);
+}
+
+table TxSignature {
+  publicKey: string (required);
+  signature: string (required);
+}
+table Transaction {
+  sender:   string (required);
+  command: Command (required);
+  txSignatures: [TxSignature] (required);
+  hash:                string (required);
+}
+
+enum State : byte { Undetermined, Commited }
+table EventSignature {
+  publicKey: string (required);
+  signature: string (required);
+}
+table ConsensusEvent{
+  transaction: [Transaction] (required);
+  eventSignatures: [EventSignature];
+  state: State;
+}
+
+table Response{
+  status: int;
+  message: string;
+}
+rpc_service Iroha {
+  Torii(ConsensusEvent): Response (streaming: "none");
+}
+
+root_type ConsensusEvent;
