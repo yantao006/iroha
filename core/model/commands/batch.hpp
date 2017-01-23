@@ -14,18 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 #ifndef CORE_DOMAIN_BATCH_HPP_
 #define CORE_DOMAIN_BATCH_HPP_
-
-#include "../objects/domain.hpp"
-#include "../objects/asset.hpp"
-#include "../objects/message.hpp"
 
 #include "command.hpp"
 
 #include <string>
-#include <iostream>
 
 namespace command {
 

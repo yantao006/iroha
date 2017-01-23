@@ -18,14 +18,9 @@ limitations under the License.
 #ifndef CORE_DOMAIN_UNBATCH_HPP_
 #define CORE_DOMAIN_UNBATCH_HPP_
 
-#include "../objects/domain.hpp"
-#include "../objects/asset.hpp"
-#include "../objects/message.hpp"
-
 #include "command.hpp"
 
 #include <string>
-#include <iostream>
 
 namespace command {
 
