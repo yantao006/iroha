@@ -53,14 +53,20 @@ struct TxSignatureT;
 struct Transaction;
 struct TransactionT;
 
+struct Response;
+struct ResponseT;
+
+struct Request;
+struct RequestT;
+
+struct Query;
+struct QueryT;
+
 struct EventSignature;
 struct EventSignatureT;
 
 struct ConsensusEvent;
 struct ConsensusEventT;
-
-struct Response;
-struct ResponseT;
 
 enum Object {
   Object_NONE = 0,
@@ -282,17 +288,42 @@ struct CommandUnion {
 
 bool VerifyCommand(flatbuffers::Verifier &verifier, const void *obj, Command type);
 
+enum QueryType {
+  QueryType_TransactionHistory = 0,
+  QueryType_HashTree = 1,
+  QueryType_ObjectInformation = 2,
+  QueryType_MIN = QueryType_TransactionHistory,
+  QueryType_MAX = QueryType_ObjectInformation
+};
+
+inline const char **EnumNamesQueryType() {
+  static const char *names[] = {
+    "TransactionHistory",
+    "HashTree",
+    "ObjectInformation",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameQueryType(QueryType e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesQueryType()[index];
+}
+
 enum State {
   State_Undetermined = 0,
   State_Commited = 1,
+  State_Rejected = 2,
   State_MIN = State_Undetermined,
-  State_MAX = State_Commited
+  State_MAX = State_Rejected
 };
 
 inline const char **EnumNamesState() {
   static const char *names[] = {
     "Undetermined",
     "Commited",
+    "Rejected",
     nullptr
   };
   return names;
@@ -326,14 +357,26 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *text() const {
     return GetPointer<const flatbuffers::String *>(VT_TEXT);
   }
+  flatbuffers::String *mutable_text() {
+    return GetPointer<flatbuffers::String *>(VT_TEXT);
+  }
   int32_t integer() const {
     return GetField<int32_t>(VT_INTEGER, 0);
+  }
+  bool mutate_integer(int32_t _integer) {
+    return SetField(VT_INTEGER, _integer);
   }
   bool boolean() const {
     return GetField<uint8_t>(VT_BOOLEAN, 0) != 0;
   }
+  bool mutate_boolean(bool _boolean) {
+    return SetField(VT_BOOLEAN, static_cast<uint8_t>(_boolean));
+  }
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
+  }
+  flatbuffers::String *mutable_name() {
+    return GetPointer<flatbuffers::String *>(VT_NAME);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -429,14 +472,26 @@ struct SimpleAsset FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
+  flatbuffers::String *mutable_name() {
+    return GetPointer<flatbuffers::String *>(VT_NAME);
+  }
   const Domain *domain() const {
     return GetPointer<const Domain *>(VT_DOMAIN);
+  }
+  Domain *mutable_domain() {
+    return GetPointer<Domain *>(VT_DOMAIN);
   }
   const BaseObject *object() const {
     return GetPointer<const BaseObject *>(VT_OBJECT);
   }
+  BaseObject *mutable_object() {
+    return GetPointer<BaseObject *>(VT_OBJECT);
+  }
   const flatbuffers::String *smartContractName() const {
     return GetPointer<const flatbuffers::String *>(VT_SMARTCONTRACTNAME);
+  }
+  flatbuffers::String *mutable_smartContractName() {
+    return GetPointer<flatbuffers::String *>(VT_SMARTCONTRACTNAME);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -534,14 +589,26 @@ struct Asset FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
+  flatbuffers::String *mutable_name() {
+    return GetPointer<flatbuffers::String *>(VT_NAME);
+  }
   const Domain *domain() const {
     return GetPointer<const Domain *>(VT_DOMAIN);
+  }
+  Domain *mutable_domain() {
+    return GetPointer<Domain *>(VT_DOMAIN);
   }
   const flatbuffers::Vector<flatbuffers::Offset<BaseObject>> *objects() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<BaseObject>> *>(VT_OBJECTS);
   }
+  flatbuffers::Vector<flatbuffers::Offset<BaseObject>> *mutable_objects() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<BaseObject>> *>(VT_OBJECTS);
+  }
   const flatbuffers::String *smartContractName() const {
     return GetPointer<const flatbuffers::String *>(VT_SMARTCONTRACTNAME);
+  }
+  flatbuffers::String *mutable_smartContractName() {
+    return GetPointer<flatbuffers::String *>(VT_SMARTCONTRACTNAME);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -636,8 +703,14 @@ struct Domain FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *ownerPublicKey() const {
     return GetPointer<const flatbuffers::String *>(VT_OWNERPUBLICKEY);
   }
+  flatbuffers::String *mutable_ownerPublicKey() {
+    return GetPointer<flatbuffers::String *>(VT_OWNERPUBLICKEY);
+  }
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
+  }
+  flatbuffers::String *mutable_name() {
+    return GetPointer<flatbuffers::String *>(VT_NAME);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -712,8 +785,14 @@ struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *publicKey() const {
     return GetPointer<const flatbuffers::String *>(VT_PUBLICKEY);
   }
+  flatbuffers::String *mutable_publicKey() {
+    return GetPointer<flatbuffers::String *>(VT_PUBLICKEY);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<Asset>> *Assets() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Asset>> *>(VT_ASSETS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<Asset>> *mutable_Assets() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Asset>> *>(VT_ASSETS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -789,8 +868,14 @@ struct Peer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *publicKey() const {
     return GetPointer<const flatbuffers::String *>(VT_PUBLICKEY);
   }
+  flatbuffers::String *mutable_publicKey() {
+    return GetPointer<flatbuffers::String *>(VT_PUBLICKEY);
+  }
   const flatbuffers::String *address() const {
     return GetPointer<const flatbuffers::String *>(VT_ADDRESS);
+  }
+  flatbuffers::String *mutable_address() {
+    return GetPointer<flatbuffers::String *>(VT_ADDRESS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -864,8 +949,14 @@ struct Add FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   Object object_type() const {
     return static_cast<Object>(GetField<uint8_t>(VT_OBJECT_TYPE, 0));
   }
+  bool mutate_object_type(Object _object_type) {
+    return SetField(VT_OBJECT_TYPE, static_cast<uint8_t>(_object_type));
+  }
   const void *object() const {
     return GetPointer<const void *>(VT_OBJECT);
+  }
+  void *mutable_object() {
+    return GetPointer<void *>(VT_OBJECT);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -931,11 +1022,20 @@ struct Transfer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *receiver() const {
     return GetPointer<const flatbuffers::String *>(VT_RECEIVER);
   }
+  flatbuffers::String *mutable_receiver() {
+    return GetPointer<flatbuffers::String *>(VT_RECEIVER);
+  }
   Object object_type() const {
     return static_cast<Object>(GetField<uint8_t>(VT_OBJECT_TYPE, 0));
   }
+  bool mutate_object_type(Object _object_type) {
+    return SetField(VT_OBJECT_TYPE, static_cast<uint8_t>(_object_type));
+  }
   const void *object() const {
     return GetPointer<const void *>(VT_OBJECT);
+  }
+  void *mutable_object() {
+    return GetPointer<void *>(VT_OBJECT);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1019,8 +1119,14 @@ struct Update FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   Object object_type() const {
     return static_cast<Object>(GetField<uint8_t>(VT_OBJECT_TYPE, 0));
   }
+  bool mutate_object_type(Object _object_type) {
+    return SetField(VT_OBJECT_TYPE, static_cast<uint8_t>(_object_type));
+  }
   const void *object() const {
     return GetPointer<const void *>(VT_OBJECT);
+  }
+  void *mutable_object() {
+    return GetPointer<void *>(VT_OBJECT);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1084,8 +1190,14 @@ struct Remove FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   Object object_type() const {
     return static_cast<Object>(GetField<uint8_t>(VT_OBJECT_TYPE, 0));
   }
+  bool mutate_object_type(Object _object_type) {
+    return SetField(VT_OBJECT_TYPE, static_cast<uint8_t>(_object_type));
+  }
   const void *object() const {
     return GetPointer<const void *>(VT_OBJECT);
+  }
+  void *mutable_object() {
+    return GetPointer<void *>(VT_OBJECT);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1150,8 +1262,14 @@ struct Batch FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *alias() const {
     return GetPointer<const flatbuffers::String *>(VT_ALIAS);
   }
+  flatbuffers::String *mutable_alias() {
+    return GetPointer<flatbuffers::String *>(VT_ALIAS);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *commands() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_COMMANDS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *mutable_commands() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_COMMANDS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1226,6 +1344,9 @@ struct Unbatch FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *alias() const {
     return GetPointer<const flatbuffers::String *>(VT_ALIAS);
   }
+  flatbuffers::String *mutable_alias() {
+    return GetPointer<flatbuffers::String *>(VT_ALIAS);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_ALIAS) &&
@@ -1294,14 +1415,26 @@ struct Contract FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   Object object_type() const {
     return static_cast<Object>(GetField<uint8_t>(VT_OBJECT_TYPE, 0));
   }
+  bool mutate_object_type(Object _object_type) {
+    return SetField(VT_OBJECT_TYPE, static_cast<uint8_t>(_object_type));
+  }
   const void *object() const {
     return GetPointer<const void *>(VT_OBJECT);
+  }
+  void *mutable_object() {
+    return GetPointer<void *>(VT_OBJECT);
   }
   const flatbuffers::String *command() const {
     return GetPointer<const flatbuffers::String *>(VT_COMMAND);
   }
+  flatbuffers::String *mutable_command() {
+    return GetPointer<flatbuffers::String *>(VT_COMMAND);
+  }
   const flatbuffers::String *contractName() const {
     return GetPointer<const flatbuffers::String *>(VT_CONTRACTNAME);
+  }
+  flatbuffers::String *mutable_contractName() {
+    return GetPointer<flatbuffers::String *>(VT_CONTRACTNAME);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1395,8 +1528,14 @@ struct TxSignature FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *publicKey() const {
     return GetPointer<const flatbuffers::String *>(VT_PUBLICKEY);
   }
+  flatbuffers::String *mutable_publicKey() {
+    return GetPointer<flatbuffers::String *>(VT_PUBLICKEY);
+  }
   const flatbuffers::String *signature() const {
     return GetPointer<const flatbuffers::String *>(VT_SIGNATURE);
+  }
+  flatbuffers::String *mutable_signature() {
+    return GetPointer<flatbuffers::String *>(VT_SIGNATURE);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1478,17 +1617,32 @@ struct Transaction FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *sender() const {
     return GetPointer<const flatbuffers::String *>(VT_SENDER);
   }
+  flatbuffers::String *mutable_sender() {
+    return GetPointer<flatbuffers::String *>(VT_SENDER);
+  }
   Command command_type() const {
     return static_cast<Command>(GetField<uint8_t>(VT_COMMAND_TYPE, 0));
+  }
+  bool mutate_command_type(Command _command_type) {
+    return SetField(VT_COMMAND_TYPE, static_cast<uint8_t>(_command_type));
   }
   const void *command() const {
     return GetPointer<const void *>(VT_COMMAND);
   }
+  void *mutable_command() {
+    return GetPointer<void *>(VT_COMMAND);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<TxSignature>> *txSignatures() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<TxSignature>> *>(VT_TXSIGNATURES);
   }
+  flatbuffers::Vector<flatbuffers::Offset<TxSignature>> *mutable_txSignatures() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<TxSignature>> *>(VT_TXSIGNATURES);
+  }
   const flatbuffers::String *hash() const {
     return GetPointer<const flatbuffers::String *>(VT_HASH);
+  }
+  flatbuffers::String *mutable_hash() {
+    return GetPointer<flatbuffers::String *>(VT_HASH);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1577,6 +1731,287 @@ inline flatbuffers::Offset<Transaction> CreateTransactionDirect(
 
 flatbuffers::Offset<Transaction> CreateTransaction(flatbuffers::FlatBufferBuilder &_fbb, const TransactionT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
+struct ResponseT : public flatbuffers::NativeTable {
+  typedef Response TableType;
+  int32_t status;
+  std::string message;
+  std::vector<std::unique_ptr<TransactionT>> transaction;
+  ObjectUnion object;
+  ResponseT()
+      : status(0) {
+  }
+};
+
+struct Response FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ResponseT NativeTableType;
+  enum {
+    VT_STATUS = 4,
+    VT_MESSAGE = 6,
+    VT_TRANSACTION = 8,
+    VT_OBJECT_TYPE = 10,
+    VT_OBJECT = 12
+  };
+  int32_t status() const {
+    return GetField<int32_t>(VT_STATUS, 0);
+  }
+  bool mutate_status(int32_t _status) {
+    return SetField(VT_STATUS, _status);
+  }
+  const flatbuffers::String *message() const {
+    return GetPointer<const flatbuffers::String *>(VT_MESSAGE);
+  }
+  flatbuffers::String *mutable_message() {
+    return GetPointer<flatbuffers::String *>(VT_MESSAGE);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<Transaction>> *transaction() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Transaction>> *>(VT_TRANSACTION);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<Transaction>> *mutable_transaction() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Transaction>> *>(VT_TRANSACTION);
+  }
+  Object object_type() const {
+    return static_cast<Object>(GetField<uint8_t>(VT_OBJECT_TYPE, 0));
+  }
+  bool mutate_object_type(Object _object_type) {
+    return SetField(VT_OBJECT_TYPE, static_cast<uint8_t>(_object_type));
+  }
+  const void *object() const {
+    return GetPointer<const void *>(VT_OBJECT);
+  }
+  void *mutable_object() {
+    return GetPointer<void *>(VT_OBJECT);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_STATUS) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_MESSAGE) &&
+           verifier.Verify(message()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_TRANSACTION) &&
+           verifier.Verify(transaction()) &&
+           verifier.VerifyVectorOfTables(transaction()) &&
+           VerifyField<uint8_t>(verifier, VT_OBJECT_TYPE) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_OBJECT) &&
+           VerifyObject(verifier, object(), object_type()) &&
+           verifier.EndTable();
+  }
+  ResponseT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(ResponseT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Response> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct ResponseBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_status(int32_t status) {
+    fbb_.AddElement<int32_t>(Response::VT_STATUS, status, 0);
+  }
+  void add_message(flatbuffers::Offset<flatbuffers::String> message) {
+    fbb_.AddOffset(Response::VT_MESSAGE, message);
+  }
+  void add_transaction(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Transaction>>> transaction) {
+    fbb_.AddOffset(Response::VT_TRANSACTION, transaction);
+  }
+  void add_object_type(Object object_type) {
+    fbb_.AddElement<uint8_t>(Response::VT_OBJECT_TYPE, static_cast<uint8_t>(object_type), 0);
+  }
+  void add_object(flatbuffers::Offset<void> object) {
+    fbb_.AddOffset(Response::VT_OBJECT, object);
+  }
+  ResponseBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ResponseBuilder &operator=(const ResponseBuilder &);
+  flatbuffers::Offset<Response> Finish() {
+    const auto end = fbb_.EndTable(start_, 5);
+    auto o = flatbuffers::Offset<Response>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Response> CreateResponse(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t status = 0,
+    flatbuffers::Offset<flatbuffers::String> message = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Transaction>>> transaction = 0,
+    Object object_type = Object_NONE,
+    flatbuffers::Offset<void> object = 0) {
+  ResponseBuilder builder_(_fbb);
+  builder_.add_object(object);
+  builder_.add_transaction(transaction);
+  builder_.add_message(message);
+  builder_.add_status(status);
+  builder_.add_object_type(object_type);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Response> CreateResponseDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t status = 0,
+    const char *message = nullptr,
+    const std::vector<flatbuffers::Offset<Transaction>> *transaction = nullptr,
+    Object object_type = Object_NONE,
+    flatbuffers::Offset<void> object = 0) {
+  return CreateResponse(
+      _fbb,
+      status,
+      message ? _fbb.CreateString(message) : 0,
+      transaction ? _fbb.CreateVector<flatbuffers::Offset<Transaction>>(*transaction) : 0,
+      object_type,
+      object);
+}
+
+flatbuffers::Offset<Response> CreateResponse(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct RequestT : public flatbuffers::NativeTable {
+  typedef Request TableType;
+  std::vector<std::unique_ptr<TransactionT>> transaction;
+  RequestT() {
+  }
+};
+
+struct Request FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef RequestT NativeTableType;
+  enum {
+    VT_TRANSACTION = 4
+  };
+  const flatbuffers::Vector<flatbuffers::Offset<Transaction>> *transaction() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Transaction>> *>(VT_TRANSACTION);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<Transaction>> *mutable_transaction() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Transaction>> *>(VT_TRANSACTION);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_TRANSACTION) &&
+           verifier.Verify(transaction()) &&
+           verifier.VerifyVectorOfTables(transaction()) &&
+           verifier.EndTable();
+  }
+  RequestT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(RequestT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Request> Pack(flatbuffers::FlatBufferBuilder &_fbb, const RequestT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct RequestBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_transaction(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Transaction>>> transaction) {
+    fbb_.AddOffset(Request::VT_TRANSACTION, transaction);
+  }
+  RequestBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  RequestBuilder &operator=(const RequestBuilder &);
+  flatbuffers::Offset<Request> Finish() {
+    const auto end = fbb_.EndTable(start_, 1);
+    auto o = flatbuffers::Offset<Request>(end);
+    fbb_.Required(o, Request::VT_TRANSACTION);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Request> CreateRequest(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Transaction>>> transaction = 0) {
+  RequestBuilder builder_(_fbb);
+  builder_.add_transaction(transaction);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Request> CreateRequestDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<flatbuffers::Offset<Transaction>> *transaction = nullptr) {
+  return CreateRequest(
+      _fbb,
+      transaction ? _fbb.CreateVector<flatbuffers::Offset<Transaction>>(*transaction) : 0);
+}
+
+flatbuffers::Offset<Request> CreateRequest(flatbuffers::FlatBufferBuilder &_fbb, const RequestT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct QueryT : public flatbuffers::NativeTable {
+  typedef Query TableType;
+  QueryType type;
+  std::string uuid;
+  QueryT()
+      : type(QueryType_TransactionHistory) {
+  }
+};
+
+struct Query FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef QueryT NativeTableType;
+  enum {
+    VT_TYPE = 4,
+    VT_UUID = 6
+  };
+  QueryType type() const {
+    return static_cast<QueryType>(GetField<int8_t>(VT_TYPE, 0));
+  }
+  bool mutate_type(QueryType _type) {
+    return SetField(VT_TYPE, static_cast<int8_t>(_type));
+  }
+  const flatbuffers::String *uuid() const {
+    return GetPointer<const flatbuffers::String *>(VT_UUID);
+  }
+  flatbuffers::String *mutable_uuid() {
+    return GetPointer<flatbuffers::String *>(VT_UUID);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int8_t>(verifier, VT_TYPE) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_UUID) &&
+           verifier.Verify(uuid()) &&
+           verifier.EndTable();
+  }
+  QueryT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(QueryT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Query> Pack(flatbuffers::FlatBufferBuilder &_fbb, const QueryT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct QueryBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_type(QueryType type) {
+    fbb_.AddElement<int8_t>(Query::VT_TYPE, static_cast<int8_t>(type), 0);
+  }
+  void add_uuid(flatbuffers::Offset<flatbuffers::String> uuid) {
+    fbb_.AddOffset(Query::VT_UUID, uuid);
+  }
+  QueryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  QueryBuilder &operator=(const QueryBuilder &);
+  flatbuffers::Offset<Query> Finish() {
+    const auto end = fbb_.EndTable(start_, 2);
+    auto o = flatbuffers::Offset<Query>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Query> CreateQuery(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    QueryType type = QueryType_TransactionHistory,
+    flatbuffers::Offset<flatbuffers::String> uuid = 0) {
+  QueryBuilder builder_(_fbb);
+  builder_.add_uuid(uuid);
+  builder_.add_type(type);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Query> CreateQueryDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    QueryType type = QueryType_TransactionHistory,
+    const char *uuid = nullptr) {
+  return CreateQuery(
+      _fbb,
+      type,
+      uuid ? _fbb.CreateString(uuid) : 0);
+}
+
+flatbuffers::Offset<Query> CreateQuery(flatbuffers::FlatBufferBuilder &_fbb, const QueryT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
 struct EventSignatureT : public flatbuffers::NativeTable {
   typedef EventSignature TableType;
   std::string publicKey;
@@ -1594,8 +2029,14 @@ struct EventSignature FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *publicKey() const {
     return GetPointer<const flatbuffers::String *>(VT_PUBLICKEY);
   }
+  flatbuffers::String *mutable_publicKey() {
+    return GetPointer<flatbuffers::String *>(VT_PUBLICKEY);
+  }
   const flatbuffers::String *signature() const {
     return GetPointer<const flatbuffers::String *>(VT_SIGNATURE);
+  }
+  flatbuffers::String *mutable_signature() {
+    return GetPointer<flatbuffers::String *>(VT_SIGNATURE);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1675,11 +2116,20 @@ struct ConsensusEvent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<flatbuffers::Offset<Transaction>> *transaction() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Transaction>> *>(VT_TRANSACTION);
   }
+  flatbuffers::Vector<flatbuffers::Offset<Transaction>> *mutable_transaction() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Transaction>> *>(VT_TRANSACTION);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<EventSignature>> *eventSignatures() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<EventSignature>> *>(VT_EVENTSIGNATURES);
   }
+  flatbuffers::Vector<flatbuffers::Offset<EventSignature>> *mutable_eventSignatures() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<EventSignature>> *>(VT_EVENTSIGNATURES);
+  }
   State state() const {
     return static_cast<State>(GetField<int8_t>(VT_STATE, 0));
+  }
+  bool mutate_state(State _state) {
+    return SetField(VT_STATE, static_cast<int8_t>(_state));
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1747,82 +2197,6 @@ inline flatbuffers::Offset<ConsensusEvent> CreateConsensusEventDirect(
 }
 
 flatbuffers::Offset<ConsensusEvent> CreateConsensusEvent(flatbuffers::FlatBufferBuilder &_fbb, const ConsensusEventT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct ResponseT : public flatbuffers::NativeTable {
-  typedef Response TableType;
-  int32_t status;
-  std::string message;
-  ResponseT()
-      : status(0) {
-  }
-};
-
-struct Response FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef ResponseT NativeTableType;
-  enum {
-    VT_STATUS = 4,
-    VT_MESSAGE = 6
-  };
-  int32_t status() const {
-    return GetField<int32_t>(VT_STATUS, 0);
-  }
-  const flatbuffers::String *message() const {
-    return GetPointer<const flatbuffers::String *>(VT_MESSAGE);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_STATUS) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_MESSAGE) &&
-           verifier.Verify(message()) &&
-           verifier.EndTable();
-  }
-  ResponseT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(ResponseT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Response> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct ResponseBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_status(int32_t status) {
-    fbb_.AddElement<int32_t>(Response::VT_STATUS, status, 0);
-  }
-  void add_message(flatbuffers::Offset<flatbuffers::String> message) {
-    fbb_.AddOffset(Response::VT_MESSAGE, message);
-  }
-  ResponseBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  ResponseBuilder &operator=(const ResponseBuilder &);
-  flatbuffers::Offset<Response> Finish() {
-    const auto end = fbb_.EndTable(start_, 2);
-    auto o = flatbuffers::Offset<Response>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Response> CreateResponse(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t status = 0,
-    flatbuffers::Offset<flatbuffers::String> message = 0) {
-  ResponseBuilder builder_(_fbb);
-  builder_.add_message(message);
-  builder_.add_status(status);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<Response> CreateResponseDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t status = 0,
-    const char *message = nullptr) {
-  return CreateResponse(
-      _fbb,
-      status,
-      message ? _fbb.CreateString(message) : 0);
-}
-
-flatbuffers::Offset<Response> CreateResponse(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 inline BaseObjectT *BaseObject::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new BaseObjectT();
@@ -2277,6 +2651,96 @@ inline flatbuffers::Offset<Transaction> CreateTransaction(flatbuffers::FlatBuffe
       _hash);
 }
 
+inline ResponseT *Response::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new ResponseT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Response::UnPackTo(ResponseT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = status(); _o->status = _e; };
+  { auto _e = message(); if (_e) _o->message = _e->str(); };
+  { auto _e = transaction(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->transaction.push_back(std::unique_ptr<TransactionT>(_e->Get(_i)->UnPack(_resolver))); } };
+  { auto _e = object_type(); _o->object.type = _e; };
+  { auto _e = object(); if (_e) _o->object.table = ObjectUnion::UnPack(_e, object_type(),_resolver); };
+}
+
+inline flatbuffers::Offset<Response> Response::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateResponse(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Response> CreateResponse(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  auto _status = _o->status;
+  auto _message = _o->message.size() ? _fbb.CreateString(_o->message) : 0;
+  auto _transaction = _o->transaction.size() ? _fbb.CreateVector<flatbuffers::Offset<Transaction>>(_o->transaction.size(), [&](size_t i) { return CreateTransaction(_fbb, _o->transaction[i].get(), _rehasher); }) : 0;
+  auto _object_type = _o->object.type;
+  auto _object = _o->object.Pack(_fbb);
+  return CreateResponse(
+      _fbb,
+      _status,
+      _message,
+      _transaction,
+      _object_type,
+      _object);
+}
+
+inline RequestT *Request::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new RequestT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Request::UnPackTo(RequestT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = transaction(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->transaction.push_back(std::unique_ptr<TransactionT>(_e->Get(_i)->UnPack(_resolver))); } };
+}
+
+inline flatbuffers::Offset<Request> Request::Pack(flatbuffers::FlatBufferBuilder &_fbb, const RequestT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateRequest(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Request> CreateRequest(flatbuffers::FlatBufferBuilder &_fbb, const RequestT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  auto _transaction = _fbb.CreateVector<flatbuffers::Offset<Transaction>>(_o->transaction.size(), [&](size_t i) { return CreateTransaction(_fbb, _o->transaction[i].get(), _rehasher); });
+  return CreateRequest(
+      _fbb,
+      _transaction);
+}
+
+inline QueryT *Query::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new QueryT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Query::UnPackTo(QueryT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = type(); _o->type = _e; };
+  { auto _e = uuid(); if (_e) _o->uuid = _e->str(); };
+}
+
+inline flatbuffers::Offset<Query> Query::Pack(flatbuffers::FlatBufferBuilder &_fbb, const QueryT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateQuery(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Query> CreateQuery(flatbuffers::FlatBufferBuilder &_fbb, const QueryT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  auto _type = _o->type;
+  auto _uuid = _o->uuid.size() ? _fbb.CreateString(_o->uuid) : 0;
+  return CreateQuery(
+      _fbb,
+      _type,
+      _uuid);
+}
+
 inline EventSignatureT *EventSignature::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new EventSignatureT();
   UnPackTo(_o, _resolver);
@@ -2334,34 +2798,6 @@ inline flatbuffers::Offset<ConsensusEvent> CreateConsensusEvent(flatbuffers::Fla
       _transaction,
       _eventSignatures,
       _state);
-}
-
-inline ResponseT *Response::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new ResponseT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Response::UnPackTo(ResponseT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = status(); _o->status = _e; };
-  { auto _e = message(); if (_e) _o->message = _e->str(); };
-}
-
-inline flatbuffers::Offset<Response> Response::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateResponse(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Response> CreateResponse(flatbuffers::FlatBufferBuilder &_fbb, const ResponseT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  auto _status = _o->status;
-  auto _message = _o->message.size() ? _fbb.CreateString(_o->message) : 0;
-  return CreateResponse(
-      _fbb,
-      _status,
-      _message);
 }
 
 inline bool VerifyObject(flatbuffers::Verifier &verifier, const void *obj, Object type) {
@@ -2630,15 +3066,32 @@ inline const iroha::ConsensusEvent *GetConsensusEvent(const void *buf) {
   return flatbuffers::GetRoot<iroha::ConsensusEvent>(buf);
 }
 
+inline ConsensusEvent *GetMutableConsensusEvent(void *buf) {
+  return flatbuffers::GetMutableRoot<ConsensusEvent>(buf);
+}
+
+inline const char *ConsensusEventIdentifier() {
+  return "IROH";
+}
+
+inline bool ConsensusEventBufferHasIdentifier(const void *buf) {
+  return flatbuffers::BufferHasIdentifier(
+      buf, ConsensusEventIdentifier());
+}
+
 inline bool VerifyConsensusEventBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<iroha::ConsensusEvent>(nullptr);
+  return verifier.VerifyBuffer<iroha::ConsensusEvent>(ConsensusEventIdentifier());
+}
+
+inline const char *ConsensusEventExtension() {
+  return "iroha";
 }
 
 inline void FinishConsensusEventBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<iroha::ConsensusEvent> root) {
-  fbb.Finish(root);
+  fbb.Finish(root, ConsensusEventIdentifier());
 }
 
 inline std::unique_ptr<ConsensusEventT> UnPackConsensusEvent(

@@ -16,40 +16,103 @@
 
 namespace iroha {
 
-static const char* Iroha_method_names[] = {
-  "/iroha.Iroha/Torii",
+static const char* Repository_method_names[] = {
+  "/iroha.Repository/find",
 };
 
-std::unique_ptr< Iroha::Stub> Iroha::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
-  std::unique_ptr< Iroha::Stub> stub(new Iroha::Stub(channel));
+std::unique_ptr< Repository::Stub> Repository::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+  std::unique_ptr< Repository::Stub> stub(new Repository::Stub(channel));
   return stub;
 }
 
-Iroha::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
-  : channel_(channel)  , rpcmethod_Torii_(Iroha_method_names[0], ::grpc::RpcMethod::NORMAL_RPC, channel)
+Repository::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
+  : channel_(channel)  , rpcmethod_find_(Repository_method_names[0], ::grpc::RpcMethod::NORMAL_RPC, channel)
   {}
   
-::grpc::Status Iroha::Stub::Torii(::grpc::ClientContext* context, const flatbuffers::BufferRef<ConsensusEvent>& request, flatbuffers::BufferRef<Response>* response) {
+::grpc::Status Repository::Stub::find(::grpc::ClientContext* context, const flatbuffers::BufferRef<Query>& request, flatbuffers::BufferRef<Response>* response) {
+  return ::grpc::BlockingUnaryCall(channel_.get(), rpcmethod_find_, context, request, response);
+}
+
+::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>* Repository::Stub::AsyncfindRaw(::grpc::ClientContext* context, const flatbuffers::BufferRef<Query>& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>(channel_.get(), cq, rpcmethod_find_, context, request);
+}
+
+Repository::Service::Service() {
+  (void)Repository_method_names;
+  AddMethod(new ::grpc::RpcServiceMethod(
+      Repository_method_names[0],
+      ::grpc::RpcMethod::NORMAL_RPC,
+      new ::grpc::RpcMethodHandler< Repository::Service, flatbuffers::BufferRef<Query>, flatbuffers::BufferRef<Response>>(
+          std::mem_fn(&Repository::Service::find), this)));
+}
+
+Repository::Service::~Service() {
+}
+
+::grpc::Status Repository::Service::find(::grpc::ServerContext* context, const flatbuffers::BufferRef<Query>* request, flatbuffers::BufferRef<Response>* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+
+static const char* Sumeragi_method_names[] = {
+  "/iroha.Sumeragi/Torii",
+  "/iroha.Sumeragi/Verify",
+};
+
+std::unique_ptr< Sumeragi::Stub> Sumeragi::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+  std::unique_ptr< Sumeragi::Stub> stub(new Sumeragi::Stub(channel));
+  return stub;
+}
+
+Sumeragi::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
+  : channel_(channel)  , rpcmethod_Torii_(Sumeragi_method_names[0], ::grpc::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Verify_(Sumeragi_method_names[1], ::grpc::RpcMethod::NORMAL_RPC, channel)
+  {}
+  
+::grpc::Status Sumeragi::Stub::Torii(::grpc::ClientContext* context, const flatbuffers::BufferRef<Request>& request, flatbuffers::BufferRef<Response>* response) {
   return ::grpc::BlockingUnaryCall(channel_.get(), rpcmethod_Torii_, context, request, response);
 }
 
-::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>* Iroha::Stub::AsyncToriiRaw(::grpc::ClientContext* context, const flatbuffers::BufferRef<ConsensusEvent>& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>* Sumeragi::Stub::AsyncToriiRaw(::grpc::ClientContext* context, const flatbuffers::BufferRef<Request>& request, ::grpc::CompletionQueue* cq) {
   return new ::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>(channel_.get(), cq, rpcmethod_Torii_, context, request);
 }
 
-Iroha::Service::Service() {
-  (void)Iroha_method_names;
+::grpc::Status Sumeragi::Stub::Verify(::grpc::ClientContext* context, const flatbuffers::BufferRef<ConsensusEvent>& request, flatbuffers::BufferRef<Response>* response) {
+  return ::grpc::BlockingUnaryCall(channel_.get(), rpcmethod_Verify_, context, request, response);
+}
+
+::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>* Sumeragi::Stub::AsyncVerifyRaw(::grpc::ClientContext* context, const flatbuffers::BufferRef<ConsensusEvent>& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< flatbuffers::BufferRef<Response>>(channel_.get(), cq, rpcmethod_Verify_, context, request);
+}
+
+Sumeragi::Service::Service() {
+  (void)Sumeragi_method_names;
   AddMethod(new ::grpc::RpcServiceMethod(
-      Iroha_method_names[0],
+      Sumeragi_method_names[0],
       ::grpc::RpcMethod::NORMAL_RPC,
-      new ::grpc::RpcMethodHandler< Iroha::Service, flatbuffers::BufferRef<ConsensusEvent>, flatbuffers::BufferRef<Response>>(
-          std::mem_fn(&Iroha::Service::Torii), this)));
+      new ::grpc::RpcMethodHandler< Sumeragi::Service, flatbuffers::BufferRef<Request>, flatbuffers::BufferRef<Response>>(
+          std::mem_fn(&Sumeragi::Service::Torii), this)));
+  AddMethod(new ::grpc::RpcServiceMethod(
+      Sumeragi_method_names[1],
+      ::grpc::RpcMethod::NORMAL_RPC,
+      new ::grpc::RpcMethodHandler< Sumeragi::Service, flatbuffers::BufferRef<ConsensusEvent>, flatbuffers::BufferRef<Response>>(
+          std::mem_fn(&Sumeragi::Service::Verify), this)));
 }
 
-Iroha::Service::~Service() {
+Sumeragi::Service::~Service() {
 }
 
-::grpc::Status Iroha::Service::Torii(::grpc::ServerContext* context, const flatbuffers::BufferRef<ConsensusEvent>* request, flatbuffers::BufferRef<Response>* response) {
+::grpc::Status Sumeragi::Service::Torii(::grpc::ServerContext* context, const flatbuffers::BufferRef<Request>* request, flatbuffers::BufferRef<Response>* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status Sumeragi::Service::Verify(::grpc::ServerContext* context, const flatbuffers::BufferRef<ConsensusEvent>* request, flatbuffers::BufferRef<Response>* response) {
   (void) context;
   (void) request;
   (void) response;
