@@ -771,7 +771,7 @@ flatbuffers::Offset<Domain> CreateDomain(flatbuffers::FlatBufferBuilder &_fbb, c
 struct AccountT : public flatbuffers::NativeTable {
   typedef Account TableType;
   std::string publicKey;
-  std::vector<std::unique_ptr<AssetT>> Assets;
+  std::vector<std::unique_ptr<AssetT>> assets;
   AccountT() {
   }
 };
@@ -788,10 +788,10 @@ struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::String *mutable_publicKey() {
     return GetPointer<flatbuffers::String *>(VT_PUBLICKEY);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<Asset>> *Assets() const {
+  const flatbuffers::Vector<flatbuffers::Offset<Asset>> *assets() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Asset>> *>(VT_ASSETS);
   }
-  flatbuffers::Vector<flatbuffers::Offset<Asset>> *mutable_Assets() {
+  flatbuffers::Vector<flatbuffers::Offset<Asset>> *mutable_assets() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Asset>> *>(VT_ASSETS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
@@ -799,8 +799,8 @@ struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_PUBLICKEY) &&
            verifier.Verify(publicKey()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_ASSETS) &&
-           verifier.Verify(Assets()) &&
-           verifier.VerifyVectorOfTables(Assets()) &&
+           verifier.Verify(assets()) &&
+           verifier.VerifyVectorOfTables(assets()) &&
            verifier.EndTable();
   }
   AccountT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -814,8 +814,8 @@ struct AccountBuilder {
   void add_publicKey(flatbuffers::Offset<flatbuffers::String> publicKey) {
     fbb_.AddOffset(Account::VT_PUBLICKEY, publicKey);
   }
-  void add_Assets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Asset>>> Assets) {
-    fbb_.AddOffset(Account::VT_ASSETS, Assets);
+  void add_assets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Asset>>> assets) {
+    fbb_.AddOffset(Account::VT_ASSETS, assets);
   }
   AccountBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -832,9 +832,9 @@ struct AccountBuilder {
 inline flatbuffers::Offset<Account> CreateAccount(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> publicKey = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Asset>>> Assets = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Asset>>> assets = 0) {
   AccountBuilder builder_(_fbb);
-  builder_.add_Assets(Assets);
+  builder_.add_assets(assets);
   builder_.add_publicKey(publicKey);
   return builder_.Finish();
 }
@@ -842,11 +842,11 @@ inline flatbuffers::Offset<Account> CreateAccount(
 inline flatbuffers::Offset<Account> CreateAccountDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *publicKey = nullptr,
-    const std::vector<flatbuffers::Offset<Asset>> *Assets = nullptr) {
+    const std::vector<flatbuffers::Offset<Asset>> *assets = nullptr) {
   return CreateAccount(
       _fbb,
       publicKey ? _fbb.CreateString(publicKey) : 0,
-      Assets ? _fbb.CreateVector<flatbuffers::Offset<Asset>>(*Assets) : 0);
+      assets ? _fbb.CreateVector<flatbuffers::Offset<Asset>>(*assets) : 0);
 }
 
 flatbuffers::Offset<Account> CreateAccount(flatbuffers::FlatBufferBuilder &_fbb, const AccountT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -2338,7 +2338,7 @@ inline void Account::UnPackTo(AccountT *_o, const flatbuffers::resolver_function
   (void)_o;
   (void)_resolver;
   { auto _e = publicKey(); if (_e) _o->publicKey = _e->str(); };
-  { auto _e = Assets(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->Assets.push_back(std::unique_ptr<AssetT>(_e->Get(_i)->UnPack(_resolver))); } };
+  { auto _e = assets(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->assets.push_back(std::unique_ptr<AssetT>(_e->Get(_i)->UnPack(_resolver))); } };
 }
 
 inline flatbuffers::Offset<Account> Account::Pack(flatbuffers::FlatBufferBuilder &_fbb, const AccountT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -2349,11 +2349,11 @@ inline flatbuffers::Offset<Account> CreateAccount(flatbuffers::FlatBufferBuilder
   (void)_rehasher;
   (void)_o;
   auto _publicKey = _o->publicKey.size() ? _fbb.CreateString(_o->publicKey) : 0;
-  auto _Assets = _o->Assets.size() ? _fbb.CreateVector<flatbuffers::Offset<Asset>>(_o->Assets.size(), [&](size_t i) { return CreateAsset(_fbb, _o->Assets[i].get(), _rehasher); }) : 0;
+  auto _assets = _o->assets.size() ? _fbb.CreateVector<flatbuffers::Offset<Asset>>(_o->assets.size(), [&](size_t i) { return CreateAsset(_fbb, _o->assets[i].get(), _rehasher); }) : 0;
   return CreateAccount(
       _fbb,
       _publicKey,
-      _Assets);
+      _assets);
 }
 
 inline PeerT *Peer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
