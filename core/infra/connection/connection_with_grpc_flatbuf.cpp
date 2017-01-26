@@ -28,135 +28,331 @@ limitations under the License.
 namespace connection {
     using namespace iroha;
 
+    template<typename T>
+    using Offset = flatbuffers::Offset<T>;
+
     std::vector<std::string> receiver_ips;
     std::vector<
         std::function<void(
             const std::string& from,
-            ConsensusEvent& message)>
+            ConsensusEvent&& message
+        )>
     > receivers;
 
     template<typename T>
-    flatbuffers::Offset<T> makeOffsset(const T* o);
+    Offset<T>
+    makeOffset(T ){}
+
+/*
+//  This is asset
+    template<>
+    Offset<BaseObject>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, BaseObject* obj){
+      ObjectBuilder ob(builder);
+      ob.add_text( text_ );
+      ob.add_integer(object_->integer());
+      ob.add_boolean(object_->boolean());
+      ob.add_name( name_ );
+      return ob.Finish();
+    }
+    template<>
+    Offset<SimpleAsset>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, SimpleAsset* simpleAsset){
+      auto name   = builder.CreateString(simpleAsset->name());
+      auto object = makeOffset<BaseObject>( builder, simpleAsset->object());
+      auto domain = makeOffset<Domain>( builder, simpleAsset->domain());
+      auto smartContractName = builder.CreateString(simpleAsset->smartContractName());
+
+      SimpleAsset sb(builder);
+      sb.add_name( name );
+      sb.add_domain( domain );
+      sb.add_object( object );
+      sb.add_smartContractName( smartContractName );
+
+      return sb.Finish();
+    }
+    template<>
+    Offset<Asset>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Asset* asset){
+      auto name   = builder.CreateString( asset->name() );
+      auto domain = makeOffset<Domain>( builder, asset->domain() );
+      auto smartContractName = builder.CreateString( asset->smartContractName() );
+
+      std::vector<Offset<BaseObject>> object_;
+      for(int i = 0; i < asset->objects()->size(); i++){
+        auto obj = makeOffset<BaseObject>( builder, asset->objects()->Get(i);
+        object_.push_back( obj.Finish() );
+      }
+      auto objects = builder.CreateVector( object_.data(), object_.size() );
+
+      Asset ab(builder);
+      ab.add_name( name );
+      ab.add_domain( domain );
+      ab.add_object( objects );
+      ab.add_smartContractName( smartContractName );
+
+      return ab.Finish();
+    }
+    template<>
+    Offset<Domain>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Domain* domain){
+      auto name   = builder.CreateString( domain->name() );
+      auto ownerPublicKey = builder.CreateString( domain->ownerPublicKey() );
+      Domain db(builder);
+
+      db.add_name( name );
+      db.add_ownerPublicKey( ownerPublicKey );
+
+      return db.Finish();
+    }
+    template<>
+    Offset<Account>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Account* account){
+      auto publicKey      = builder.CreateString( account->publicKey() );
+
+      std::vector<Offset<Asset>> assets_;
+      for(int i = 0; i < account->assets()->size(); i++){
+        auto asset = makeOffset<Asset>( builder, account->assets()->Get(i);
+        assets_.push_back( asset.Finish() );
+      }
+      auto assets = builder.CreateVector( assets_.data(), assets_.size() );
+
+      Account ab(builder);
+      ab.add_publicKey( publicKey );
+      ab.add_assets( assets );
+      return ab.Finish();
+    }
 
     template<>
-    flatbuffers::Offset<iroha::Contract> makeOffsset<iroha::Contract>(const iroha::Contract* contract){
-      flatbuffers::FlatBufferBuilder fbb;
-      fbb.Clear();
+    Offset<Peer>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Peer* peer){
+      auto publicKey = builder.CreateString( peer->publicKey() );
+      auto address   = builder.CreateString( peer->address() );
 
+      Account pb(builder);
+      pb.add_publicKey( publicKey );
+      pb.add_assets( address );
+      return pb.Finish();
+    }
+
+    // This is command
+    template<typename T>
+    std::tuple<flatbuffers::Offset<void>,Object> makeObject(T* hasObj){
       flatbuffers::Offset<void> object;
-      switch(contract->object_type()){
-        case Object::Object_SimpleAsset:
-             object = makeOffsset(reinterpret_cast<const SimpleAsset *>(contract->object())).Union(); break;
-        case Object::Object_Asset:
-             object = makeOffsset(reinterpret_cast<const Asset *>(contract->object())).Union(); break;
-        case Object::Object_Domain:
-             object = makeOffsset(reinterpret_cast<const Domain *>(contract->object())).Union(); break;
-        case Object::Object_Account:
-             object = makeOffsset(reinterpret_cast<const Account *>(contract->object())).Union(); break;
-        case Object::Object_Peer:
-             object = makeOffsset(reinterpret_cast<const Peer *>(contract->object())).Union(); break;
-      }
-      return CreateContract(
-        fbb,
-        contract->object_type(),
-        object,
-        fbb.CreateString(contract->command()),
-        fbb.CreateString(contract->contractName())
-      );
-    }
+      Object object_type;
+      if( add->object_type() == Object::Object_SimpleAsset ){
+        return std::make_tuple(
+          makeOffset<SimpleAsset>(reinterpret_cast<const SimpleAsset *>(hasObj->object())),
+          Object::Object_SimpleAsset
+        );
 
-    template<>
-    flatbuffers::Offset<iroha::TxSignature> makeOffsset<iroha::TxSignature>(const iroha::TxSignature* txSig){
-      flatbuffers::FlatBufferBuilder fbb;
-      fbb.Clear();
-      return CreateTxSignature(
-          fbb,
-          fbb.CreateString(txSig->publicKey()),
-          fbb.CreateString(txSig->signature())
-      );
-    }
-    template<>
-    flatbuffers::Offset<iroha::Transaction> makeOffsset<iroha::Transaction>(const iroha::Transaction* tx){
-      flatbuffers::FlatBufferBuilder fbb;
-      fbb.Clear();
+      }else if( add->object_type() == Object::Object_Asset ){
+        return std::make_tuple(
+          makeOffset<Asset>(reinterpret_cast<const Asset *>(hasObj->object())),
+          Object::Object_Asset
+        );
 
-      std::vector<flatbuffers::Offset<iroha::TxSignature>> txSigs;
-      for(
-        auto txs = tx->txSignatures()->begin();
-        txs != tx->txSignatures()->end();
-        txs++
-      ) {
-        txSigs.push_back( makeOffsset<iroha::TxSignature>( *txs ));
-      }
+      }else if( add->object_type() == Object::Object_Domain ){
+        return std::make_tuple(
+          makeOffset<Domain>(reinterpret_cast<const Domain *>(hasObj->object())),
+          Object::Object_Domain
+        );
 
-      flatbuffers::Offset<void> command;
-      switch(tx->command_type()){
-        case Command::Command_Add:
-             command = makeOffsset(reinterpret_cast<const Add *>(tx->command())).Union(); break;
-        case Command::Command_Transfer:
-             command = makeOffsset(reinterpret_cast<const Transfer *>(tx->command())).Union(); break;
-        case Command::Command_Update:
-             command = makeOffsset(reinterpret_cast<const Update *>(tx->command())).Union(); break;
-        case Command::Command_Remove:
-             command = makeOffsset(reinterpret_cast<const Remove *>(tx->command())).Union(); break;
-        case Command::Command_Batch:
-             command = makeOffsset(reinterpret_cast<const Batch *>(tx->command())).Union(); break;
-        case Command::Command_Unbatch:
-             command = makeOffsset(reinterpret_cast<const Unbatch *>(tx->command())).Union(); break;
-        case Command::Command_Contract:
-             command = makeOffsset(reinterpret_cast<const Contract *>(tx->command())).Union(); break;
+      }else if( add->object_type() == Object::Object_Account ){
+        return std::make_tuple(
+          makeOffset<Account>(reinterpret_cast<const Account *>(hasObj->object())),
+          Object::Object_Account
+        );
+
+      }else if( add->object_type() == Object::Object_Peer ){
+        return std::make_tuple(
+          makeOffset<Peer>(reinterpret_cast<const Peer *>(hasObj->object())),
+          Object::Object_Peer
+        );
       }
-      return CreateTransaction(
-        fbb,
-        fbb.CreateString(tx->sender()),
-        tx->command_type(),
-        command,
-        fbb.CreateVector(txSigs),
-        fbb.CreateString(tx->hash())
-      );
     }
     template<>
-    flatbuffers::Offset<iroha::EventSignature> makeOffsset<iroha::EventSignature>(const iroha::EventSignature* eventSig){
-      flatbuffers::FlatBufferBuilder fbb;
-      fbb.Clear();
-      return CreateEventSignature(
-          fbb,
-          fbb.CreateString(eventSig->publicKey()),
-          fbb.CreateString(eventSig->signature())
-      );
+    Offset<Add>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Add* hasObj){
+      auto tuple_obj = makeObject(hasObj);
+      AddBuilder ab(builder);
+      ab.add_object( std::get<0>(tuple_obj) );
+      ab.add_object_type( std::get<1>(tuple_obj) );
+      return pb.Finish();
     }
     template<>
-    flatbuffers::Offset<iroha::ConsensusEvent> makeOffsset<iroha::ConsensusEvent>(const iroha::ConsensusEvent* event){
-      flatbuffers::FlatBufferBuilder fbb;
-      fbb.Clear();
-      std::vector<flatbuffers::Offset<iroha::Transaction>> txv;
-      for(
-        auto tx = event->transaction()->begin();
-        tx != event->transaction()->end();
-        tx++
-      ) {
-        txv.push_back( makeOffsset<iroha::Transaction>( *tx ));
-      }
+    Offset<Transfer>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Transfer* hasObj){
+      auto receiver = builder.CreateString( hasObj->receiver() );
+      auto tuple_obj = makeObject(hasObj);
+      TransferBuilder b(builder);
+      b.add_receiver( receiver );
+      b.add_object( std::get<0>(tuple_obj) );
+      b.add_object_type( std::get<1>(tuple_obj) );
+      return b.Finish();
+    }
+    template<>
+    Offset<Update>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Update* hasObj){
+      auto tuple_obj = makeObject(hasObj);
+      UpdagteBuilder b(builder);
+      b.add_object( std::get<0>(tuple_obj) );
+      b.add_object_type( std::get<1>(tuple_obj) );
+      return b.Finish();
+    }
+    template<>
+    Offset<Remove>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Remove* hasObj){
+      auto tuple_obj = makeObject(hasObj);
+      UpdagteBuilder b(builder);
+      b.add_object( std::get<0>(tuple_obj) );
+      b.add_object_type( std::get<1>(tuple_obj) );
+      return b.Finish();
+    }
+    template<>
+    Offset<Batch>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Batch* obj){
+      auto alias = builder.CreateString( hasObj->alias() );
 
-      std::vector<flatbuffers::Offset<iroha::EventSignature>> eSigs;
-      for(
-        auto esig = event->eventSignatures()->begin();
-        esig != event->eventSignatures()->end();
-        esig++
-      ) {
-        eSigs.push_back( makeOffsset<iroha::EventSignature>( *esig ));
+      std::vector<Offset<std::String>> commands_;
+      for(int i = 0; i < obj->commands()->size(); i++){
+         commands_.push_back( obj->commands()->objects()->Get(i)->str() );
       }
+      auto commands = builder.CreateVectorOfStrings(commands_);
 
-      return CreateConsensusEvent(
-          fbb,
-          fbb.CreateVector(txv),
-          fbb.CreateVector(eSigs),
-          event->state()
-      );
+      BatchBuilder b(builder);
+      b.add_alias( alias );
+      b.add_commands( commands );
+      return b.Finish();
+    }
+    template<>
+    Offset<Unbatch>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Unbatch* obj){
+      auto alias = builder.CreateString( obj->alias() );
+      UnbatchBuilder b(builder);
+      b.add_alias( alias );s
+      return b.Finish();
+    }
+    template<>
+    Offset<Contract>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Contract* hasObj){
+      auto command = builder.CreateString( hasObj->command() );
+      auto contractName = builder.CreateString( hasObj->contractName() );
+
+      auto tuple_obj = makeObject(hasObj);
+      UpdagteBuilder b(builder);
+      b.add_object( std::get<0>(tuple_obj) );
+      b.add_object_type( std::get<1>(tuple_obj) );
+      b.add_command( command );
+      b.add_contractName( contractName );
+      return b.Finish();
+    }
+
+    std::tuple<flatbuffers::Offset<void>,Command> makeCommand(Transaction* tx){
+      if( tx->command_type() == Command::Command_Add ){
+        return std::make_tuple(
+          makeOffset<Add>(reinterpret_cast<const Add *>(tx->command())),
+          Command::Command_Add
+        );
+      }else if( tx->command_type() == Command::Command_Transfer ){
+        return std::make_tuple(
+          makeOffset<Transfer>(reinterpret_cast<const Transfer *>(tx->object())),
+          Object::Object_Transfer
+        );
+      }else if( tx->object_type() == Object::Object_Update ){
+        return std::make_tuple(
+          makeOffset<Update>(reinterpret_cast<const Update *>(tx->object())),
+          Object::Object_Update
+        );
+      }else if( tx->object_type() == Object::Object_Remove ){
+        return std::make_tuple(
+          makeOffset<Remove>(reinterpret_cast<const Remove *>(tx->object())),
+          Object::Object_Remove
+        );
+      }else if( tx->object_type() == Object::Object_Batch ){
+        return std::make_tuple(
+          makeOffset<Batch>(reinterpret_cast<const Batch *>(tx->object())),
+          Object::Object_Batch
+        );
+      }else if( tx->object_type() == Object::Object_Unbatch ){
+        return std::make_tuple(
+          makeOffset<Unbatch>(reinterpret_cast<const Unbatch *>(tx->object())),
+          Object::Object_Unbatch
+        );
+      }
     }
 
 
-    class IrohaServiceImpl final : public Iroha::Service {
+    // This is
+    template<>
+    Offset<TxSignature>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, TxSignature* obj){
+      auto publicKey = builder.CreateString( obj->publicKey() );
+      auto signature = builder.CreateString( obj->signature() );
+
+      TxSignatureBuilder b(builder);
+      b.add_publicKey( publicKey );
+      b.add_signature( signature );
+      return b.Finish();
+    }
+    template<>
+    Offset<Transaction>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, Transaction* obj){
+      auto sender = builder.CreateString( obj->sender() );
+
+      auto command = makeCommand(obj);
+
+      std::vector<Offset<TxSignature>> txSigs_;
+      for(int i = 0; i < obj->txSignatures()->size(); i++){
+        auto obj = makeOffset<TxSignature>( builder, obj->txSignatures()->Get(i);
+        txSigs_.push_back( obj.Finish() );
+      }
+      auto txSigs = builder.CreateVector( txSigs_.data(), txSigs_.size() );
+      auto hash = builder.CreateString( obj->hash() );
+
+      TxSignatureBuilder b(builder);
+      b.add_sender( sender );
+      b.add_command( command );
+      b.add_txSignatures( txSignatures );
+      b.add_hash( hash );
+      return b.Finish();
+    }
+
+    Offset<ConsensusEvent>
+    makeOffset(flatbuffers::FlatBufferBuilder builder, ConsensusEvent* obj){
+      auto sender = builder.CreateString( obj->sender() );
+
+      auto command = makeCommand(obj);
+
+      std::vector<Offset<EventSignature>> exSigs_;
+      for(int i = 0; i < obj->txSignatures()->size(); i++){
+        auto obj = makeOffset<EventSignature>( builder, obj->eventSignatures()->Get(i);
+        exSigs_.push_back( obj.Finish() );
+      }
+      auto eventSignatures = builder.CreateVector( exSigs_.data(), exSigs_.size() );
+
+      std::vector<Offset<Transaction>> txs_;
+      for(int i = 0; i < obj->transaction()->size(); i++){
+        auto obj = makeOffset<Transaction>( builder, obj->transaction();
+        txs_.push_back( obj.Finish() );
+      }
+      auto transactions = builder.CreateVector( txs_.data(), txs_.size() );
+
+      ConsensusEventBuilder b(builder);
+      b.add_transaction( transactions );
+      b.add_eventSignatures( eventSignatures );
+      b.add_state( State::State_Commited );
+      return b.Finish();
+    }
+
+*/
+
+
+    void FuncConsensusEvent(ConsensusEvent aaa){
+
+    }
+
+    class IrohaServiceImpl final : public Sumeragi::Service {
         flatbuffers::FlatBufferBuilder fbb_;
     public:
         virtual ::grpc::Status Torii(
@@ -164,32 +360,44 @@ namespace connection {
           const flatbuffers::BufferRef<ConsensusEvent> *consensusEvent,
           flatbuffers::BufferRef<Response> *response
         ) override {
+          auto consensusEvent_ = consensusEvent->GetRoot();
 
-            fbb_.Clear();
+          std::vector<Offset<EventSignature>> exSigs_;
+          for(int i = 0; i < consensusEvent_->eventSignatures()->size(); i++){
+            auto obj = makeOffset<EventSignature>( fbb_, consensusEvent_->eventSignatures()->Get(i) );
+            exSigs_.push_back( obj.Finish() );
+          }
+          auto eventSignatures = fbb_.CreateVector( exSigs_.data(), exSigs_.size() );
 
-            logger::info("connection")  <<  "Operation";
-            logger::info("connection")  <<  "eventSignatures size: "    <<  consensusEvent->GetRoot()->eventSignatures()->size();
+          std::vector<Offset<Transaction>> txs_;
+          for(int i = 0; i < consensusEvent_->transaction()->size(); i++){
+            auto obj = makeOffset<Transaction>( fbb_, consensusEvent_->transaction() );
+            txs_.push_back( obj.Finish() );
+          }
+          auto transactions = fbb_.CreateVector( txs_.data(), txs_.size() );
 
+          ConsensusEventBuilder b(fbb_);
+          b.add_transaction( transactions );
+          b.add_eventSignatures( eventSignatures );
+          b.add_state( State::State_Commited );
+          auto consensusEvent = b.Finish();
 
-            flatbuffers::FlatBufferBuilder bb;
-            ConsensusEvent user = consensusEvent.getRootAsConsensusEvent(bb); 
+          FuncConsensusEvent(consensusEvent);
 
-            for (auto& f: receivers){
-                //f("dummy", event);
-            }
-
-            fbb_.Clear();
-            fbb_.Finish(CreateResponse(
-                fbb_,
-                200,
-        	      fbb_.CreateString("Ok")
-            ));
-
-            *response = flatbuffers::BufferRef<Response>(
-                fbb_.GetBufferPointer(),
-                fbb_.GetSize()
-            );
-            return grpc::Status::OK;
+          for(auto f: receivers){
+              f("aa", consensusEvent_);
+          }
+          fbb_.Clear();
+          auto stat_offset = CreateResponse(fbb_,
+              200,
+            	fbb_.CreateString("Hello, " +
+                    	std::to_string(request->GetRoot()->state())
+            	)
+          );
+          fbb_.Finish(stat_offset);
+          *response = flatbuffers::BufferRef<Response>(fbb_.GetBufferPointer(),
+                                                   fbb_.GetSize());
+          return grpc::Status::OK;
         }
     };
 
@@ -254,9 +462,11 @@ namespace connection {
         return true;
     }
 
-    bool receive(const std::function<void(
+    bool receive(
+      const std::function<void(
         const std::string&,
-        ConsensusEvent&)>& callback) {
+        ConsensusEvent&&
+      )>& callback) {
         receivers.push_back(callback);
         return true;
     }
