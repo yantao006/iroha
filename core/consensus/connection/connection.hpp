@@ -46,7 +46,7 @@ namespace connection {
 
     bool receive(const std::function<void(
         const std::string&,
-        iroha::ConsensusEvent&)
+        iroha::ConsensusEvent&&)
     >& callback);
 
 

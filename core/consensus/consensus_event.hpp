@@ -67,7 +67,7 @@ public:
         T(std::forward<Args>(args)...)
     {}
 
-    void addSignature(const std::string& publicKey, const std::string& signature){
+    void addEventSignature(std::string&& publicKey,std::string&& signature){
         _eventSignatures.push_back(eventSignature(publicKey, signature));
     }
 
@@ -78,6 +78,15 @@ public:
         }
         return res;
     };
+
+    int numberOfValidSignatures(){
+        return std::count_if(
+            _eventSignatures.begin(), _eventSignatures.end(),
+            [hash = T::getHash()](eventSignature sig){
+                return signature::verify(sig.signature, hash, sig.publicKey);
+            }
+        );
+    }
 
     void execution(){
         T::execution();

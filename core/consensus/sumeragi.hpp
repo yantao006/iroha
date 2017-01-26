@@ -24,20 +24,13 @@ limitations under the License.
 #include <thread>
 #include <memory>
 
-#include "consensus_event.hpp"
-
 #include "../service/peer_service.hpp"
 #include "../../flatbuf/api_generated.h"
 
-#include "../model/commands/add.hpp"
-#include "../model/commands/transfer.hpp"
-#include "../model/commands/update.hpp"
-
-#include "../model/objects/account.hpp"
-#include "../model/objects/asset.hpp"
-#include "../model/objects/domain.hpp"
 
 namespace sumeragi {
+
+    using iroha::ConsensusEvent;
 
     void initializeSumeragi(
         const std::string& myPublicKey,
@@ -46,12 +39,12 @@ namespace sumeragi {
     void loop();
 
     void getNextOrder(
-        const iroha::ConsensusEvent& event
+        const ConsensusEvent& event
     );
 
-    void processTransaction(iroha::ConsensusEvent& event);
+    void processTransaction(ConsensusEvent&& event);
 
-    void panic(const iroha::ConsensusEvent& event);
+    void panic(const ConsensusEvent& event);
     void setAwkTimer(const int sleepMillisecs, const std::function<void(void)> action);
     void determineConsensusOrder(/*std::vector<double> trustVector*/);
 
