@@ -55,7 +55,7 @@ namespace domain {
                 if (domain == domainName) {
                      return true;
                 }
-            }   
+            }
             return false;
         } else {
             return false;
@@ -76,7 +76,7 @@ namespace domain {
     bool AccountUser::pay(const std::string &to, const int quantity, const std::string &assetUrl) {
         std::unique_ptr<AccountUser> receiverAccount = account_repository::findByUid(to);
         if (receiverAccount != nullptr) {
-           
+
             // Oh no...,This is bad. not only asset name, require domain information.
             // Todo use domain informaion
             std::pair<
@@ -87,17 +87,17 @@ namespace domain {
             int receiverBalance = receiverAccount->sampleAssetQuantitiesWhatIHaveAccount.at(assetName.second);
 
             if (myBalance > quantity) {
-                account_repository::update_quantity( 
+                account_repository::update_quantity(
                     receiverAccount->uid,
                     receiverBalance + quantity,
                     assetName.second
                 );
 
-                account_repository::update_quantity( 
+                account_repository::update_quantity(
                     this->uid,
                     myBalance - quantity,
                     assetName.second
-                );      
+                );
 
                 return true;
             } else {
@@ -106,5 +106,5 @@ namespace domain {
         } else {
             return false;
         }
-    }    
+    }
 }

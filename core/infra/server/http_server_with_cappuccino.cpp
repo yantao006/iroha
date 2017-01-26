@@ -20,7 +20,6 @@ limitations under the License.
 #include "../../vendor/Cappuccino/cappuccino.hpp"
 #include "../../util/logger.hpp"
 #include "../../service/peer_service.hpp"
-#include "../../infra/protobuf/convertor.hpp"
 
 #include "../../consensus/connection/connection.hpp"
 
@@ -239,6 +238,12 @@ namespace http {
         });
 
         Cappuccino::route<Cappuccino::Method::GET>( "/history/transaction",[](std::shared_ptr<Request> request) -> Response{
+          res.json(json({
+            {"status",  200},
+            {"history", tx_json}
+          }));
+          return res;
+          /*
             std::string uuid = request->params("uuid");
             auto res = Response(request);
             auto tx_json = json::array();
@@ -294,6 +299,7 @@ namespace http {
               {"history", tx_json}
             }));
             return res;
+*/
         });
 
         logger::info("server") << "start server!";

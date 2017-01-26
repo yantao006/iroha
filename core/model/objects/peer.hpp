@@ -25,11 +25,10 @@ namespace object {
 
 class Peer{
 
-public:
-    std::string ip;
-    std::string publicKey;
-
-};
+    public:
+        std::string ip;
+        std::string publicKey;
+    };
 
 };  // namespace object
 

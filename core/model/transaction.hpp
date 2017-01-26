@@ -24,8 +24,7 @@ namespace transaction {
 
 template <typename T>
 class Transaction: public T {
-
-protected:
+public:
     struct txSignature{
         std::string publicKey;
         std::string signature;
@@ -41,7 +40,6 @@ protected:
 
     std::string hash;
     std::vector<txSignature> txSignatures;
-public:
     std::int64_t    timestamp;
     std::string     senderPubkey;
     std::string     ownerPublicKey; // okay?
