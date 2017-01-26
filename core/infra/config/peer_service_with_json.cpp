@@ -17,7 +17,18 @@ limitations under the License.
 #include "peer_service_with_json.hpp"
 
 namespace config {
-    PeerServiceConfig::PeerServiceConfig() {}
+
+    PeerServiceConfig::PeerServiceConfig() {
+        if (auto config = openConfig(getConfigName())) {
+            for (const auto& peer : (*config)["group"].get<std::vector<json>>()){
+                peerList.push_back(std::make_unique<peer::Node>(
+                    peer["ip"].get<std::string>(),
+                    peer["publicKey"].get<std::string>(),
+                    1
+                ));
+            }
+        }
+    }
 
     PeerServiceConfig& PeerServiceConfig::getInstance() {
         static PeerServiceConfig serviceConfig;
@@ -46,17 +57,11 @@ namespace config {
     }
 
     std::vector<std::unique_ptr<peer::Node>> PeerServiceConfig::getPeerList() {
-        std::vector<std::unique_ptr<peer::Node>> nodes;
-        if (auto config = openConfig(getConfigName())) {
-            for (const auto& peer : (*config)["group"].get<std::vector<json>>()){
-                nodes.push_back(std::make_unique<peer::Node>(
-                    peer["ip"].get<std::string>(),
-                    peer["publicKey"].get<std::string>(),
-                    1
-                ));
-            }
-        }
-        return nodes;
+        return peerList;
+    }
+
+    void addPeer( peer::Node* peer ) {
+        peerList.push_back( unique_ptr<peer::Node>( peer ) );
     }
 
     std::string PeerServiceConfig::getConfigName() {

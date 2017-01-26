@@ -25,6 +25,8 @@ namespace config {
 
     class PeerServiceConfig: IConfig {
     private:
+        static std::vector<std::unique_ptr<peer::Node>> peerList;
+
         PeerServiceConfig();
         PeerServiceConfig(const PeerServiceConfig&);
         PeerServiceConfig& operator=(const PeerServiceConfig&);
@@ -36,6 +38,8 @@ namespace config {
         std::string getPrivateKey();
         std::string getMyIp();
         std::vector<std::unique_ptr<peer::Node>> getPeerList();
+
+        void addPeer( peer::Node* );
 
         virtual std::string getConfigName();
     };
