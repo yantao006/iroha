@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <utility>
 #include "../../repository/domain/account_repository.hpp"
+#include "../../repository/domain/peer_repository.hpp"
 
 namespace command {
 

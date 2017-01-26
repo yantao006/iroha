@@ -18,7 +18,12 @@ limitations under the License.
 
 #include "../objects/account.hpp"
 #include "../objects/asset.hpp"
+#include "../objects/peer.hpp"
+
 #include "../../util/logger.hpp"
+
+#include "../../service/peer_service.hpp"
+#include "../../config/peer_service_with_json.hpp"
 
 namespace command {
 
@@ -31,5 +36,17 @@ namespace command {
     template <>
     void Add<object::Asset>::execution() {
 
+    }
+
+    template<>
+    void Add<object::Peer>::execution() {
+        logger::debug("Add<Peer>") << "save ip:" << object::Peer::ip << " publicKey:" << object::Peer::publicKey;
+
+        // add peerList
+        double trustScore = 1.0; // calclation trust score
+        config::PeerServiceConfig::getInstance()::addPeer( new peer::Node( object::Peer::ip, object::Peer::publicKey, trustScore ) );
+
+        // add local
+        repository::peer::add(object::Peer::ip, object::Peer::publicKey);
     }
 }
