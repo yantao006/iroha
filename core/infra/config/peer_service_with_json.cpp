@@ -16,16 +16,20 @@ limitations under the License.
 
 #include "peer_service_with_json.hpp"
 
+
 namespace config {
 
+    std::set< peer::Node > PeerServiceConfig::peerList;
     PeerServiceConfig::PeerServiceConfig() {
-        if (auto config = openConfig(getConfigName())) {
-            for (const auto& peer : (*config)["group"].get<std::vector<json>>()){
-                peerList.push_back(std::make_unique<peer::Node>(
-                    peer["ip"].get<std::string>(),
-                    peer["publicKey"].get<std::string>(),
-                    1
-                ));
+        if( peerList.empty() ) {
+            if (auto config = openConfig(getConfigName())) {
+                for (const auto& peer : (*config)["group"].get<std::vector<json>>()){
+                    peerList.insert( peer::Node(
+                        peer["ip"].get<std::string>(),
+                        peer["publicKey"].get<std::string>(),
+                        1
+                    ));
+                }
             }
         }
     }
@@ -57,11 +61,21 @@ namespace config {
     }
 
     std::vector<std::unique_ptr<peer::Node>> PeerServiceConfig::getPeerList() {
-        return peerList;
+        std::vector<std::unique_ptr<peer::Node>> nodes;
+        for( auto node : peerList ) {
+            nodes.push_back( std::make_unique<peer::Node>( node.getIP(), node.getPublicKey(), node.getTrustScore() ) );
+        }
+        sort( nodes.begin(), nodes.end(),
+            []( const std::unique_ptr<peer::Node> &a, const std::unique_ptr<peer::Node> &b ) { return a->getTrustScore() > b->getTrustScore(); } );
+        return nodes;
     }
 
-    void addPeer( peer::Node* peer ) {
-        peerList.push_back( unique_ptr<peer::Node>( peer ) );
+    void PeerServiceConfig::addPeer( peer::Node peer ) {
+        peerList.insert( peer );
+    }
+
+    void PeerServiceConfig::removePeer( peer::Node peer ) {
+        peerList.erase( peerList.find( peer ) );
     }
 
     std::string PeerServiceConfig::getConfigName() {

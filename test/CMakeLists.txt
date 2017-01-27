@@ -11,3 +11,5 @@ add_subdirectory(infra/service)
 add_subdirectory(connection)
 add_subdirectory(consensus)
 add_subdirectory(vendor)
+add_subdirectory(model)
+

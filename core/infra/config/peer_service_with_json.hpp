@@ -20,18 +20,20 @@ limitations under the License.
 #include "../../service/peer_service.hpp"
 #include "iroha_config.hpp"
 #include <vector>
+#include <memory>
+#include <set>
 
 namespace config {
 
     class PeerServiceConfig: IConfig {
     private:
-        static std::vector<std::unique_ptr<peer::Node>> peerList;
 
         PeerServiceConfig();
         PeerServiceConfig(const PeerServiceConfig&);
         PeerServiceConfig& operator=(const PeerServiceConfig&);
 
     public:
+        static std::set<peer::Node> peerList;
         static PeerServiceConfig &getInstance();
 
         std::string getMyPublicKey();
@@ -39,7 +41,8 @@ namespace config {
         std::string getMyIp();
         std::vector<std::unique_ptr<peer::Node>> getPeerList();
 
-        void addPeer( peer::Node* );
+        void addPeer( peer::Node );
+        void removePeer( peer::Node );
 
         virtual std::string getConfigName();
     };

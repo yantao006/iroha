@@ -22,8 +22,8 @@ namespace object {
 
 
 Peer::Peer(
-    std::string     ip
-    std::string     publicKey,
+    std::string     ip,
+    std::string     publicKey
 ):
     ip ( std::move( ip ) ),
     publicKey ( std::move( publicKey ) )
