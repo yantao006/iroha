@@ -25,12 +25,11 @@ limitations under the License.
 #include <memory>
 
 #include "../service/peer_service.hpp"
-#include "../../flatbuf/api_generated.h"
-
+#include "consensus_event.hpp"
 
 namespace sumeragi {
 
-    using iroha::ConsensusEvent;
+    using event::ConsensusEvent;
 
     void initializeSumeragi(
         const std::string& myPublicKey,
@@ -42,7 +41,7 @@ namespace sumeragi {
         const ConsensusEvent& event
     );
 
-    void processTransaction(ConsensusEvent&& event);
+    void processTransaction(ConsensusEvent& event);
 
     void panic(const ConsensusEvent& event);
     void setAwkTimer(const int sleepMillisecs, const std::function<void(void)> action);

@@ -48,8 +48,6 @@ limitations under the License.
 */
 namespace sumeragi {
 
-    using iroha::ConsensusEvent;
-
     static size_t concurrency =
         std::thread::hardware_concurrency() <= 0
         ? 1
@@ -66,14 +64,6 @@ namespace sumeragi {
 
     namespace detail {
 
-        bool eventSignatureIsEmpty(const ConsensusEvent& event) {
-            return event.eventSignatures()->size() == 0;
-        }
-
-        unsigned int getNumValidSignatures(const ConsensusEvent& event){
-          // TODO
-          return 4;
-        }
         void printIsSumeragi(bool isSumeragi) {
             if (isSumeragi){
                 logger::explore("sumeragi") <<  "===+==========+===";
@@ -197,15 +187,15 @@ namespace sumeragi {
 
         context->isSumeragi = context->validatingPeers.at(0)->getPublicKey() == context->myPublicKey;
 
-        connection::receive([](const std::string& from, ConsensusEvent&& event) {
+        connection::receive([](const std::string& from, ConsensusEvent& event) {
             logger::info("sumeragi") << "receive!";
-            logger::info("sumeragi") << "received message! sig:[" << event.eventSignatures()->size() << "]";
+            logger::info("sumeragi") << "received message! sig:[" << event.numberOfValidSignatures() << "]";
 
             // send processTransaction(event) as a task to processing pool
             // this returns std::future<void> object
             // (std::future).get() method locks processing until result of processTransaction will be available
             // but processTransaction returns void, so we don't have to call it and wait
-            std::function<void()> &&task = std::bind(processTransaction, std::move(event));
+            std::function<void()> &&task = std::bind(processTransaction, event);
             pool.process(std::move(task));
         });
 
@@ -229,7 +219,7 @@ namespace sumeragi {
     }
 
 
-    void processTransaction(ConsensusEvent&& event) {
+    void processTransaction(ConsensusEvent& event) {
 
         logger::info("sumeragi")    <<  "processTransaction";
         //if (!transaction_validator::isValid(event->getTx())) {
@@ -238,9 +228,7 @@ namespace sumeragi {
         logger::info("sumeragi")    <<  "valid";
         logger::info("sumeragi")    <<  "Add my signature...";
 
-        if(event.transaction()->size() == 0) throw "";
-
-        auto hash = event.transaction()->Get(0)->hash()->str();
+        auto hash = event.getTransactionHash();
         logger::info("sumeragi")    <<  "hash:" << hash;
         logger::info("sumeragi")    <<  "signature:"  <<
           signature::sign(
@@ -251,15 +239,15 @@ namespace sumeragi {
         // TODO Create add event signature.
         // event.addEventSignature( peer::getMyPublicKey(), signature::sign( hash, peer::getMyPublicKey(), peer::getPrivateKey()));
 
-        if (detail::eventSignatureIsEmpty(event) && context->isSumeragi) {
+        if (event.eventSignatureIsEmpty() && context->isSumeragi) {
             logger::info("sumeragi") << "signatures.empty() isSumragi";
             // Determine the order for processing this event
             // TODO Create add event signature.
             // event.set_order(getNextOrder());
             // logger::info("sumeragi") << "new  order:" << event.order();
-        } else if (!detail::eventSignatureIsEmpty(event)) {
+        } else if (!event.eventSignatureIsEmpty()) {
             // Check if we have at least 2f+1 signatures needed for Byzantine fault tolerance
-            if (detail::getNumValidSignatures(event) >= context->maxFaulty * 2 + 1) {
+            if (event.numberOfValidSignatures() >= context->maxFaulty * 2 + 1) {
 
                 logger::info("sumeragi")    <<  "Signature exists";
 
@@ -271,7 +259,7 @@ namespace sumeragi {
                 logger::explore("sumeragi") <<  "\033[93m0\033[1m"  <<  hash  <<  "0\033[0m";
                 logger::explore("sumeragi") <<  "\033[93m0================================================================0\033[0m";
 
-                detail::printJudge(detail::getNumValidSignatures(event), context->numValidatingPeers, context->maxFaulty * 2 + 1);
+                detail::printJudge(event.numberOfValidSignatures(), context->numValidatingPeers, context->maxFaulty * 2 + 1);
 
                 detail::printAgree();
                 // Check Merkle roots to see if match for new state
@@ -345,7 +333,7 @@ namespace sumeragi {
                     logger::info("sumeragi")    <<  "I will send event to " <<  context->validatingPeers.at(context->proxyTailNdx)->getIP();
                     connection::send(context->validatingPeers.at(context->proxyTailNdx)->getIP(), std::move(event)); // Think In Process
                 } else {
-                    logger::info("sumeragi")    <<  "Send All! sig:["       <<  detail::getNumValidSignatures(event) << "]";
+                    logger::info("sumeragi")    <<  "Send All! sig:["       <<  event.numberOfValidSignatures() << "]";
                     connection::sendAll(std::move(event)); // TODO: Think In Process
                 }
 

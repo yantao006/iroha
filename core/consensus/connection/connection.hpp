@@ -22,10 +22,11 @@ limitations under the License.
 #include <memory>
 #include <functional>
 
-#include "../../../flatbuf/api_generated.h"
 #include "../consensus_event.hpp"
 
 namespace connection {
+
+    using event::ConsensusEvent;
 
     struct Config{
         std::string name;
@@ -37,16 +38,16 @@ namespace connection {
 
     bool send(
         const std::string& ip,
-        const iroha::ConsensusEvent& msg)
+        const ConsensusEvent& msg)
     ;
 
     bool sendAll(
-        const iroha::ConsensusEvent& msg
+        const ConsensusEvent& msg
     );
 
     bool receive(const std::function<void(
         const std::string&,
-        iroha::ConsensusEvent&&)
+        ConsensusEvent&)
     >& callback);
 
 

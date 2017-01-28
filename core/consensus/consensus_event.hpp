@@ -35,12 +35,16 @@ limitations under the License.
 #include "../model/objects/account.hpp"
 #include "../model/objects/asset.hpp"
 #include "../model/objects/domain.hpp"
+#include "../model/objects/message.hpp"
+#include "../model/objects/peer.hpp"
 
 
 namespace event {
 
-template <typename T>
-class ConsensusEvent: public T {
+  using namespace object;
+  using transaction::Transaction;
+
+class ConsensusEvent{
 
     struct eventSignature{
         std::string publicKey;
@@ -60,11 +64,24 @@ class ConsensusEvent: public T {
 public:
     int order;
 
-    template<typename... Args>
+    std::string hash;
+
+    Asset asset;
+    Domain domain;
+    Message message;
+    Peer  peer;
+
+    enum Command_type{
+      ADD,
+      TRANSFER,
+      UPDATE,
+      REMOVE
+    };
+
+    template<typename T>
     ConsensusEvent(
-        Args&&... args
-    ):
-        T(std::forward<Args>(args)...)
+        Transaction<T>
+    )
     {}
 
     void addEventSignature(std::string&& publicKey,std::string&& signature){
@@ -79,17 +96,24 @@ public:
         return res;
     };
 
-    int numberOfValidSignatures(){
+    unsigned int numberOfValidSignatures(){
         return std::count_if(
             _eventSignatures.begin(), _eventSignatures.end(),
-            [hash = T::getHash()](eventSignature sig){
+            [&](eventSignature sig){
                 return signature::verify(sig.signature, hash, sig.publicKey);
             }
         );
     }
 
+    std::string getTransactionHash(){
+      return hash;
+    }
+
+    bool eventSignatureIsEmpty() {
+        return _eventSignatures.empty();
+    }
+
     void execution(){
-        T::execution();
     }
 
 };
