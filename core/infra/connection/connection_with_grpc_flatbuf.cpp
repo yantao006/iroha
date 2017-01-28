@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "../../consensus/connection/connection.hpp"
+#include "../../consensus/consensus_event.hpp"
 #include "../../util/logger.hpp"
 #include "../../service/peer_service.hpp"
 
@@ -35,7 +36,7 @@ namespace connection {
     std::vector<
         std::function<void(
             const std::string& from,
-            ConsensusEvent&& message
+            event::ConsensusEvent& message
         )>
     > receivers;
 
@@ -43,10 +44,9 @@ namespace connection {
     Offset<T>
     makeOffset(T ){}
 
-/*
 //  This is asset
     template<>
-    Offset<BaseObject>
+    BaseObject
     makeOffset(flatbuffers::FlatBufferBuilder builder, BaseObject* obj){
       ObjectBuilder ob(builder);
       ob.add_text( text_ );
@@ -347,46 +347,17 @@ namespace connection {
 
 */
 
-
-    void FuncConsensusEvent(ConsensusEvent aaa){
-
-    }
-
     class IrohaServiceImpl final : public Sumeragi::Service {
         flatbuffers::FlatBufferBuilder fbb_;
     public:
         virtual ::grpc::Status Torii(
           ::grpc::ServerContext* context,
-          const flatbuffers::BufferRef<ConsensusEvent> *consensusEvent,
+          const flatbuffers::BufferRef<ConsensusEvent> *consensusEvent_,
           flatbuffers::BufferRef<Response> *response
         ) override {
-          auto consensusEvent_ = consensusEvent->GetRoot();
 
-          std::vector<Offset<EventSignature>> exSigs_;
-          for(int i = 0; i < consensusEvent_->eventSignatures()->size(); i++){
-            auto obj = makeOffset<EventSignature>( fbb_, consensusEvent_->eventSignatures()->Get(i) );
-            exSigs_.push_back( obj.Finish() );
-          }
-          auto eventSignatures = fbb_.CreateVector( exSigs_.data(), exSigs_.size() );
+          auto consensusEvent = GetConsensusEvent( consensusEvent_ );
 
-          std::vector<Offset<Transaction>> txs_;
-          for(int i = 0; i < consensusEvent_->transaction()->size(); i++){
-            auto obj = makeOffset<Transaction>( fbb_, consensusEvent_->transaction() );
-            txs_.push_back( obj.Finish() );
-          }
-          auto transactions = fbb_.CreateVector( txs_.data(), txs_.size() );
-
-          ConsensusEventBuilder b(fbb_);
-          b.add_transaction( transactions );
-          b.add_eventSignatures( eventSignatures );
-          b.add_state( State::State_Commited );
-          auto consensusEvent = b.Finish();
-
-          FuncConsensusEvent(consensusEvent);
-
-          for(auto f: receivers){
-              f("aa", consensusEvent_);
-          }
           fbb_.Clear();
           auto stat_offset = CreateResponse(fbb_,
               200,
@@ -415,7 +386,7 @@ namespace connection {
 
     bool send(
         const std::string& ip,
-        const ConsensusEvent& event
+        const event::ConsensusEvent& event
     ) {
         logger::info("connection") << "start send";
         if (find(receiver_ips.begin(), receiver_ips.end(), ip) != receiver_ips.end()){
@@ -452,7 +423,7 @@ namespace connection {
     }
 
     bool sendAll(
-        const Event::ConsensusEvent& event
+        const event::ConsensusEvent& event
     ) {
         for (auto& ip : receiver_ips){
             if (ip != peer::getMyIp()){
@@ -465,7 +436,7 @@ namespace connection {
     bool receive(
       const std::function<void(
         const std::string&,
-        ConsensusEvent&&
+        event::ConsensusEvent&
       )>& callback) {
         receivers.push_back(callback);
         return true;

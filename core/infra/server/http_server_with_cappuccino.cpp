@@ -34,7 +34,6 @@ namespace http {
     using Request = Cappuccino::Request;
     using Response = Cappuccino::Response;
 
-
     using namespace transaction;
     using namespace command;
     using namespace event;
@@ -66,7 +65,7 @@ namespace http {
     void server() {
         logger::info("server") << "initialize server!";
         Cappuccino::Cappuccino( 0, nullptr);
-
+/*
         Cappuccino::route<Cappuccino::Method::POST>( "/account/register",[](std::shared_ptr<Request> request) -> Response{
             auto res = Response(request);
             auto data = request->json();
@@ -172,7 +171,7 @@ namespace http {
                             sender)
                         ) {
 
-                        */
+
                             auto event = ConsensusEvent < Transaction < Transfer < object::Asset >> > (
                                 sender.c_str(),
                                 sender.c_str(),
@@ -192,7 +191,7 @@ namespace http {
                             res.json(responseError("Validation failed!"));
                             return res;
                         }
-                        */
+
                     }else if(command == "add"){
                         auto value     = data["params"]["value"].get<std::string>();
 
@@ -205,7 +204,7 @@ namespace http {
                             ",params.command:" + command + \
                             ",asset-uuid:" + assetUuid,
                             sender)) {
-                        */
+
                             auto event = ConsensusEvent < Transaction < Add < object::Asset >> > (
                                 sender.c_str(),
                                 sender.c_str(),
@@ -243,7 +242,7 @@ namespace http {
             {"history", tx_json}
           }));
           return res;
-          /*
+
             std::string uuid = request->params("uuid");
             auto res = Response(request);
             auto tx_json = json::array();
@@ -299,9 +298,9 @@ namespace http {
               {"history", tx_json}
             }));
             return res;
-*/
-        });
 
+        });
+        */
         logger::info("server") << "start server!";
         // runnning
         Cappuccino::run();
