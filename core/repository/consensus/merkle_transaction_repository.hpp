@@ -23,8 +23,10 @@ limitations under the License.
 #include <unordered_map>
 #include "../../consensus/consensus_event.hpp"
 
+
 namespace merkle_transaction_repository {
 
+  using event::ConsensusEvent;
 
 struct MerkleNode {
     std::string hash;
@@ -59,7 +61,7 @@ struct MerkleNode {
 };
 
 //TODO: change bool to throw an exception instead
-bool commit(const iroha::ConsensusEvent& event){
+bool commit(const ConsensusEvent& event){
     return false; // TODO: fill this function
 };
 
@@ -73,7 +75,7 @@ std::string getLeaf(const std::string& hash){
 
 template <typename T>
 std::string calculateNewRoot(
-    const iroha::ConsensusEvent& event,
+    const ConsensusEvent& event,
     std::vector<std::tuple<std::string,std::string>> &batchCommit
 );
 
