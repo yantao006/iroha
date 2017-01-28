@@ -22,7 +22,7 @@ limitations under the License.
 #include <cstdint>
 
 namespace object {
-    
+
     class Account {
 
     public:

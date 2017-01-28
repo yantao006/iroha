@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
-#define CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+#ifndef CORE_DOMAIN_OBJECTS_PEER_HPP_
+#define CORE_DOMAIN_OBJECTS_PEER_HPP_
 
 #include <string>
 #include <memory>
@@ -32,4 +32,4 @@ class Peer{
 
 };  // namespace object
 
-#endif  // CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+#endif  // CORE_DOMAIN_OBJECTS_PEER_HPP_
