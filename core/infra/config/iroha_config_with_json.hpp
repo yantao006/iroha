@@ -27,7 +27,7 @@ class IrohaConfigManager : ACM {
   IrohaConfigManager();
 
   template <typename T>
-  T getParam(const std::string& param, const T&& defaultValue) {
+  T getParam(const std::string& param, const T& defaultValue) {
     if (auto config = openConfig(getConfigName())) {
       return config->value(param, defaultValue);
     }

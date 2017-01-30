@@ -64,9 +64,9 @@ namespace sumeragi {
     static ThreadPool pool(
         ThreadPoolOptions{
             .threads_count = config::IrohaConfigManager::getInstance()
-                    .getConcurrency(0);
+                    .getConcurrency(0),
             .worker_queue_size = config::IrohaConfigManager::getInstance()
-                    .getPoolWorkerQueueSize(1024);
+                    .getPoolWorkerQueueSize(1024),
         }
     );
 
