@@ -26,10 +26,6 @@ class IrohaConfigManager : ACM {
  private:
   IrohaConfigManager();
 
- public:
-  static IrohaConfigManager& getInstance();
-  std::string getConfigName();
-
   template <typename T>
   T getParam(const std::string& param, const T&& defaultValue) {
     if (auto config = openConfig(getConfigName())) {
@@ -37,6 +33,15 @@ class IrohaConfigManager : ACM {
     }
     return defaultValue;
   }
+
+ public:
+  static IrohaConfigManager& getInstance();
+  std::string getConfigName();
+
+  std::string getDatabasePath(const std::string& defaultValue);
+  size_t getConcurrency(size_t defaultValue);
+  size_t getMaxFaultyPeers(size_t defaultValue);
+  size_t getPoolWorkerQueueSize(size_t defaultValue);
 };
 }
 

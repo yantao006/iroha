@@ -63,12 +63,10 @@ namespace sumeragi {
     //thread pool and a storage of events 
     static ThreadPool pool(
         ThreadPoolOptions{
-            .threads_count = 
-                (size_t)config::IrohaConfigManager::getInstance()
-                .getParam("concurrency", 0),
-            .worker_queue_size = 
-                (size_t)config::IrohaConfigManager::getInstance()
-                .getParam("pool_worker_queue_size", 1024)
+            .threads_count = config::IrohaConfigManager::getInstance()
+                    .getConcurrency(0);
+            .worker_queue_size = config::IrohaConfigManager::getInstance()
+                    .getPoolWorkerQueueSize(1024);
         }
     );
 
@@ -201,7 +199,8 @@ namespace sumeragi {
 
         context->numValidatingPeers = context->validatingPeers.size();
         // maxFaulty = Default to approx. 1/3 of the network.
-        context->maxFaulty = config::IrohaConfigManager::getInstance().getParam("maxFaultyPeers", context->numValidatingPeers / 3);  
+        context->maxFaulty = config::IrohaConfigManager::getInstance()
+                .getMaxFaultyPeers(context->numValidatingPeers / 3);
         context->proxyTailNdx = context->maxFaulty * 2 + 1;
 
         if (context->validatingPeers.empty()) {
