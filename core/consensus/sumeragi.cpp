@@ -260,9 +260,9 @@ namespace sumeragi {
         logger::info("sumeragi")    <<  "Add my signature...";
 
         logger::info("sumeragi")    <<  "hash:" <<  event.transaction().hash();
-        logger::info("sumeragi")    <<  "pub:"  <<  config::PeerServiceConfig::getInstance().getMyPublicKey();
-        logger::info("sumeragi")    <<  "pro:"  <<  config::PeerServiceConfig::getInstance().getMyPrivateKey();
-        logger::info("sumeragi")    <<  "sog:"  <<  signature::sign(
+        logger::info("sumeragi")    <<  "pub: "  <<  config::PeerServiceConfig::getInstance().getMyPublicKey();
+        logger::info("sumeragi")    <<  "priv:"  <<  config::PeerServiceConfig::getInstance().getMyPrivateKey();
+        logger::info("sumeragi")    <<  "sig: "  <<  signature::sign(
                                                     event.transaction().hash(),
                                                     config::PeerServiceConfig::getInstance().getMyPublicKey(),
                                                     config::PeerServiceConfig::getInstance().getMyPrivateKey()
