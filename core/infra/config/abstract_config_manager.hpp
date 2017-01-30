@@ -68,7 +68,7 @@ class AbstractConfigManager {
     try {
       _configData = json::parse(std::move(jsonStr));
     } catch (...) {
-      logger::error("config") << "Can't barse json: " << getConfigName();
+      logger::error("config") << "Can't parse json: " << getConfigName();
     }
   }
 
