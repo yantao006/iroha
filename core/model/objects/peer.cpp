@@ -26,8 +26,23 @@ Peer::Peer(
     std::string     publicKey
 ):
     ip ( std::move( ip ) ),
-    publicKey ( std::move( publicKey ) )
+    publicKey ( std::move( publicKey ) ),
+    trustScore ( 1.0 )
 {}
+
+Peer::Peer(
+    std::string     ip,
+    std::string     publicKey,
+    double          trustScore
+):
+    ip ( std::move( ip ) ),
+    publicKey ( std::move( publicKey ) ),
+    trustScore ( trustScore )
+{}
+
+Peer Peer::getInstance() const{
+    return *this;
+}
 
 
 };  // namespace peer

@@ -24,22 +24,55 @@ limitations under the License.
 namespace object {
 
 class Peer {
-
-public:
+private:
     std::string     ip;
     std::string     publicKey;
+    double          trustScore;
 
-
+public:
     explicit Peer():
         ip(""),
-        publicKey("")
+        publicKey(""),
+        trustScore(1.0)
     {}
 
+    explicit Peer(
+        std::string ip,
+        std::string publicKey
+    );
 
     explicit Peer(
         std::string     ip,
-        std::string     publicKey
+        std::string     publicKey,
+        double          trustScore
     );
+    
+    
+    ~Peer() = default; // make dtor virtual
+    Peer(Peer&&) = default;  // support moving
+    Peer& operator = (Peer&&) = default;
+    Peer(const Peer&) = default; // support copying
+    Peer& operator = (const Peer&) = default;
+
+    bool operator < (const Peer& peer) const {
+        if( ip == peer.ip ) return publicKey < peer.publicKey;
+        return ip < peer.ip;
+    }
+   
+
+    std::string getIP() const {
+        return ip;
+    }
+
+    std::string getPublicKey() const {
+        return publicKey;
+    }
+
+    double getTrustScore() const {
+        return trustScore;
+    }
+
+    Peer getInstance() const;
 
 };
 

@@ -40,12 +40,12 @@ namespace command {
 
     template<>
     void Remove<object::Peer>::execution() {
-        logger::debug("Remove<Peer>") << "save ip:" << object::Peer::ip << " publicKey:" << object::Peer::publicKey;
+        logger::debug("Remove<Peer>") << "save ip:" << object::Peer::getIP() << " publicKey:" << object::Peer::getPublicKey();
 
         // delete all database
         // TODO
 
         // remove peerList
-        config::PeerServiceConfig::getInstance().removePeer( peer::Node( object::Peer::ip, object::Peer::publicKey, 0.0 ) );
+        config::PeerServiceConfig::getInstance().removePeer( object::Peer::getInstance() );
     }
 }

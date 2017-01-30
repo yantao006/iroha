@@ -19,12 +19,12 @@ limitations under the License.
 
 namespace config {
 
-    std::set< peer::Node > PeerServiceConfig::peerList;
+    std::set< object::Peer > PeerServiceConfig::peerList;
     PeerServiceConfig::PeerServiceConfig() {
         if( peerList.empty() ) {
             if (auto config = openConfig(getConfigName())) {
                 for (const auto& peer : (*config)["group"].get<std::vector<json>>()){
-                    peerList.insert( peer::Node(
+                    peerList.insert( object::Peer(
                         peer["ip"].get<std::string>(),
                         peer["publicKey"].get<std::string>(),
                         1
@@ -60,21 +60,22 @@ namespace config {
         return "";
     }
 
-    std::vector<std::unique_ptr<peer::Node>> PeerServiceConfig::getPeerList() {
-        std::vector<std::unique_ptr<peer::Node>> nodes;
+    std::vector<std::unique_ptr<object::Peer>> PeerServiceConfig::getPeerList() {
+        std::vector<std::unique_ptr<object::Peer>> nodes;
         for( auto node : peerList ) {
-            nodes.push_back( std::make_unique<peer::Node>( node.getIP(), node.getPublicKey(), node.getTrustScore() ) );
+            nodes.push_back( std::make_unique<object::Peer>( node.getIP(), node.getPublicKey(), node.getTrustScore() ) );
         }
         sort( nodes.begin(), nodes.end(),
-            []( const std::unique_ptr<peer::Node> &a, const std::unique_ptr<peer::Node> &b ) { return a->getTrustScore() > b->getTrustScore(); } );
+            []( const std::unique_ptr<object::Peer> &a, const std::unique_ptr<object::Peer> &b ) { return a->getTrustScore() > b->getTrustScore(); } );
         return nodes;
     }
 
-    void PeerServiceConfig::addPeer( peer::Node peer ) {
+    void PeerServiceConfig::addPeer( object::Peer peer ) {
         peerList.insert( peer );
+        std::cout << "addPeer: " << peer.getIP() << std::endl;
     }
 
-    void PeerServiceConfig::removePeer( peer::Node peer ) {
+    void PeerServiceConfig::removePeer( object::Peer peer ) {
         peerList.erase( peerList.find( peer ) );
     }
 

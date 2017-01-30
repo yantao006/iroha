@@ -40,7 +40,7 @@ namespace command {
 
     template<>
     void Add<object::Peer>::execution() {
-        logger::debug("Add<Peer>") << "save ip:" << object::Peer::ip << " publicKey:" << object::Peer::publicKey;
+        logger::debug("Add<Peer>") << "save ip:" << object::Peer::getIP() << " publicKey:" << object::Peer::getPublicKey();
 
         // save all Data and Consensus another peer
         // TODO
@@ -49,8 +49,8 @@ namespace command {
         // TODO
 
         // add peerList
-        double trustScore = 0.4; // calclation trust score
-        config::PeerServiceConfig::getInstance().addPeer( peer::Node( object::Peer::ip, object::Peer::publicKey, trustScore ) );
+        //double trustScore = 0.4; // calclation trust score
+        config::PeerServiceConfig::getInstance().addPeer( object::Peer::getInstance() );
 
         // add local
         //repository::peer::add(object::Peer::ip, object::Peer::publicKey); // replace ametsuchi
