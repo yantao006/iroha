@@ -29,28 +29,18 @@ limitations under the License.
 #include "../../core/service/peer_service.hpp"
 #include "../../core/util/logger.hpp"
 #include "../../core/crypto/hash.hpp"
-#include "../../core/infra/protobuf/convertor.hpp"
 
-template<typename T>
-using Transaction = transaction::Transaction<T>;
-template<typename T>
-using ConsensusEvent = event::ConsensusEvent<T>;
-template<typename T>
-using Add = command::Add<T>;
-template<typename T>
-using Transfer = command::Transfer<T>;
-template<typename T>
-using Update = command::Update<T>;
-
+/*
 void setAwkTimer(int const sleepMillisecs, const std::function<void(void)>& action) {
     std::thread([action, sleepMillisecs]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepMillisecs));
         action();
     }).join();
 }
+*/
 
 int main(int argc, char *argv[]){
-
+/*
     try {
         std::string value;
         std::string senderPublicKey;
@@ -77,7 +67,7 @@ int main(int argc, char *argv[]){
             connection::run();
         });
 
-        // since we have thread pool, it sets all necessary callbacks in 
+        // since we have thread pool, it sets all necessary callbacks in
         // sumeragi::initializeSumeragi.
         // std::thread http_th([]() {
         //     sumeragi::loop();
@@ -108,6 +98,6 @@ int main(int argc, char *argv[]){
     }catch(char const *e){
         std::cout << e << std::endl;
     }
-
+*/
     return 0;
 }

@@ -16,7 +16,7 @@ add_executable(connection_grpc_test
 )
 target_link_libraries(connection_grpc_test
   convertor
-  connection_with_grpc
+  connection_with_grpc_flatbuf
   consensus_event
   signature
   peer_service_with_json

@@ -20,9 +20,8 @@ target_link_libraries(sumeragi_test
     snappy
     base64
     signature
-    convertor
     sumeragi
-    connection_with_grpc
+    connection_with_grpc_flatbuf
     peer_service_with_json
     pthread
     consensus_event
@@ -37,7 +36,7 @@ target_link_libraries(transaction_test
     base64
     signature
     sumeragi
-    connection_with_grpc
+    connection_with_grpc_flatbuf
     peer_service_with_json
     pthread
     consensus_event

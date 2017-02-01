@@ -28,25 +28,17 @@ limitations under the License.
 
 #include "../../core/service/peer_service.hpp"
 #include "../../core/crypto/hash.hpp"
-#include "../../core/infra/protobuf/convertor.hpp"
 
-template<typename T>
-using Transaction = transaction::Transaction<T>;
-template<typename T>
-using ConsensusEvent = event::ConsensusEvent<T>;
-template<typename T>
-using Add = command::Add<T>;
-template<typename T>
-using Transfer = command::Transfer<T>;
-
+/*
 void setAwkTimer(int const sleepMillisecs, std::function<void(void)> const &action) {
     std::thread([action, sleepMillisecs]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepMillisecs));
         action();
     }).join();
 }
-
+*/
 int main(){
+/*
     std::string senderPublicKey;
 
     std::string pubKey = peer::getMyPublicKey();
@@ -67,6 +59,6 @@ int main(){
             );
         });
     }
-
+*/
     return 0;
 }
