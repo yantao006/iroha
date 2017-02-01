@@ -14,8 +14,7 @@ target_link_libraries(http_server_with_cappuccino
 
   base64
   signature
-  convertor
-  connection_with_grpc
+  connection_with_grpc_flatbuf
   peer_service_with_json
 
   domain_repository

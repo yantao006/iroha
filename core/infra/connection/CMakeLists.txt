@@ -11,6 +11,7 @@ link_directories(
 
 ADD_LIBRARY(connection_with_grpc_flatbuf STATIC
   connection_with_grpc_flatbuf.cpp
+  $ENV{IROHA_HOME}/flatbuf/api.grpc.fb.cc
 )
 target_link_libraries(connection_with_grpc_flatbuf
   grpc++
