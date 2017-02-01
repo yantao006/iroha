@@ -46,7 +46,7 @@ target_link_libraries(iroha-main
   sumeragi
   logger
   http_server_with_cappuccino
-  connection_with_grpc
+  connection_with_grpc_flatbuf
   peer_service_with_json
   pthread
   keccak

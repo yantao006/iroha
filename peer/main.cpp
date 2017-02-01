@@ -30,15 +30,6 @@ limitations under the License.
 
 std::atomic_bool running(true);
 
-template<typename T>
-using Transaction = transaction::Transaction<T>;
-template<typename T>
-using ConsensusEvent = event::ConsensusEvent<T>;
-template<typename T>
-using Add = command::Add<T>;
-template<typename T>
-using Transfer = command::Transfer<T>;
-
 void server(){
     http::server();
 }
@@ -64,10 +55,10 @@ int main() {
     for (const auto& n : nodes){
         connection::addSubscriber(n->getIP());
     }
-  
+
     sumeragi::initializeSumeragi(peer::getMyPublicKey(), peer::getPeerList());
 
-    // since we have thread pool, it sets all necessary callbacks in 
+    // since we have thread pool, it sets all necessary callbacks in
     // sumeragi::initializeSumeragi.
     // std::thread sumeragi_thread(sumeragi::loop);
     std::thread http_thread(server);
