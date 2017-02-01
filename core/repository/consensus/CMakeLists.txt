@@ -5,7 +5,6 @@ add_library(event_repository STATIC
 )
 target_link_libraries(event_repository
     world_state_repo_with_level_db
-    event_with_grpc
     logger
 )
 #add_library(merkle_transaction_repository STATIC

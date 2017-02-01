@@ -10,7 +10,7 @@ include_directories(
 
 target_link_libraries(sumeragi
   peer_service_with_json
-  connection_with_grpc
+  connection_with_grpc_flatbuf
   signature
   event_repository
 )
