@@ -122,6 +122,7 @@ rpc_service Sumeragi {
 
   // sumeragi uses.
   Verify(ConsensusEvent): Response (streaming: "none");
+
 }
 
 // Use sumeragi
