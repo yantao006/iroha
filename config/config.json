@@ -1,10 +1,6 @@
 { 
-  // path to database file
   "database_path":"/tmp/iroha_ledger",
-  // 0 means = autodetection
   "concurrency": 0,
-  // max faulty peers in a network 
-  "maxFaultyPeers" : 1,
-  // task queue of each worker
+  "max_faulty_peers" : 1,
   "pool_worker_queue_size": 1024
 }

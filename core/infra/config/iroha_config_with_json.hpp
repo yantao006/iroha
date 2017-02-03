@@ -19,20 +19,13 @@ limitations under the License.
 
 #include "abstract_config_manager.hpp"
 
-using ACM = config::AbstractConfigManager;
-
 namespace config {
-class IrohaConfigManager : ACM {
+class IrohaConfigManager : config::AbstractConfigManager {
  private:
   IrohaConfigManager();
 
   template <typename T>
-  T getParam(const std::string& param, const T& defaultValue) {
-    if (auto config = openConfig(getConfigName())) {
-      return config->value(param, defaultValue);
-    }
-    return defaultValue;
-  }
+  T getParam(const std::string& param, const T& defaultValue);
 
  public:
   static IrohaConfigManager& getInstance();

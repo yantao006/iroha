@@ -21,11 +21,9 @@ limitations under the License.
 #include <service/peer_service.hpp>
 #include "abstract_config_manager.hpp"
 
-using ACM = config::AbstractConfigManager;
-
 namespace config {
 
-class PeerServiceConfig : ACM {
+class PeerServiceConfig : config::AbstractConfigManager {
  private:
   PeerServiceConfig();
 

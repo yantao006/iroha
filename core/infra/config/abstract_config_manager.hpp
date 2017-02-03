@@ -22,18 +22,16 @@ limitations under the License.
 #include <util/use_optional.hpp>
 #include <vendor/json/src/json.hpp>
 
-using json = nlohmann::json;
-
 namespace config {
+
+using json = nlohmann::json;
 
 class AbstractConfigManager {
  protected:
-
   optional<json> openConfig(const std::string& configName) {
     if (_configData) {  // content is already loaded
       return _configData;
     }
-
 
     auto iroha_home = getenv("IROHA_HOME");
     if (iroha_home == nullptr) {
@@ -42,7 +40,7 @@ class AbstractConfigManager {
     }
 
     auto configFolderPath = std::string(iroha_home) + "/";
-    auto jsonStr = openJSONText(configFolderPath + configName);
+    auto jsonStr = readConfigData(configFolderPath + configName);
 
     logger::debug("config") << "load json is " << jsonStr;
 
@@ -51,18 +49,16 @@ class AbstractConfigManager {
     return _configData;
   }
 
-
-  std::string openJSONText(const std::string& PathToJSONFile) {
-    std::ifstream ifs(PathToJSONFile);
+  std::string readConfigData(const std::string& pathToJSONFile) {
+    std::ifstream ifs(pathToJSONFile);
     if (ifs.fail()) {
-      logger::error("config") << "Not found: " << PathToJSONFile;
+      logger::error("config") << "Not found: " << pathToJSONFile;
       return nullptr;
     }
 
     std::istreambuf_iterator<char> it(ifs);
     return std::string(it, std::istreambuf_iterator<char>());
   }
-
 
   void setConfigData(std::string&& jsonStr) {
     try {
@@ -71,7 +67,6 @@ class AbstractConfigManager {
       logger::error("config") << "Can't parse json: " << getConfigName();
     }
   }
-
 
  public:
   virtual std::string getConfigName() = 0;
