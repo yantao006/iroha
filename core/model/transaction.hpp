@@ -22,8 +22,7 @@ limitations under the License.
 
 namespace transaction {
 
-template <typename T>
-class Transaction: public T {
+class Transaction {
 public:
     struct txSignature{
         std::string publicKey;
@@ -38,6 +37,7 @@ public:
         {}
     };
 
+    enum
     std::string hash;
     std::vector<txSignature> txSignatures;
     std::int64_t    timestamp;
@@ -59,6 +59,7 @@ public:
     {}
 
     void execution(){
+
     }
 
     auto getHash() {

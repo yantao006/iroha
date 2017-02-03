@@ -40,16 +40,11 @@ namespace connection {
         )>
     > receivers;
 
-    template<typename T>
-    Offset<T>
-    makeOffset(const T* obj){}
-
 //  This is asset
-    template<>
     Offset<BaseObject>
-    makeOffset(const BaseObject* object_){
+    makeOffset(const object::BaseObject& obj_){
       flatbuffers::FlatBufferBuilder builder;
-      auto text_   = builder.CreateString(object_->text());
+      auto text_   = builder.CreateString(obj_.text());
       auto integer_ = object_->integer();
       auto boolean_ = object_->boolean();
       auto name_ = builder.CreateString(object_->name());
@@ -270,39 +265,39 @@ namespace connection {
       return b.Finish();
     }
 
-    std::tuple<flatbuffers::Offset<void>,Command> makeCommand(const Transaction* tx){
+    std::tuple<flatbuffers::Offset<void>,Command> makeCommand(const Transaction tx){
       if( tx->command_type() == Command::Command_Add ){
         return std::make_tuple(
           makeOffset<Add>(reinterpret_cast<const Add *>(tx->command())).Union(),
-          tx->command_type()
+          Command::Command_Add
         );
       }else if( tx->command_type() == Command::Command_Transfer ){
         return std::make_tuple(
           makeOffset<Transfer>(reinterpret_cast<const Transfer *>(tx->command())).Union(),
-          tx->command_type()
+          Command::Command_Transfer
         );
       }else if( tx->command_type() == Command::Command_Update ){
         return std::make_tuple(
           makeOffset<Update>(reinterpret_cast<const Update *>(tx->command())).Union(),
-          tx->command_type()
+          Command::Command_Update
         );
       }else if( tx->command_type() == Command::Command_Remove ){
         return std::make_tuple(
           makeOffset<Remove>(reinterpret_cast<const Remove *>(tx->command())).Union(),
-          tx->command_type()
+          Command::Command_Remove
         );
       }else if( tx->command_type() == Command::Command_Batch ){
         return std::make_tuple(
           makeOffset<Batch>(reinterpret_cast<const Batch *>(tx->command())).Union(),
-          tx->command_type()
+          Command::Command_Batch
         );
       }else if( tx->command_type() == Command::Command_Unbatch ){
         return std::make_tuple(
           makeOffset<Unbatch>(reinterpret_cast<const Unbatch *>(tx->command())).Union(),
-          tx->command_type()
+          Command::Command_Unbatch
         );
       }
-    }
+   }
 
 
     // This is
@@ -318,13 +313,13 @@ namespace connection {
       b.add_signature( signature );
       return b.Finish();
     }
-    template<>
-    Offset<Transaction>
-    makeOffset(const Transaction* obj){
-      flatbuffers::FlatBufferBuilder builder;
-      auto sender = builder.CreateString( obj->sender() );
 
-      auto command = makeCommand(obj);
+    Offset<Transaction>
+    makeOffset(const transaction::Transaction tx){
+      flatbuffers::FlatBufferBuilder builder;
+      auto sender = builder.CreateString( tx.senderPubkey );
+
+      auto command = makeCommand(tx);
 
       std::vector<Offset<TxSignature>> txSigs_;
       for(int i = 0; i < obj->txSignatures()->size(); i++){
@@ -342,21 +337,20 @@ namespace connection {
       return b.Finish();
     }
 
-    Offset<iroha::ConsensusEvent>
-    makeOffset(const iroha::ConsensusEvent* obj){
+    Offset<event::ConsensusEvent>
+    makeOffset(const event::ConsensusEvent event){
       flatbuffers::FlatBufferBuilder builder;
 
       std::vector<Offset<EventSignature>> exSigs_;
-      for(int i = 0; i < obj->eventSignatures()->size(); i++){
-        auto esig = makeOffset<EventSignature>( obj->eventSignatures()->Get(i) );
+      for(const auto  sig: event.eventSignatures()){
+        auto esig = makeOffset<EventSignature>( sig );
         exSigs_.push_back( esig );
       }
       auto eventSignatures = builder.CreateVector( exSigs_.data(), exSigs_.size() );
 
       std::vector<Offset<Transaction>> txs_;
-      for(int i = 0; i < obj->transaction()->size(); i++){
-        auto tx = makeOffset<Transaction>( obj->transaction()->Get(i) );
-        txs_.push_back( tx );
+      for(const auto  tx: event.transactions() ){
+        txs_.push_back( makeOffset<Transaction>( tx ) );
       }
       auto transactions = builder.CreateVector( txs_.data(), txs_.size() );
 

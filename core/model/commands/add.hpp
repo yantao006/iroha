@@ -19,10 +19,11 @@ limitations under the License.
 
 #include "command.hpp"
 
+
 namespace command {
 
 template <typename T>
-class Add: public T, public Command {
+class Add: public Command {
   public:
 
     template<typename... Args>

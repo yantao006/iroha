@@ -59,6 +59,7 @@ class ConsensusEvent{
         {}
     };
 
+    std::vector<Transaction> _transactions;
     std::vector<eventSignature> _eventSignatures;
 
 public:
@@ -78,22 +79,23 @@ public:
       REMOVE
     };
 
-    template<typename T>
     ConsensusEvent(
-        Transaction<T>
+        Transaction tx
     )
-    {}
+    {
+      _transactions.push_back(tx)
+    }
 
     void addEventSignature(std::string&& publicKey,std::string&& signature){
         _eventSignatures.push_back(eventSignature(publicKey, signature));
     }
 
-    std::vector<std::tuple<std::string,std::string>> eventSignatures() const{
-        std::vector<std::tuple<std::string,std::string>> res;
-        for(const auto& sig: _eventSignatures){
-            res.push_back(std::make_tuple(sig.publicKey,sig.signature));
-        }
-        return res;
+    std::vetor<Transaction> transactions() const{
+      return _transactions;
+    }
+
+    std::vector<EventSignature> eventSignatures() const{
+        return _eventSignatures;
     };
 
     unsigned int numberOfValidSignatures(){
