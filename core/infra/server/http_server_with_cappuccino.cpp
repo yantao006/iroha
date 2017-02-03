@@ -88,11 +88,13 @@ namespace http {
                         );
 
                         event.addTxSignature(
-                            peer::getMyPublicKey(),
-                            signature::sign(event.getHash(), peer::getMyPublicKey(), peer::getPrivateKey()).c_str()
+                            config::PeerServiceConfig::getInstance().getMyPublicKey(),
+                            signature::sign(event.getHash(),
+                                            config::PeerServiceConfig::getInstance().getMyPublicKey(),
+                                            config::PeerServiceConfig::getInstance().getPrivateKey()).c_str()
                         );
 
-                        connection::send(peer::getMyIp(), convertor::encode(event));
+                        connection::send(config::PeerServiceConfig::getInstance().getMyIp(), convertor::encode(event));
 
                     }else{
                         res.json(responseError("duplicate user"));
@@ -148,6 +150,7 @@ namespace http {
             auto data = request->json();
             if(!data.empty()){
                 try{
+
 
                     auto assetUuid = data["asset-uuid"].get<std::string>();
                     auto timestamp = data["timestamp"].get<int>();
