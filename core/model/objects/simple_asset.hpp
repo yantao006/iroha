@@ -15,22 +15,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
-#define CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+#ifndef CORE_DOMAIN_OBJECTS_ASSET_HPP_
+#define CORE_DOMAIN_OBJECTS_ASSET_HPP_
 
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 namespace object {
 
-class Message {
+using SimpleAssetValueT = ObjectT;
+
+class SimpleAsset {
 
 public:
-    std::string text;
 
-    explicit Message(std::string text);
+    std::string         domain;
+    std::string         name;
+    SimpleAssetValueT   value;
+
+    SimpleAsset() = default;
+
+    explicit Asset(
+        std::string         domain,
+        std::string         name,
+        SimpleAssetValueT   value
+    );
+
+    explicit Asset(
+        std::string         name,
+        SimpleAssetValueT   value
+    );
+
 };
 
-};  // namespace message
+};  // namespace asset
 
-#endif  // CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+#endif  // CORE_DOMAIN_OBJECTS_ASSET_HPP_
+

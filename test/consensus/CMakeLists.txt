@@ -41,4 +41,5 @@ target_link_libraries(transaction_test
     pthread
     consensus_event
     transaction
+    objects
 )

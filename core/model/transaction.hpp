@@ -37,7 +37,6 @@ public:
         {}
     };
 
-    enum
     std::string hash;
     std::vector<txSignature> txSignatures;
     std::int64_t    timestamp;
@@ -59,7 +58,6 @@ public:
     {}
 
     void execution(){
-
     }
 
     auto getHash() {

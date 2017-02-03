@@ -14,9 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-#ifndef CORE_DOMAIN_UPDATE_HPP_
-#define CORE_DOMAIN_UPDATE_HPP_
+#ifndef IROHA_UPDATE_H
+#define IROHA_UPDATE_H
 
 #include "command.hpp"
 
@@ -25,18 +24,30 @@ limitations under the License.
 namespace command {
 
     template <typename T>
-    class Update: public T, public Command{
-      public:
+    class Update: public T {
+
+    public:
+        std::string ownerPublicKey;
+
         template<typename... Args>
-        constexpr Update(
+        constexpr explicit Update(
+            std::string&& ownerPublicKey,
             Args&&... args
         ):
-            T(std::forward<Args>(args)...)
+            T(std::forward<Args>(args)...),
+            ownerPublicKey(std::move(ownerPublicKey))
         {}
 
-        constexpr auto getCommandName() const {
+        auto getCommandName() const{
             return "Update";
         }
+
+        void execution(){
+
+        }
+
     };
-}
-#endif  // CORE_DOMAIN_UPDATE_HPP_
+
+};  // namespace command
+
+#endif //IROHA_UPDATE_H

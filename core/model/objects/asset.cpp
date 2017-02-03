@@ -13,13 +13,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <iostream>
+#include <cstdint>
+#include <unordered_map>
+#include "asset.hpp"
 
-package repository;
+namespace object {
 
-public class Repository {
-    public static native void save(String key,String value);
-    public static native void find(String key);
-    public static native void update(String key,String value);
-    public static native void remove(String key);
-}
+Asset::Asset(
+    std::string     domain,
+    std::string     name,
+    AssetValueT     value
+):
+    domain(std::move(domain)),
+    name(std::move(name)),
+    value(std::move(value))
+{}
 
+
+Asset::Asset(
+    std::string     name,
+    AssetValueT     value
+):
+    domain(""),
+    name(std::move(name)),
+    value(std::move(value))
+{}
+
+};  // namespace asset

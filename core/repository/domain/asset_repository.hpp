@@ -16,19 +16,25 @@ limitations under the License.
 #ifndef IROHA_ASSET_REPOSITORY_H
 #define IROHA_ASSET_REPOSITORY_H
 
+#include <string>
+#include <vector>
+
+#include "../../model/objects/asset.hpp"
+#include "../../model/state/asset.hpp"
+
 namespace repository {
     namespace asset {
+        
+        std::string add(const std::string& domainId, const std::string& assetName, const std::string& value);
+        bool update(const std::string& domainId, const std::string& assetName, const std::string& newValue);
+        bool remove(const std::string& domainId, const std::string& assetName);
+        std::vector <object::Asset> findAll(const std::string& key);
 
-        bool add(std::string publicKey, std::string assetName, std::string value);
-        bool update(std::string publicKey, std::string assetName, std::string newValue);
-        bool remove(std::string publicKey, std::string assetName);
-        std::vector <std::string> findAll(std::string key);
+        object::Asset findByUuid(const std::string& uuid);
+        
+        object::Asset findByUuidOrElse(const std::string& uuid, const object::Asset& defaultValue);
 
-        std::string findOne(std::string key);
-
-        std::string findOrElse(std::string key, std::string defaultVale);
-
-        bool isExist(std::string key);
+        bool isExist(const std::string& key);
     };
 };
 

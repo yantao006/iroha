@@ -23,8 +23,8 @@ limitations under the License.
 namespace command {
 
     template<typename T>
-    class Transfer : public T {
-      public:
+    class Transfer : public T, public Command {
+    public:
         std::string senderPublicKey;
         std::string receiverPublicKey;
 
@@ -33,10 +33,10 @@ namespace command {
             std::string&& sender,
             std::string&& receiver,
             Args&&... args
-       ):
+        ):
+            T(std::forward<Args>(args)...),
             senderPublicKey(std::move(sender)),
-            receiverPublicKey(std::move(receiver)),
-            T(std::forward<Args>(args)...)
+            receiverPublicKey(std::move(receiver))
         {}
 
         auto getCommandName() const {

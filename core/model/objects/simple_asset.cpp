@@ -1,6 +1,5 @@
 /*
 Copyright Soramitsu Co., Ltd. 2016 All Rights Reserved.
-http://soramitsu.co.jp
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,23 +13,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-#ifndef CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
-#define CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
-
-#include <string>
-#include <memory>
+#include <iostream>
+#include <cstdint>
+#include <unordered_map>
+#include "asset.hpp"
 
 namespace object {
 
-class Message {
+SimpleAsset::SimpleAsset(
+    std::string         domain,
+    std::string         name,
+    SimpleAssetValueT   value
+):
+    domain(std::move(domain)),
+    name(std::move(name)),
+    value(std::move(value))
+{}
 
-public:
-    std::string text;
 
-    explicit Message(std::string text);
-};
+SimpleAsset::SimpleAsset(
+    std::string         name,
+    SimpleAssetValueT   value
+):
+    domain(""),
+    name(std::move(name)),
+    value(std::move(value))
+{}
 
-};  // namespace message
-
-#endif  // CORE_DOMAIN_OBJECTS_MESSAGE_HPP_
+};  // namespace asset

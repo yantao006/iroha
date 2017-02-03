@@ -19,11 +19,10 @@ limitations under the License.
 
 #include "command.hpp"
 
-
 namespace command {
 
 template <typename T>
-class Add: public Command {
+class Add: public T {
   public:
 
     template<typename... Args>
@@ -36,6 +35,9 @@ class Add: public Command {
     constexpr auto getCommandName() const{
         return "Add";
     }
+
+    void execution();
+
 };
 
 };  // namespace command
