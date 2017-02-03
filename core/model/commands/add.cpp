@@ -25,6 +25,7 @@ limitations under the License.
 #include "../../service/peer_service.hpp"
 #include "../../infra/config/peer_service_with_json.hpp"
 
+
 namespace command {
 
     template <>
@@ -41,6 +42,12 @@ namespace command {
     template<>
     void Add<object::Peer>::execution() {
         logger::debug("Add<Peer>") << "save ip:" << object::Peer::getIP() << " publicKey:" << object::Peer::getPublicKey();
+
+        // 自身がリーダーノードの場合、Peerにデータを送る。
+        if ( config::PeerServiceConfig::getInstance().isLeaderMyPeer() ) {
+
+        }
+
 
         // save all Data and Consensus another peer
         // TODO

@@ -60,9 +60,10 @@ namespace config {
         return "";
     }
 
+
     std::vector<std::unique_ptr<object::Peer>> PeerServiceConfig::getPeerList() {
         std::vector<std::unique_ptr<object::Peer>> nodes;
-        for( auto node : peerList ) {
+        for( auto &&node : peerList ) {
             nodes.push_back( std::make_unique<object::Peer>( node.getIP(), node.getPublicKey(), node.getTrustScore() ) );
         }
         sort( nodes.begin(), nodes.end(),
@@ -77,6 +78,12 @@ namespace config {
 
     void PeerServiceConfig::removePeer( object::Peer peer ) {
         peerList.erase( peerList.find( peer ) );
+    }
+
+    bool PeerServiceConfig::isLeaderMyPeer() {
+        if( peerList.empty() ) return false;
+        return peerList.begin()->getPublicKey() == getMyPublicKey() &&
+               peerList.begin()->getIP() == getMyIp();
     }
 
     std::string PeerServiceConfig::getConfigName() {

@@ -34,6 +34,8 @@ namespace config {
 
     public:
         static std::set<object::Peer> peerList;
+        static object::Peer myPeer;
+
         static PeerServiceConfig &getInstance();
 
         std::string getMyPublicKey();
@@ -43,6 +45,7 @@ namespace config {
 
         void addPeer( object::Peer );
         void removePeer( object::Peer );
+        bool isLeaderMyPeer();
 
         virtual std::string getConfigName();
     };
