@@ -13,20 +13,20 @@ link_directories(
     ${AERON_PATH}/cppbuild/Release/lib
 )
 
-add_executable(sumeragi_test
-    sumeragi_test.cpp
-)
-target_link_libraries(sumeragi_test
-    snappy
-    base64
-    signature
-    sumeragi
-    connection_with_grpc_flatbuf
-    peer_service_with_json
-    pthread
-    consensus_event
-    transaction
-)
+#add_executable(sumeragi_test
+#    sumeragi_test.cpp
+#)
+#target_link_libraries(sumeragi_test
+#    snappy
+#    base64
+#    signature
+#    sumeragi
+#    connection_with_grpc_flatbuf
+#    peer_service_with_json
+#    pthread
+#    consensus_event
+#    transaction
+#)
 
 add_executable(transaction_test
     transaction_test.cpp
