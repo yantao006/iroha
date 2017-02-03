@@ -54,7 +54,3 @@ target_link_libraries(iroha-main
   keccak
   hash
 )
-
-link_directories(
-  ${PROJECT_SOURCE_DIR}/core/infra/config
-)

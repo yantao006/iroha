@@ -27,7 +27,3 @@ target_link_libraries(
   signature
   config_manager
 )
-
-link_directories(
-  ${PROJECT_SOURCE_DIR}/core/infra/config
-)
