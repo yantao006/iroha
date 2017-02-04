@@ -32,7 +32,7 @@ namespace object {
     BaseObject::BaseObject(DecimalT rhs) noexcept : decimal(rhs) {}
 
     BaseObject::BaseObject(ValueT t) {
-        switch (t) {              
+        switch (t) {
 
             case BaseObjectValueT::array: {
                 array = detail::allocateObject<ArrayObjectT>();

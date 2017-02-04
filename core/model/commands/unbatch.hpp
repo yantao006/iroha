@@ -24,23 +24,24 @@ limitations under the License.
 
 namespace command {
 
-    template<typename T>
-    class Unbatch : public T, public Command{
-      public:
-        std::string alias;
+    class Unbatch: public Command {
+      Unbatch(){}
 
-        template<typename... Args>
-        explicit Unbatch(
-          std::string&& alias,
-          Args&&... args
-        ):
-          T(std::forward<Args>(args)...),
-          alias(std::move(alias))
-        {}
+      std::string getCommandName() const{
+        return "Unbatch";
+      }
 
-        constexpr auto getCommandName() const {
-            return "Unbatch";
-        }
+      std::string getHash() const{
+        return "WIP:Hash";
+      }
+
+      void execute(Executor& e){
+        e.execute(this);
+      }
+
+      Object getObject() const{
+        return Object(object::ObjectValueT::null);
+      }
     };  // namespace command
 };
 #endif  // CORE_DOMAIN_UNBATCH_HPP_

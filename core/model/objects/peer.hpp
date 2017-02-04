@@ -23,13 +23,13 @@ limitations under the License.
 
 namespace object {
 
-class Peer{
+    class Peer{
 
-    public:
-        std::string ip;
-        std::string publicKey;
-    };
+        public:
+            std::string ip;
+            std::string publicKey;
+        };
 
-};  // namespace object
+    };  // namespace object
 
 #endif  // CORE_DOMAIN_OBJECTS_PEER_HPP_

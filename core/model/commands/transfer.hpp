@@ -22,28 +22,37 @@ limitations under the License.
 
 namespace command {
 
-    template<typename T>
-    class Transfer : public T, public Command {
-    public:
+    class Transfer : public Command {
+        Object obj;
         std::string senderPublicKey;
         std::string receiverPublicKey;
+      public:
 
-        template<typename... Args>
-        constexpr explicit Transfer(
-            std::string&& sender,
-            std::string&& receiver,
-            Args&&... args
+        Transfer(
+            Object o,
+            std::string sender,
+            std::string receiver
         ):
-            T(std::forward<Args>(args)...),
-            senderPublicKey(std::move(sender)),
-            receiverPublicKey(std::move(receiver))
+            obj(o),
+            senderPublicKey(sender),
+            receiverPublicKey(receiver)
         {}
 
-        auto getCommandName() const {
-            return "Transfer";
+        std::string getCommandName() const{
+          return "Transfer";
         }
 
-        void execution();
+        std::string getHash() const{
+          return "WIP:Hash";
+        }
+
+        void execute(Executor& e){
+          e.execute(this);
+        }
+
+        Object getObject() const{
+          return obj;
+        }
 
     };  // namespace command
 };

@@ -60,7 +60,7 @@ namespace object {
     Object::Object() = default;	// ctor for ValueT::null
 
     Object::Object(ObjectValueT t) {
-        switch (t) {              
+        switch (t) {
 
             case ObjectValueT::simpleAsset: {
                 simpleAsset = detail::allocateObject<SimpleAsset>();
@@ -86,12 +86,10 @@ namespace object {
                 message = detail::allocateObject<Message>();
                 break;
             }
-            /*
             case ObjectValueT::peer: {
                 peer = detail::allocateObject<Peer>();
             	break;
             }
-            */
             case ObjectValueT::null: {
                 break;
             }

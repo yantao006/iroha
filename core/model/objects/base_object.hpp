@@ -21,7 +21,7 @@ limitations under the License.
 #include <string>
 #include <cstdint>
 
-#include "../../utils/exception.hpp"
+#include "../../util/exception.hpp"
 
 namespace object {
 
@@ -31,6 +31,8 @@ namespace object {
         bool        bool_;
         float       float_;
 
+      public:
+
         enum Object_type{
           STRING = 0,
           INTEGER,
@@ -39,17 +41,16 @@ namespace object {
           NONE
         } object_type;
 
-        std::string type2str(Object_type t){
+        std::string type2str(const Object_type t) const{
           switch (t) {
             case STRING:  return "string";
             case INTEGER: return "int";
             case BOOLEAN: return "bool";
             case FLOAT:   return "float";
-            case None:    return "none";
+            case NONE:    return "none";
             default:      return "Other";
           }
         }
-      public:
 
         explicit BaseObject(std::string s):
           str_(s),
@@ -62,7 +63,7 @@ namespace object {
         {}
 
         explicit BaseObject(bool b):
-          bool_(i),
+          bool_(b),
           object_type(Object_type::BOOLEAN)
         {}
 
@@ -71,32 +72,36 @@ namespace object {
           object_type(Object_type::FLOAT)
         {}
 
+        Object_type type() const{
+          return object_type;
+        }
+
         operator int() const{
           if(object_type == Object_type::INTEGER){
             return int_;
           }else{
-            throw error::InvalidCastException( type2str(object_type), "int", __FILE__);
+            throw exception::InvalidCastException( type2str(object_type), "int", __FILE__);
           }
         }
         operator std::string() const{
           if(object_type == Object_type::STRING){
             return str_;
           }else{
-            throw error::InvalidCastException( type2str(object_type), "string", __FILE__);
+            throw exception::InvalidCastException( type2str(object_type), "string", __FILE__);
           }
         }
         operator bool() const{
           if(object_type == Object_type::BOOLEAN){
             return bool_;
           }else{
-            throw error::InvalidCastException( type2str(object_type), "bool", __FILE__);
+            throw exception::InvalidCastException( type2str(object_type), "bool", __FILE__);
           }
         }
         operator float() const{
           if(object_type == Object_type::FLOAT){
             return float_;
           }else{
-            throw error::InvalidCastException( type2str(object_type), "float", __FILE__);
+            throw exception::InvalidCastException( type2str(object_type), "float", __FILE__);
           }
         }
     };

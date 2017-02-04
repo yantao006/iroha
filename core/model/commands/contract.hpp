@@ -14,33 +14,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef CORE_DOMAIN_BATCH_HPP_
-#define CORE_DOMAIN_BATCH_HPP_
+#ifndef CORE_DOMAIN_COMMANDS_CONTRACT_HPP_
+#define CORE_DOMAIN_COMMANDS_CONTRACT_HPP_
 
 #include "command.hpp"
 
-#include <string>
-
 namespace command {
 
-    class Batch: public Command {
-        Batch(){}
+class Contract: public Command {
+    Object obj;
+  public:
 
-        std::string getCommandName() const{
-          return "Batch";
-        }
+    Contract(
+        Object o
+    ):
+        obj(o)
+    {}
 
-        std::string getHash() const{
-          return "WIP:Hash";
-        }
+    std::string getCommandName() const{
+      return "Contract";
+    }
 
-        void execute(Executor& e){
-          e.execute(this);
-        }
+    std::string getHash() const{
+      return "WIP:Hash";
+    }
 
-        Object getObject() const{
-          return Object(object::ObjectValueT::null);
-        }
-    };  // namespace command
+    void execute(Executor& e){
+      e.execute(this);
+    }
+
+    Object getObject() const{
+      return obj;
+    }
 };
-#endif  // CORE_DOMAIN_BATCH_HPP_
+
+};  // namespace command
+
+#endif  // CORE_DOMAIN_TRANSACTIONS_CONTRACT_HPP_

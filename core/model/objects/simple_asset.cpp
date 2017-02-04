@@ -23,7 +23,7 @@ namespace object {
 SimpleAsset::SimpleAsset(
     std::string         domain,
     std::string         name,
-    SimpleAssetValueT   value
+    BaseObject          value
 ):
     domain(std::move(domain)),
     name(std::move(name)),
@@ -33,7 +33,7 @@ SimpleAsset::SimpleAsset(
 
 SimpleAsset::SimpleAsset(
     std::string         name,
-    SimpleAssetValueT   value
+    BaseObject          value
 ):
     domain(""),
     name(std::move(name)),

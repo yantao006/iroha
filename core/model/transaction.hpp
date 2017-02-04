@@ -17,13 +17,17 @@ limitations under the License.
 #include "../crypto/signature.hpp"
 #include "../util/datetime.hpp"
 #include "../crypto/hash.hpp"
+
+#include "commands/command.hpp"
+#include "../service/executor.hpp"
+
 #include <algorithm>
 #include <cstdint>
 
 namespace transaction {
 
 class Transaction {
-public:
+  public:
     struct txSignature{
         std::string publicKey;
         std::string signature;
@@ -43,14 +47,15 @@ public:
     std::string     senderPubkey;
     std::string     ownerPublicKey; // okay?
 
-    template<typename... Args>
+    std::unique_ptr<command::Command> command;
+
     Transaction(
-        std::string&& senderPublickey,
-        Args&&... args
+      std::string senderPublickey,
+      std::unique_ptr<command::Command>&& cmd
     ):
-        T(std::forward<Args>(args)...),
         timestamp(datetime::unixtime()),
-        senderPubkey(senderPublickey)
+        senderPubkey(senderPublickey),
+        command(std::move(cmd))
     {}
 
     Transaction():
@@ -58,10 +63,12 @@ public:
     {}
 
     void execution(){
+      Executor executor;
+      command->execute(executor);
     }
 
     auto getHash() {
-        return hash::sha3_256_hex( T::getCommandName() + std::to_string(timestamp) + senderPubkey);
+        return hash::sha3_256_hex( command->getHash() + std::to_string(timestamp) + senderPubkey);
     }
 
     std::vector<txSignature> getTxSignatures(){

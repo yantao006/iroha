@@ -23,30 +23,32 @@ limitations under the License.
 
 namespace command {
 
-    template <typename T>
-    class Update: public T {
-
+  class Update: public Command {
+      Object obj;
     public:
-        std::string ownerPublicKey;
 
-        template<typename... Args>
-        constexpr explicit Update(
-            std::string&& ownerPublicKey,
-            Args&&... args
-        ):
-            T(std::forward<Args>(args)...),
-            ownerPublicKey(std::move(ownerPublicKey))
-        {}
+      Update(
+          Object o
+      ):
+          obj(o)
+      {}
 
-        auto getCommandName() const{
-            return "Update";
-        }
+      std::string getCommandName() const{
+        return "Update";
+      }
 
-        void execution(){
+      std::string getHash() const{
+        return "WIP:Hash";
+      }
 
-        }
+      void execute(Executor& e){
+        e.execute(this);
+      }
 
-    };
+      Object getObject() const{
+        return obj;
+      }
+  };
 
 };  // namespace command
 

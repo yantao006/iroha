@@ -22,21 +22,32 @@ limitations under the License.
 
 namespace command {
 
-    template <typename T>
-    class Remove: public T, public Command {
+  class Remove: public Command {
+        Object obj;
       public:
 
-        template<typename... Args>
-        constexpr Remove(
-            Args&&... args
+        Remove(
+            Object o
         ):
-            T(std::forward<Args>(args)...)
+            obj(o)
         {}
 
-        constexpr auto getCommandName() const {
-            return "Remove";
+        std::string getCommandName() const{
+          return "Remove";
         }
-    };
+
+        std::string getHash() const{
+          return "WIP:Hash";
+        }
+
+        void execute(Executor& e){
+          e.execute(this);
+        }
+
+        Object getObject() const{
+          return obj;
+        }
+  };
 
 };
 #endif  // CORE_DOMAIN_REMOVE_HPP_

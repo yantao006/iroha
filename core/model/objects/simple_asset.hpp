@@ -32,19 +32,19 @@ public:
 
     std::string         domain;
     std::string         name;
-    SimpleAssetValueT   value;
+    BaseObject          value;
 
     SimpleAsset() = default;
 
-    explicit Asset(
+    explicit SimpleAsset(
         std::string         domain,
         std::string         name,
-        SimpleAssetValueT   value
+        BaseObject          value
     );
 
-    explicit Asset(
+    explicit SimpleAsset(
         std::string         name,
-        SimpleAssetValueT   value
+        BaseObject          value
     );
 
 };
@@ -52,4 +52,3 @@ public:
 };  // namespace asset
 
 #endif  // CORE_DOMAIN_OBJECTS_ASSET_HPP_
-

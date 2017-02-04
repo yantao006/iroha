@@ -15,12 +15,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef IROHA_COMMAND_H
-#define IROHA_COMMAND_H
+#ifndef IROHA_COMMAND_HPP
+#define IROHA_COMMAND_HPP
+
+#include "../../service/executor.hpp"
+#include "../objects/object.hpp"
 
 namespace command {
+
+  using object::Object;
   // Entity
-  class Command {};
+  class Command {
+  public:
+    virtual ~Command() {}
+    virtual void execute(Executor&) = 0;
+    virtual std::string getCommandName() const = 0;
+    virtual std::string getHash() const = 0;
+    virtual Object getObject() const = 0;
+  };
 
 };
+
 #endif //IROHA_COMMAND_H

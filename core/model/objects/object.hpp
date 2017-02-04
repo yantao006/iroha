@@ -28,12 +28,12 @@ limitations under the License.
 
 namespace object {
 
-    class SimpleAsset;
-    class Account;
-    class Asset;
-    class Domain;
-    class Message;
-    // class Peer;
+  class SimpleAsset;
+  class Account;
+  class Asset;
+  class Domain;
+  class Message;
+  class Peer;
 
 	namespace detail {
 	    template<
@@ -51,7 +51,7 @@ namespace object {
         domain,
         account,
         message,
-//        peer,
+        peer,
     };
 
     // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
@@ -61,7 +61,7 @@ namespace object {
         Domain*         domain;
         Account*        account;
         Message*        message;
-//        Peer*           peer;
+        Peer*           peer;
 
         Object();
         Object(ObjectValueT t);

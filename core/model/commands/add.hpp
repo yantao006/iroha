@@ -18,26 +18,35 @@ limitations under the License.
 #define CORE_DOMAIN_COMMANDS_ADD_HPP_
 
 #include "command.hpp"
+#include "../objects/object.hpp"
 
 namespace command {
 
-template <typename T>
-class Add: public T {
+class Add: public Command {
+    object::Object obj;
   public:
 
-    template<typename... Args>
-    constexpr Add(
-        Args&&... args
+    Add(
+        Object o
     ):
-        T(std::forward<Args>(args)...)
+        obj(o)
     {}
 
-    constexpr auto getCommandName() const{
-        return "Add";
+    std::string getCommandName() const{
+      return "Add";
     }
 
-    void execution();
+    std::string getHash() const{
+      return "WIP:Hash";
+    }
 
+    void execute(Executor& e){
+      e.execute(this);
+    }
+
+    Object getObject() const{
+      return obj;
+    }
 };
 
 };  // namespace command
