@@ -15,28 +15,30 @@ table BaseObject{
    name: string (required);
 }
 table SimpleAsset{
-  name:   string;
-  domain: Domain (required);
+  name:   string (required);
+  domain: string (required);
 
   object: BaseObject;
 
   smartContractName: string;
 }
 table Asset{
-  name:   string;
-  domain: Domain (required);
+  name:   string (required);
+  domain: string;
 
   objects: [BaseObject];
 
   smartContractName: string;
 }
+union AssetObject  { SimpleAsset, Asset }
+
 table Domain{
   ownerPublicKey: string;
   name: string;
 }
 table Account{
   publicKey: string;
-  assets: [Asset];
+  assets: [AssetObject];
 }
 table Peer{
   publicKey: string;
