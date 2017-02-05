@@ -38,7 +38,10 @@ namespace repository{
 
         object::Account findByUuid(const std::string& uuid);
 
-        std::string add(const std::string& publicKey, const std::string& alias);
+        std::string add(
+            std::string &publicKey,
+            std::string &alias
+        );
 
     };
 };

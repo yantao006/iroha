@@ -14,26 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef __CORE_SMART_CONTRACT_JAVA_VM_
-#define __CORE_SMART_CONTRACT_JAVA_VM_
+package repository;
 
-#include <unordered_map>
-#include <string>
+public class Repository {
+    public static native void save(String key,String value);
+    public static native void find(String key);
+    public static native void update(String key,String value);
+    public static native void remove(String key);
+}
 
-namespace smart_contract {
-
-  class SmartContract {
-   public:
-      void initializeVM(const std::string& contractName);
-
-      void finishVM(const std::string& contractName);
-
-      void invokeFunction(
-        const std::string& contractName,
-        const std::string& functionName,
-        const std::unordered_map<std::string, std::string>& params
-      );
-  };
-};
-
-#endif  // __CORE_SMART_CONTRACT_JAVA_VM_

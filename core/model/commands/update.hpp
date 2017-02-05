@@ -14,8 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef IROHA_UPDATE_H
-#define IROHA_UPDATE_H
+
+#ifndef CORE_DOMAIN_UPDATE_HPP_
+#define CORE_DOMAIN_UPDATE_HPP_
 
 #include "command.hpp"
 

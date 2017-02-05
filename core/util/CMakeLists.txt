@@ -2,10 +2,12 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 SET(JSON_PATH "${PROJECT_SOURCE_DIR}/core/vendor/json")
 
+# Datetime
 ADD_LIBRARY(datetime  STATIC datetime.cpp)
 
+# Logger
 ADD_LIBRARY(logger  STATIC logger.cpp)
-TARGET_LINK_LIBRARIES(logger
+target_link_libraries(logger
   datetime
 )
 

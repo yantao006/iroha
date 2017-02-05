@@ -1,7 +1,6 @@
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-SET(LEVELDB_PATH ${PROJECT_SOURCE_DIR}/core/vendor/leveldb)
 
-SET(CMAKE_CXX_FLAGS "-g -Wall -std=c++1y -fPIC")
+SET(LEVELDB_PATH ${PROJECT_SOURCE_DIR}/core/vendor/leveldb)
 
 include_directories(
   ${LEVELDB_PATH}/include

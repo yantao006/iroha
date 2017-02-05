@@ -20,6 +20,7 @@ limitations under the License.
 #include "command.hpp"
 #include "../objects/object.hpp"
 
+
 namespace command {
 
 class Add: public Command {

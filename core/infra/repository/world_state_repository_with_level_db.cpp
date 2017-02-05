@@ -18,7 +18,7 @@ limitations under the License.
 #include "../../util/exception.hpp"
 #include "../../infra/config/iroha_config_with_json.hpp"
 
-#include "../../util/logger.hpp"
+#include "../../../util/logger.hpp"
 
 #include <leveldb/write_batch.h>
 #include <leveldb/db.h>
@@ -174,7 +174,7 @@ namespace repository {
               detail::loadDb();
           }
 
-          std::string result;
+          std::string result = "";
           detail::loggerStatus(detail::db->Get(leveldb::ReadOptions(), key, &result));
           if (result == "") {
               return defaultValue;
@@ -188,7 +188,7 @@ namespace repository {
               detail::loadDb();
           }
 
-          std::string result;
+          std::string result = "";
           detail::loggerStatus(detail::db->Get(leveldb::ReadOptions(), key, &result));
           return result == "";
       }
