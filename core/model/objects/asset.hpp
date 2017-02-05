@@ -21,11 +21,11 @@ limitations under the License.
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "object.hpp"
+#include "base_object.hpp"
 
 namespace object {
 
-using AssetValueT   = std::unordered_map<std::string, object::Object>;
+using AssetValueT   = std::unordered_map<std::string, object::BaseObject>;
 
 class Asset {
 

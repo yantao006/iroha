@@ -120,9 +120,33 @@ namespace object {
     Object::Object(const Message& rhs) {
         message = detail::allocateObject<Message>(rhs);
     }
-    /*
     Object::Object(const Peer& rhs) {
         peer = detail::allocateObject<Peer>(rhs);
     }
-    */
+
+		SimpleAsset* AsSimpleAsset(){
+			return type == ObjectValueT::simpleAsset?
+				simpleAsset : nullptr;
+		}
+		Asset*       AsAsset(){
+			return type == ObjectValueT::asset?
+				asset : nullptr;
+		}
+		Domain*      AsDomain(){
+			return type == ObjectValueT::domain?
+				domain : nullptr;
+		}
+		Account*     AsAccount(){
+			return type == ObjectValueT::account
+				account : nullptr;
+		}
+		Message*     AsMessage(){
+			return type == ObjectValueT::message?
+				message : nullptr;
+		}
+		Peer*        AsPeer(){
+			return type == ObjectValueT::peer?
+				peer : nullptr;
+		}
+
 }

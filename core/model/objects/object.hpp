@@ -63,6 +63,8 @@ namespace object {
         Message*        message;
         Peer*           peer;
 
+        ObjectValueT type;
+
         Object();
         Object(ObjectValueT t);
         Object(const SimpleAsset& rhs);
@@ -70,9 +72,14 @@ namespace object {
         Object(const Domain& rhs);
         Object(const Account& rhs);
         Object(const Message& rhs);
-        /*
         Object(const Peer& rhs);
-        */
+
+        SimpleAsset* AsSimpleAsset();
+        Asset*       AsAsset();
+        Domain*      AsDomain();
+        Account*     AsAccount();
+        Message*     AsMessage();
+        Peer*        AsPeer();
     };
 }
 

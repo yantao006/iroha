@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef IROHA_ACCOUNT_HPP
-#define IROHA_ACCOUNT_HPP
+#ifndef IROHA_BASE_OBJECT_HPP
+#define IROHA_BASE_OBJECT_HPP
 
 #include <string>
 #include <cstdint>
