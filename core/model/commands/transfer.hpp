@@ -23,7 +23,7 @@ limitations under the License.
 namespace command {
 
     class Transfer : public Command {
-        Object obj;
+        object::Object object;
         std::string senderPublicKey;
         std::string receiverPublicKey;
       public:
@@ -33,13 +33,13 @@ namespace command {
             std::string sender,
             std::string receiver
         ):
-            obj(o),
+            object(o),
             senderPublicKey(sender),
             receiverPublicKey(receiver)
         {}
 
-        std::string getCommandName() const{
-          return "Transfer";
+        CommandType getCommandName() const{
+          return CommandType::TRANSFER;
         }
 
         std::string getHash() const{
@@ -51,7 +51,7 @@ namespace command {
         }
 
         Object getObject() const{
-          return obj;
+          return object;
         }
 
     };  // namespace command

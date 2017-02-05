@@ -26,8 +26,8 @@ namespace command {
     class Batch: public Command {
         Batch(){}
 
-        std::string getCommandName() const{
-          return "Batch";
+        CommandType getCommandName() const{
+          return CommandType::BATCH;
         }
 
         std::string getHash() const{

@@ -23,17 +23,17 @@ limitations under the License.
 namespace command {
 
 class Add: public Command {
-    object::Object obj;
+    object::Object object;
   public:
 
     Add(
         Object o
     ):
-        obj(o)
+        object(o)
     {}
 
-    std::string getCommandName() const{
-      return "Add";
+    CommandType getCommandName() const{
+      return CommandType::ADD;
     }
 
     std::string getHash() const{
@@ -45,7 +45,7 @@ class Add: public Command {
     }
 
     Object getObject() const{
-      return obj;
+      return object;
     }
 };
 

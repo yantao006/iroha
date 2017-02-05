@@ -27,9 +27,20 @@ namespace command {
   // Entity
   class Command {
   public:
+
+    enum class CommandType{
+      ADD,
+      TRANSFER,
+      UPDATE,
+      REMOVE,
+      BATCH,
+      UNBATCH,
+      CONTRACT
+    };
+
     virtual ~Command() {}
     virtual void execute(Executor&) = 0;
-    virtual std::string getCommandName() const = 0;
+    virtual CommandType getCommandName() const = 0;
     virtual std::string getHash() const = 0;
     virtual Object getObject() const = 0;
   };

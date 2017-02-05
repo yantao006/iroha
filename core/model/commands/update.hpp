@@ -24,17 +24,17 @@ limitations under the License.
 namespace command {
 
   class Update: public Command {
-      Object obj;
+      object::Object object;
     public:
 
       Update(
           Object o
       ):
-          obj(o)
+          object(o)
       {}
 
-      std::string getCommandName() const{
-        return "Update";
+      CommandType getCommandName() const{
+        return CommandType::UPDATE;
       }
 
       std::string getHash() const{
@@ -46,7 +46,7 @@ namespace command {
       }
 
       Object getObject() const{
-        return obj;
+        return object;
       }
   };
 

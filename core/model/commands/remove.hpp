@@ -23,17 +23,17 @@ limitations under the License.
 namespace command {
 
   class Remove: public Command {
-        Object obj;
+      object::Object object;
       public:
 
         Remove(
             Object o
         ):
-            obj(o)
+            object(o)
         {}
 
-        std::string getCommandName() const{
-          return "Remove";
+        CommandType getCommandName() const{
+          return CommandType::REMOVE;
         }
 
         std::string getHash() const{
@@ -45,7 +45,7 @@ namespace command {
         }
 
         Object getObject() const{
-          return obj;
+          return object;
         }
   };
 

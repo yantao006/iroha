@@ -22,17 +22,17 @@ limitations under the License.
 namespace command {
 
 class Contract: public Command {
-    Object obj;
+    object::Object object;
   public:
 
     Contract(
         Object o
     ):
-        obj(o)
+        object(o)
     {}
 
-    std::string getCommandName() const{
-      return "Contract";
+    CommandType getCommandName() const{
+      return CommandType::CONTRACT;
     }
 
     std::string getHash() const{
@@ -44,7 +44,7 @@ class Contract: public Command {
     }
 
     Object getObject() const{
-      return obj;
+      return object;
     }
 };
 

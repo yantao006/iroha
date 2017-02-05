@@ -27,8 +27,8 @@ namespace command {
     class Unbatch: public Command {
       Unbatch(){}
 
-      std::string getCommandName() const{
-        return "Unbatch";
+      CommandType getCommandName() const{
+        return CommandType::UNBATCH;
       }
 
       std::string getHash() const{
