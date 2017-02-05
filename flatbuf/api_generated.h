@@ -11,17 +11,14 @@ namespace iroha {
 struct BaseObject;
 struct BaseObjectT;
 
-struct SimpleAsset;
-struct SimpleAssetT;
-
 struct Asset;
 struct AssetT;
 
-struct Domain;
-struct DomainT;
-
 struct Account;
 struct AccountT;
+
+struct Domain;
+struct DomainT;
 
 struct Peer;
 struct PeerT;
@@ -68,84 +65,12 @@ struct EventSignatureT;
 struct ConsensusEvent;
 struct ConsensusEventT;
 
-enum AssetObject {
-  AssetObject_NONE = 0,
-  AssetObject_SimpleAsset = 1,
-  AssetObject_Asset = 2,
-  AssetObject_MIN = AssetObject_NONE,
-  AssetObject_MAX = AssetObject_Asset
-};
-
-inline const char **EnumNamesAssetObject() {
-  static const char *names[] = {
-    "NONE",
-    "SimpleAsset",
-    "Asset",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameAssetObject(AssetObject e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesAssetObject()[index];
-}
-
-template<typename T> struct AssetObjectTraits {
-  static const AssetObject enum_value = AssetObject_NONE;
-};
-
-template<> struct AssetObjectTraits<SimpleAsset> {
-  static const AssetObject enum_value = AssetObject_SimpleAsset;
-};
-
-template<> struct AssetObjectTraits<Asset> {
-  static const AssetObject enum_value = AssetObject_Asset;
-};
-
-struct AssetObjectUnion {
-  AssetObject type;
-  flatbuffers::NativeTable *table;
-
-  AssetObjectUnion() : type(AssetObject_NONE), table(nullptr) {}
-  AssetObjectUnion(const AssetObjectUnion &);
-  AssetObjectUnion &operator=(const AssetObjectUnion &);
-  ~AssetObjectUnion() { Reset(); }
-
-  void Reset();
-
-  template <typename T>
-  void Set(T&& value) {
-    Reset();
-    type = AssetObjectTraits<typename T::TableType>::enum_value;
-    if (type != AssetObject_NONE) {
-      table = new T(std::forward<T>(value));
-    }
-  }
-
-  static flatbuffers::NativeTable *UnPack(const void *obj, AssetObject type, const flatbuffers::resolver_function_t *resolver);
-  flatbuffers::Offset<void> Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher = nullptr) const;
-
-  SimpleAssetT *AsSimpleAsset() {
-    return type == AssetObject_SimpleAsset ?
-      reinterpret_cast<SimpleAssetT *>(table) : nullptr;
-  }
-  AssetT *AsAsset() {
-    return type == AssetObject_Asset ?
-      reinterpret_cast<AssetT *>(table) : nullptr;
-  }
-};
-
-bool VerifyAssetObject(flatbuffers::Verifier &verifier, const void *obj, AssetObject type);
-bool VerifyAssetObjectVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
-
 enum Object {
   Object_NONE = 0,
-  Object_SimpleAsset = 1,
-  Object_Asset = 2,
-  Object_Domain = 3,
-  Object_Account = 4,
-  Object_Peer = 5,
+  Object_Asset = 1,
+  Object_Domain = 2,
+  Object_Account = 3,
+  Object_Peer = 4,
   Object_MIN = Object_NONE,
   Object_MAX = Object_Peer
 };
@@ -153,7 +78,6 @@ enum Object {
 inline const char **EnumNamesObject() {
   static const char *names[] = {
     "NONE",
-    "SimpleAsset",
     "Asset",
     "Domain",
     "Account",
@@ -170,10 +94,6 @@ inline const char *EnumNameObject(Object e) {
 
 template<typename T> struct ObjectTraits {
   static const Object enum_value = Object_NONE;
-};
-
-template<> struct ObjectTraits<SimpleAsset> {
-  static const Object enum_value = Object_SimpleAsset;
 };
 
 template<> struct ObjectTraits<Asset> {
@@ -215,10 +135,6 @@ struct ObjectUnion {
   static flatbuffers::NativeTable *UnPack(const void *obj, Object type, const flatbuffers::resolver_function_t *resolver);
   flatbuffers::Offset<void> Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher = nullptr) const;
 
-  SimpleAssetT *AsSimpleAsset() {
-    return type == Object_SimpleAsset ?
-      reinterpret_cast<SimpleAssetT *>(table) : nullptr;
-  }
   AssetT *AsAsset() {
     return type == Object_Asset ?
       reinterpret_cast<AssetT *>(table) : nullptr;
@@ -412,10 +328,12 @@ struct BaseObjectT : public flatbuffers::NativeTable {
   std::string text;
   int32_t integer;
   bool boolean;
+  float decimal;
   std::string name;
   BaseObjectT()
       : integer(0),
-        boolean(false) {
+        boolean(false),
+        decimal(0.0f) {
   }
 };
 
@@ -425,7 +343,8 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_TEXT = 4,
     VT_INTEGER = 6,
     VT_BOOLEAN = 8,
-    VT_NAME = 10
+    VT_DECIMAL = 10,
+    VT_NAME = 12
   };
   const flatbuffers::String *text() const {
     return GetPointer<const flatbuffers::String *>(VT_TEXT);
@@ -436,6 +355,9 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool boolean() const {
     return GetField<uint8_t>(VT_BOOLEAN, 0) != 0;
   }
+  float decimal() const {
+    return GetField<float>(VT_DECIMAL, 0.0f);
+  }
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
@@ -445,6 +367,7 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(text()) &&
            VerifyField<int32_t>(verifier, VT_INTEGER) &&
            VerifyField<uint8_t>(verifier, VT_BOOLEAN) &&
+           VerifyField<float>(verifier, VT_DECIMAL) &&
            VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            verifier.EndTable();
@@ -466,6 +389,9 @@ struct BaseObjectBuilder {
   void add_boolean(bool boolean) {
     fbb_.AddElement<uint8_t>(BaseObject::VT_BOOLEAN, static_cast<uint8_t>(boolean), 0);
   }
+  void add_decimal(float decimal) {
+    fbb_.AddElement<float>(BaseObject::VT_DECIMAL, decimal, 0.0f);
+  }
   void add_name(flatbuffers::Offset<flatbuffers::String> name) {
     fbb_.AddOffset(BaseObject::VT_NAME, name);
   }
@@ -475,7 +401,7 @@ struct BaseObjectBuilder {
   }
   BaseObjectBuilder &operator=(const BaseObjectBuilder &);
   flatbuffers::Offset<BaseObject> Finish() {
-    const auto end = fbb_.EndTable(start_, 4);
+    const auto end = fbb_.EndTable(start_, 5);
     auto o = flatbuffers::Offset<BaseObject>(end);
     fbb_.Required(o, BaseObject::VT_NAME);
     return o;
@@ -487,9 +413,11 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObject(
     flatbuffers::Offset<flatbuffers::String> text = 0,
     int32_t integer = 0,
     bool boolean = false,
+    float decimal = 0.0f,
     flatbuffers::Offset<flatbuffers::String> name = 0) {
   BaseObjectBuilder builder_(_fbb);
   builder_.add_name(name);
+  builder_.add_decimal(decimal);
   builder_.add_integer(integer);
   builder_.add_text(text);
   builder_.add_boolean(boolean);
@@ -501,130 +429,28 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObjectDirect(
     const char *text = nullptr,
     int32_t integer = 0,
     bool boolean = false,
+    float decimal = 0.0f,
     const char *name = nullptr) {
   return CreateBaseObject(
       _fbb,
       text ? _fbb.CreateString(text) : 0,
       integer,
       boolean,
+      decimal,
       name ? _fbb.CreateString(name) : 0);
 }
 
 flatbuffers::Offset<BaseObject> CreateBaseObject(flatbuffers::FlatBufferBuilder &_fbb, const BaseObjectT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct SimpleAssetT : public flatbuffers::NativeTable {
-  typedef SimpleAsset TableType;
-  std::string name;
-  std::string domain;
-  std::unique_ptr<BaseObjectT> object;
-  std::string smartContractName;
-  SimpleAssetT() {
-  }
-};
-
-struct SimpleAsset FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef SimpleAssetT NativeTableType;
-  enum {
-    VT_NAME = 4,
-    VT_DOMAIN = 6,
-    VT_OBJECT = 8,
-    VT_SMARTCONTRACTNAME = 10
-  };
-  const flatbuffers::String *name() const {
-    return GetPointer<const flatbuffers::String *>(VT_NAME);
-  }
-  const flatbuffers::String *domain() const {
-    return GetPointer<const flatbuffers::String *>(VT_DOMAIN);
-  }
-  const BaseObject *object() const {
-    return GetPointer<const BaseObject *>(VT_OBJECT);
-  }
-  const flatbuffers::String *smartContractName() const {
-    return GetPointer<const flatbuffers::String *>(VT_SMARTCONTRACTNAME);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
-           verifier.Verify(name()) &&
-           VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_DOMAIN) &&
-           verifier.Verify(domain()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_OBJECT) &&
-           verifier.VerifyTable(object()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_SMARTCONTRACTNAME) &&
-           verifier.Verify(smartContractName()) &&
-           verifier.EndTable();
-  }
-  SimpleAssetT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(SimpleAssetT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<SimpleAsset> Pack(flatbuffers::FlatBufferBuilder &_fbb, const SimpleAssetT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct SimpleAssetBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
-    fbb_.AddOffset(SimpleAsset::VT_NAME, name);
-  }
-  void add_domain(flatbuffers::Offset<flatbuffers::String> domain) {
-    fbb_.AddOffset(SimpleAsset::VT_DOMAIN, domain);
-  }
-  void add_object(flatbuffers::Offset<BaseObject> object) {
-    fbb_.AddOffset(SimpleAsset::VT_OBJECT, object);
-  }
-  void add_smartContractName(flatbuffers::Offset<flatbuffers::String> smartContractName) {
-    fbb_.AddOffset(SimpleAsset::VT_SMARTCONTRACTNAME, smartContractName);
-  }
-  SimpleAssetBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  SimpleAssetBuilder &operator=(const SimpleAssetBuilder &);
-  flatbuffers::Offset<SimpleAsset> Finish() {
-    const auto end = fbb_.EndTable(start_, 4);
-    auto o = flatbuffers::Offset<SimpleAsset>(end);
-    fbb_.Required(o, SimpleAsset::VT_NAME);
-    fbb_.Required(o, SimpleAsset::VT_DOMAIN);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<SimpleAsset> CreateSimpleAsset(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::String> name = 0,
-    flatbuffers::Offset<flatbuffers::String> domain = 0,
-    flatbuffers::Offset<BaseObject> object = 0,
-    flatbuffers::Offset<flatbuffers::String> smartContractName = 0) {
-  SimpleAssetBuilder builder_(_fbb);
-  builder_.add_smartContractName(smartContractName);
-  builder_.add_object(object);
-  builder_.add_domain(domain);
-  builder_.add_name(name);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<SimpleAsset> CreateSimpleAssetDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const char *name = nullptr,
-    const char *domain = nullptr,
-    flatbuffers::Offset<BaseObject> object = 0,
-    const char *smartContractName = nullptr) {
-  return CreateSimpleAsset(
-      _fbb,
-      name ? _fbb.CreateString(name) : 0,
-      domain ? _fbb.CreateString(domain) : 0,
-      object,
-      smartContractName ? _fbb.CreateString(smartContractName) : 0);
-}
-
-flatbuffers::Offset<SimpleAsset> CreateSimpleAsset(flatbuffers::FlatBufferBuilder &_fbb, const SimpleAssetT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 struct AssetT : public flatbuffers::NativeTable {
   typedef Asset TableType;
   std::string name;
   std::string domain;
+  bool isSingleAsset;
   std::vector<std::unique_ptr<BaseObjectT>> objects;
   std::string smartContractName;
-  AssetT() {
+  AssetT()
+      : isSingleAsset(false) {
   }
 };
 
@@ -633,14 +459,18 @@ struct Asset FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_NAME = 4,
     VT_DOMAIN = 6,
-    VT_OBJECTS = 8,
-    VT_SMARTCONTRACTNAME = 10
+    VT_ISSINGLEASSET = 8,
+    VT_OBJECTS = 10,
+    VT_SMARTCONTRACTNAME = 12
   };
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
   const flatbuffers::String *domain() const {
     return GetPointer<const flatbuffers::String *>(VT_DOMAIN);
+  }
+  bool isSingleAsset() const {
+    return GetField<uint8_t>(VT_ISSINGLEASSET, 0) != 0;
   }
   const flatbuffers::Vector<flatbuffers::Offset<BaseObject>> *objects() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<BaseObject>> *>(VT_OBJECTS);
@@ -652,8 +482,9 @@ struct Asset FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_DOMAIN) &&
+           VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_DOMAIN) &&
            verifier.Verify(domain()) &&
+           VerifyField<uint8_t>(verifier, VT_ISSINGLEASSET) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_OBJECTS) &&
            verifier.Verify(objects()) &&
            verifier.VerifyVectorOfTables(objects()) &&
@@ -675,6 +506,9 @@ struct AssetBuilder {
   void add_domain(flatbuffers::Offset<flatbuffers::String> domain) {
     fbb_.AddOffset(Asset::VT_DOMAIN, domain);
   }
+  void add_isSingleAsset(bool isSingleAsset) {
+    fbb_.AddElement<uint8_t>(Asset::VT_ISSINGLEASSET, static_cast<uint8_t>(isSingleAsset), 0);
+  }
   void add_objects(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<BaseObject>>> objects) {
     fbb_.AddOffset(Asset::VT_OBJECTS, objects);
   }
@@ -687,9 +521,10 @@ struct AssetBuilder {
   }
   AssetBuilder &operator=(const AssetBuilder &);
   flatbuffers::Offset<Asset> Finish() {
-    const auto end = fbb_.EndTable(start_, 4);
+    const auto end = fbb_.EndTable(start_, 5);
     auto o = flatbuffers::Offset<Asset>(end);
     fbb_.Required(o, Asset::VT_NAME);
+    fbb_.Required(o, Asset::VT_DOMAIN);
     return o;
   }
 };
@@ -698,6 +533,7 @@ inline flatbuffers::Offset<Asset> CreateAsset(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     flatbuffers::Offset<flatbuffers::String> domain = 0,
+    bool isSingleAsset = false,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<BaseObject>>> objects = 0,
     flatbuffers::Offset<flatbuffers::String> smartContractName = 0) {
   AssetBuilder builder_(_fbb);
@@ -705,6 +541,7 @@ inline flatbuffers::Offset<Asset> CreateAsset(
   builder_.add_objects(objects);
   builder_.add_domain(domain);
   builder_.add_name(name);
+  builder_.add_isSingleAsset(isSingleAsset);
   return builder_.Finish();
 }
 
@@ -712,17 +549,97 @@ inline flatbuffers::Offset<Asset> CreateAssetDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     const char *domain = nullptr,
+    bool isSingleAsset = false,
     const std::vector<flatbuffers::Offset<BaseObject>> *objects = nullptr,
     const char *smartContractName = nullptr) {
   return CreateAsset(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
       domain ? _fbb.CreateString(domain) : 0,
+      isSingleAsset,
       objects ? _fbb.CreateVector<flatbuffers::Offset<BaseObject>>(*objects) : 0,
       smartContractName ? _fbb.CreateString(smartContractName) : 0);
 }
 
 flatbuffers::Offset<Asset> CreateAsset(flatbuffers::FlatBufferBuilder &_fbb, const AssetT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct AccountT : public flatbuffers::NativeTable {
+  typedef Account TableType;
+  std::string publicKey;
+  std::vector<std::unique_ptr<AssetT>> assets;
+  AccountT() {
+  }
+};
+
+struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef AccountT NativeTableType;
+  enum {
+    VT_PUBLICKEY = 4,
+    VT_ASSETS = 6
+  };
+  const flatbuffers::String *publicKey() const {
+    return GetPointer<const flatbuffers::String *>(VT_PUBLICKEY);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<Asset>> *assets() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Asset>> *>(VT_ASSETS);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_PUBLICKEY) &&
+           verifier.Verify(publicKey()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_ASSETS) &&
+           verifier.Verify(assets()) &&
+           verifier.VerifyVectorOfTables(assets()) &&
+           verifier.EndTable();
+  }
+  AccountT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(AccountT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Account> Pack(flatbuffers::FlatBufferBuilder &_fbb, const AccountT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct AccountBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_publicKey(flatbuffers::Offset<flatbuffers::String> publicKey) {
+    fbb_.AddOffset(Account::VT_PUBLICKEY, publicKey);
+  }
+  void add_assets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Asset>>> assets) {
+    fbb_.AddOffset(Account::VT_ASSETS, assets);
+  }
+  AccountBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  AccountBuilder &operator=(const AccountBuilder &);
+  flatbuffers::Offset<Account> Finish() {
+    const auto end = fbb_.EndTable(start_, 2);
+    auto o = flatbuffers::Offset<Account>(end);
+    fbb_.Required(o, Account::VT_PUBLICKEY);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Account> CreateAccount(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> publicKey = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Asset>>> assets = 0) {
+  AccountBuilder builder_(_fbb);
+  builder_.add_assets(assets);
+  builder_.add_publicKey(publicKey);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Account> CreateAccountDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *publicKey = nullptr,
+    const std::vector<flatbuffers::Offset<Asset>> *assets = nullptr) {
+  return CreateAccount(
+      _fbb,
+      publicKey ? _fbb.CreateString(publicKey) : 0,
+      assets ? _fbb.CreateVector<flatbuffers::Offset<Asset>>(*assets) : 0);
+}
+
+flatbuffers::Offset<Account> CreateAccount(flatbuffers::FlatBufferBuilder &_fbb, const AccountT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 struct DomainT : public flatbuffers::NativeTable {
   typedef Domain TableType;
@@ -799,97 +716,6 @@ inline flatbuffers::Offset<Domain> CreateDomainDirect(
 }
 
 flatbuffers::Offset<Domain> CreateDomain(flatbuffers::FlatBufferBuilder &_fbb, const DomainT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct AccountT : public flatbuffers::NativeTable {
-  typedef Account TableType;
-  std::string publicKey;
-  std::vector<AssetObject> assets_type;
-  std::vector<AssetObjectUnion> assets;
-  AccountT() {
-  }
-};
-
-struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef AccountT NativeTableType;
-  enum {
-    VT_PUBLICKEY = 4,
-    VT_ASSETS_TYPE = 6,
-    VT_ASSETS = 8
-  };
-  const flatbuffers::String *publicKey() const {
-    return GetPointer<const flatbuffers::String *>(VT_PUBLICKEY);
-  }
-  const flatbuffers::Vector<uint8_t> *assets_type() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_ASSETS_TYPE);
-  }
-  const flatbuffers::Vector<flatbuffers::Offset<void>> *assets() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<void>> *>(VT_ASSETS);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_PUBLICKEY) &&
-           verifier.Verify(publicKey()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_ASSETS_TYPE) &&
-           verifier.Verify(assets_type()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_ASSETS) &&
-           verifier.Verify(assets()) &&
-           VerifyAssetObjectVector(verifier, assets(), assets_type()) &&
-           verifier.EndTable();
-  }
-  AccountT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(AccountT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Account> Pack(flatbuffers::FlatBufferBuilder &_fbb, const AccountT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct AccountBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_publicKey(flatbuffers::Offset<flatbuffers::String> publicKey) {
-    fbb_.AddOffset(Account::VT_PUBLICKEY, publicKey);
-  }
-  void add_assets_type(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> assets_type) {
-    fbb_.AddOffset(Account::VT_ASSETS_TYPE, assets_type);
-  }
-  void add_assets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<void>>> assets) {
-    fbb_.AddOffset(Account::VT_ASSETS, assets);
-  }
-  AccountBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  AccountBuilder &operator=(const AccountBuilder &);
-  flatbuffers::Offset<Account> Finish() {
-    const auto end = fbb_.EndTable(start_, 3);
-    auto o = flatbuffers::Offset<Account>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Account> CreateAccount(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::String> publicKey = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> assets_type = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<void>>> assets = 0) {
-  AccountBuilder builder_(_fbb);
-  builder_.add_assets(assets);
-  builder_.add_assets_type(assets_type);
-  builder_.add_publicKey(publicKey);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<Account> CreateAccountDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const char *publicKey = nullptr,
-    const std::vector<uint8_t> *assets_type = nullptr,
-    const std::vector<flatbuffers::Offset<void>> *assets = nullptr) {
-  return CreateAccount(
-      _fbb,
-      publicKey ? _fbb.CreateString(publicKey) : 0,
-      assets_type ? _fbb.CreateVector<uint8_t>(*assets_type) : 0,
-      assets ? _fbb.CreateVector<flatbuffers::Offset<void>>(*assets) : 0);
-}
-
-flatbuffers::Offset<Account> CreateAccount(flatbuffers::FlatBufferBuilder &_fbb, const AccountT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 struct PeerT : public flatbuffers::NativeTable {
   typedef Peer TableType;
@@ -2136,6 +1962,7 @@ inline void BaseObject::UnPackTo(BaseObjectT *_o, const flatbuffers::resolver_fu
   { auto _e = text(); if (_e) _o->text = _e->str(); };
   { auto _e = integer(); _o->integer = _e; };
   { auto _e = boolean(); _o->boolean = _e; };
+  { auto _e = decimal(); _o->decimal = _e; };
   { auto _e = name(); if (_e) _o->name = _e->str(); };
 }
 
@@ -2149,47 +1976,15 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObject(flatbuffers::FlatBufferB
   auto _text = _o->text.size() ? _fbb.CreateString(_o->text) : 0;
   auto _integer = _o->integer;
   auto _boolean = _o->boolean;
+  auto _decimal = _o->decimal;
   auto _name = _fbb.CreateString(_o->name);
   return CreateBaseObject(
       _fbb,
       _text,
       _integer,
       _boolean,
+      _decimal,
       _name);
-}
-
-inline SimpleAssetT *SimpleAsset::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new SimpleAssetT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void SimpleAsset::UnPackTo(SimpleAssetT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = name(); if (_e) _o->name = _e->str(); };
-  { auto _e = domain(); if (_e) _o->domain = _e->str(); };
-  { auto _e = object(); if (_e) _o->object = std::unique_ptr<BaseObjectT>(_e->UnPack(_resolver)); };
-  { auto _e = smartContractName(); if (_e) _o->smartContractName = _e->str(); };
-}
-
-inline flatbuffers::Offset<SimpleAsset> SimpleAsset::Pack(flatbuffers::FlatBufferBuilder &_fbb, const SimpleAssetT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateSimpleAsset(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<SimpleAsset> CreateSimpleAsset(flatbuffers::FlatBufferBuilder &_fbb, const SimpleAssetT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  auto _name = _fbb.CreateString(_o->name);
-  auto _domain = _fbb.CreateString(_o->domain);
-  auto _object = _o->object ? CreateBaseObject(_fbb, _o->object.get(), _rehasher) : 0;
-  auto _smartContractName = _o->smartContractName.size() ? _fbb.CreateString(_o->smartContractName) : 0;
-  return CreateSimpleAsset(
-      _fbb,
-      _name,
-      _domain,
-      _object,
-      _smartContractName);
 }
 
 inline AssetT *Asset::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
@@ -2203,6 +1998,7 @@ inline void Asset::UnPackTo(AssetT *_o, const flatbuffers::resolver_function_t *
   (void)_resolver;
   { auto _e = name(); if (_e) _o->name = _e->str(); };
   { auto _e = domain(); if (_e) _o->domain = _e->str(); };
+  { auto _e = isSingleAsset(); _o->isSingleAsset = _e; };
   { auto _e = objects(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->objects.push_back(std::unique_ptr<BaseObjectT>(_e->Get(_i)->UnPack(_resolver))); } };
   { auto _e = smartContractName(); if (_e) _o->smartContractName = _e->str(); };
 }
@@ -2215,15 +2011,45 @@ inline flatbuffers::Offset<Asset> CreateAsset(flatbuffers::FlatBufferBuilder &_f
   (void)_rehasher;
   (void)_o;
   auto _name = _fbb.CreateString(_o->name);
-  auto _domain = _o->domain.size() ? _fbb.CreateString(_o->domain) : 0;
+  auto _domain = _fbb.CreateString(_o->domain);
+  auto _isSingleAsset = _o->isSingleAsset;
   auto _objects = _o->objects.size() ? _fbb.CreateVector<flatbuffers::Offset<BaseObject>>(_o->objects.size(), [&](size_t i) { return CreateBaseObject(_fbb, _o->objects[i].get(), _rehasher); }) : 0;
   auto _smartContractName = _o->smartContractName.size() ? _fbb.CreateString(_o->smartContractName) : 0;
   return CreateAsset(
       _fbb,
       _name,
       _domain,
+      _isSingleAsset,
       _objects,
       _smartContractName);
+}
+
+inline AccountT *Account::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new AccountT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Account::UnPackTo(AccountT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = publicKey(); if (_e) _o->publicKey = _e->str(); };
+  { auto _e = assets(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->assets.push_back(std::unique_ptr<AssetT>(_e->Get(_i)->UnPack(_resolver))); } };
+}
+
+inline flatbuffers::Offset<Account> Account::Pack(flatbuffers::FlatBufferBuilder &_fbb, const AccountT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateAccount(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Account> CreateAccount(flatbuffers::FlatBufferBuilder &_fbb, const AccountT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  auto _publicKey = _fbb.CreateString(_o->publicKey);
+  auto _assets = _o->assets.size() ? _fbb.CreateVector<flatbuffers::Offset<Asset>>(_o->assets.size(), [&](size_t i) { return CreateAsset(_fbb, _o->assets[i].get(), _rehasher); }) : 0;
+  return CreateAccount(
+      _fbb,
+      _publicKey,
+      _assets);
 }
 
 inline DomainT *Domain::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
@@ -2252,37 +2078,6 @@ inline flatbuffers::Offset<Domain> CreateDomain(flatbuffers::FlatBufferBuilder &
       _fbb,
       _ownerPublicKey,
       _name);
-}
-
-inline AccountT *Account::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new AccountT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Account::UnPackTo(AccountT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = publicKey(); if (_e) _o->publicKey = _e->str(); };
-  { auto _e = assets_type(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->assets_type.push_back((AssetObject)_e->Get(_i)); } };
-  { auto _e = assets(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->assets.push_back((AssetObject)_e->Get(_i)); } };
-}
-
-inline flatbuffers::Offset<Account> Account::Pack(flatbuffers::FlatBufferBuilder &_fbb, const AccountT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateAccount(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Account> CreateAccount(flatbuffers::FlatBufferBuilder &_fbb, const AccountT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  auto _publicKey = _o->publicKey.size() ? _fbb.CreateString(_o->publicKey) : 0;
-  auto _assets_type = _o->assets_type.size() ? _fbb.CreateVector((const uint8_t*)_o->assets_type.data(), _o->assets_type.size()) : 0;
-  auto _assets = _o->assets.size() ? _fbb.CreateVector((const uint8_t*)_o->assets.data(), _o->assets.size()) : 0;
-  return CreateAccount(
-      _fbb,
-      _publicKey,
-      _assets_type,
-      _assets);
 }
 
 inline PeerT *Peer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
@@ -2729,88 +2524,10 @@ inline flatbuffers::Offset<ConsensusEvent> CreateConsensusEvent(flatbuffers::Fla
       _state);
 }
 
-inline bool VerifyAssetObject(flatbuffers::Verifier &verifier, const void *obj, AssetObject type) {
-  switch (type) {
-    case AssetObject_NONE: {
-      return true;
-    }
-    case AssetObject_SimpleAsset: {
-      auto ptr = reinterpret_cast<const SimpleAsset *>(obj);
-      return verifier.VerifyTable(ptr);
-    }
-    case AssetObject_Asset: {
-      auto ptr = reinterpret_cast<const Asset *>(obj);
-      return verifier.VerifyTable(ptr);
-    }
-    default: return false;
-  }
-}
-
-inline bool VerifyAssetObjectVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types) {
-  if (values->size() != types->size()) return false;
-  for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
-    if (!VerifyAssetObject(
-        verifier,  values->Get(i), types->GetEnum<AssetObject>(i))) {
-      return false;
-    }
-  }
-  return true;
-}
-
-inline flatbuffers::NativeTable *AssetObjectUnion::UnPack(const void *obj, AssetObject type, const flatbuffers::resolver_function_t *resolver) {
-  switch (type) {
-    case AssetObject_SimpleAsset: {
-      auto ptr = reinterpret_cast<const SimpleAsset *>(obj);
-      return ptr->UnPack(resolver);
-    }
-    case AssetObject_Asset: {
-      auto ptr = reinterpret_cast<const Asset *>(obj);
-      return ptr->UnPack(resolver);
-    }
-    default: return nullptr;
-  }
-}
-
-inline flatbuffers::Offset<void> AssetObjectUnion::Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher) const {
-  switch (type) {
-    case AssetObject_SimpleAsset: {
-      auto ptr = reinterpret_cast<const SimpleAssetT *>(table);
-      return CreateSimpleAsset(_fbb, ptr, _rehasher).Union();
-    }
-    case AssetObject_Asset: {
-      auto ptr = reinterpret_cast<const AssetT *>(table);
-      return CreateAsset(_fbb, ptr, _rehasher).Union();
-    }
-    default: return 0;
-  }
-}
-
-inline void AssetObjectUnion::Reset() {
-  switch (type) {
-    case AssetObject_SimpleAsset: {
-      auto ptr = reinterpret_cast<SimpleAssetT *>(table);
-      delete ptr;
-      break;
-    }
-    case AssetObject_Asset: {
-      auto ptr = reinterpret_cast<AssetT *>(table);
-      delete ptr;
-      break;
-    }
-    default: break;
-  }
-  table = nullptr;
-  type = AssetObject_NONE;
-}
-
 inline bool VerifyObject(flatbuffers::Verifier &verifier, const void *obj, Object type) {
   switch (type) {
     case Object_NONE: {
       return true;
-    }
-    case Object_SimpleAsset: {
-      auto ptr = reinterpret_cast<const SimpleAsset *>(obj);
-      return verifier.VerifyTable(ptr);
     }
     case Object_Asset: {
       auto ptr = reinterpret_cast<const Asset *>(obj);
@@ -2845,10 +2562,6 @@ inline bool VerifyObjectVector(flatbuffers::Verifier &verifier, const flatbuffer
 
 inline flatbuffers::NativeTable *ObjectUnion::UnPack(const void *obj, Object type, const flatbuffers::resolver_function_t *resolver) {
   switch (type) {
-    case Object_SimpleAsset: {
-      auto ptr = reinterpret_cast<const SimpleAsset *>(obj);
-      return ptr->UnPack(resolver);
-    }
     case Object_Asset: {
       auto ptr = reinterpret_cast<const Asset *>(obj);
       return ptr->UnPack(resolver);
@@ -2871,10 +2584,6 @@ inline flatbuffers::NativeTable *ObjectUnion::UnPack(const void *obj, Object typ
 
 inline flatbuffers::Offset<void> ObjectUnion::Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher) const {
   switch (type) {
-    case Object_SimpleAsset: {
-      auto ptr = reinterpret_cast<const SimpleAssetT *>(table);
-      return CreateSimpleAsset(_fbb, ptr, _rehasher).Union();
-    }
     case Object_Asset: {
       auto ptr = reinterpret_cast<const AssetT *>(table);
       return CreateAsset(_fbb, ptr, _rehasher).Union();
@@ -2897,11 +2606,6 @@ inline flatbuffers::Offset<void> ObjectUnion::Pack(flatbuffers::FlatBufferBuilde
 
 inline void ObjectUnion::Reset() {
   switch (type) {
-    case Object_SimpleAsset: {
-      auto ptr = reinterpret_cast<SimpleAssetT *>(table);
-      delete ptr;
-      break;
-    }
     case Object_Asset: {
       auto ptr = reinterpret_cast<AssetT *>(table);
       delete ptr;

@@ -11,40 +11,31 @@ table BaseObject{
    text: string;
    integer: int;
    boolean: bool;
-
+   decimal: float;
    name: string (required);
-}
-table SimpleAsset{
-  name:   string (required);
-  domain: string (required);
-
-  object: BaseObject;
-
-  smartContractName: string;
 }
 table Asset{
   name:   string (required);
-  domain: string;
+  domain: string (required);
 
+  isSingleAsset: bool;
   objects: [BaseObject];
 
   smartContractName: string;
 }
-union AssetObject  { SimpleAsset, Asset }
-
+table Account{
+  publicKey: string (required);
+  assets: [Asset];
+}
 table Domain{
   ownerPublicKey: string;
   name: string;
-}
-table Account{
-  publicKey: string;
-  assets: [AssetObject];
 }
 table Peer{
   publicKey: string;
   address: string;
 }
-union Object  { SimpleAsset, Asset, Domain, Account, Peer }
+union Object  {  Asset, Domain, Account, Peer }
 
 // -------------------------------
 //  This is command used by iroha
