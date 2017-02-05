@@ -46,11 +46,11 @@ namespace event {
 
 class ConsensusEvent{
 
-    struct eventSignature{
+    struct EventSignature{
         std::string publicKey;
         std::string signature;
 
-        eventSignature(
+        EventSignature(
             std::string pubKey,
             std::string sig
         ):
@@ -59,40 +59,25 @@ class ConsensusEvent{
         {}
     };
 
-    std::vector<Transaction> _transactions;
-    std::vector<eventSignature> _eventSignatures;
+    std::vector<EventSignature> _eventSignatures;
 
 public:
+
+    std::vector<Transaction> transactions;
     int order;
 
     std::string hash;
 
-    Asset asset;
-    Domain domain;
-    Message message;
-    Peer  peer;
-
-    enum Command_type{
-      ADD,
-      TRANSFER,
-      UPDATE,
-      REMOVE
-    };
-
     ConsensusEvent(
-        Transaction tx
-    )
-    {
-      _transactions.push_back(tx)
+        Transaction&& tx
+    ){
+      transactions.push_back(std::move(tx));
     }
 
     void addEventSignature(std::string&& publicKey,std::string&& signature){
-        _eventSignatures.push_back(eventSignature(publicKey, signature));
+        _eventSignatures.push_back(EventSignature(publicKey, signature));
     }
 
-    std::vetor<Transaction> transactions() const{
-      return _transactions;
-    }
 
     std::vector<EventSignature> eventSignatures() const{
         return _eventSignatures;
@@ -101,7 +86,7 @@ public:
     unsigned int numberOfValidSignatures(){
         return std::count_if(
             _eventSignatures.begin(), _eventSignatures.end(),
-            [&](eventSignature sig){
+            [&](auto sig){
                 return signature::verify(sig.signature, hash, sig.publicKey);
             }
         );

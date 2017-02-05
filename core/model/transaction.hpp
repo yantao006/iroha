@@ -28,11 +28,11 @@ namespace transaction {
 
 class Transaction {
   public:
-    struct txSignature{
+    struct TxSignature{
         std::string publicKey;
         std::string signature;
 
-        txSignature(
+        TxSignature(
                 std::string pubKey,
                 std::string sig
         ):
@@ -42,19 +42,19 @@ class Transaction {
     };
 
     std::string hash;
-    std::vector<txSignature> txSignatures;
+    std::vector<TxSignature> txSignatures_;
     std::int64_t    timestamp;
-    std::string     senderPubkey;
+    std::string     senderPublicKey;
     std::string     ownerPublicKey; // okay?
 
     std::unique_ptr<command::Command> command;
 
     Transaction(
-      std::string senderPublickey,
+      std::string senderPublicKey,
       std::unique_ptr<command::Command>&& cmd
     ):
         timestamp(datetime::unixtime()),
-        senderPubkey(senderPublickey),
+        senderPublicKey(senderPublicKey),
         command(std::move(cmd))
     {}
 
@@ -68,24 +68,24 @@ class Transaction {
     }
 
     auto getHash() {
-        return hash::sha3_256_hex( command->getHash() + std::to_string(timestamp) + senderPubkey);
+        return hash::sha3_256_hex( command->getHash() + std::to_string(timestamp) + senderPublicKey);
     }
 
-    std::vector<txSignature> getTxSignatures(){
-        return txSignatures;
+    std::vector<TxSignature> txSignatures() const{
+        return txSignatures_;
     }
 
     void addTxSignature(const std::string& pubKey,const std::string& signature){
-        txSignatures.push_back(txSignature(pubKey, signature));
+        txSignatures_.push_back(TxSignature(pubKey, signature));
     }
 
     bool isValidSignatures(){
         return std::count_if(
-            txSignatures.begin(), txSignatures.end(),
-            [hash = getHash()](txSignature sig){
+            txSignatures_.begin(), txSignatures_.end(),
+            [hash = getHash()](TxSignature sig){
                 return signature::verify(sig.signature, hash, sig.publicKey);
             }
-        ) == txSignatures.size();
+        ) == txSignatures_.size();
     }
 
 };
