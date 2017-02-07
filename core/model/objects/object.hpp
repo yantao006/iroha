@@ -26,23 +26,14 @@ limitations under the License.
 #include <unordered_map>
 #include "../../util/logger.hpp"
 
+#include "asset.hpp"
+#include "simple_asset.hpp"
+#include "peer.hpp"
+#include "message.hpp"
+#include "account.hpp"
+#include "domain.hpp"
+
 namespace object {
-
-  class SimpleAsset;
-  class Account;
-  class Asset;
-  class Domain;
-  class Message;
-  class Peer;
-
-	namespace detail {
-	    template<
-	    	typename T,
-	    	typename... Args,
-	    	template<typename U> typename AllocatorType
-    	>
-	    static T* allocateObject(Args&& ... args);
-	}
 
     enum class ObjectValueT : std::uint8_t {
         null,
@@ -66,8 +57,8 @@ namespace object {
         ObjectValueT type;
 
         Object();
-        Object(ObjectValueT t);
-        Object(const SimpleAsset& rhs);
+
+        Object(SimpleAsset&& rhs);
         Object(const Asset& rhs);
         Object(const Domain& rhs);
         Object(const Account& rhs);

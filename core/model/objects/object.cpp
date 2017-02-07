@@ -27,124 +27,74 @@ limitations under the License.
 #include "asset.hpp"
 #include "domain.hpp"
 #include "message.hpp"
+
+#include "object.hpp"
 //#include "peer.hpp"
 
 
 namespace object {
 
-	namespace detail {
-	    template<
-	    	typename T,
-	    	typename... Args,
-	    	template<typename U> typename AllocatorType = std::allocator
-    	>
-	    static T* allocateObject(Args&& ... args) {
-	    	constexpr int NumAlloc = 1;
-	       	AllocatorType<T> alloc;
-	    	auto deleter = [&NumAlloc, &alloc](T* object) {
-	        	alloc.deallocate(object, NumAlloc);
-	        };
-	        std::unique_ptr<T, decltype(deleter)> object(alloc.allocate(NumAlloc), deleter);
-	        alloc.construct(object.get(), std::forward<Args>(args)...);
-
-	        if (object == nullptr) {
-	        	logger::fatal("model object") << "cannot allcoate object";
-	        	exit(EXIT_FAILURE);
-	        }
-
-	        return object.release();
-	    }
-	}
-
     // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
-    Object::Object() = default;	// ctor for ValueT::null
+    Object::Object() :
+			type(ObjectValueT::null)
+		{};	// ctor for ValueT::null
 
-    Object::Object(ObjectValueT t) {
-        switch (t) {
-
-            case ObjectValueT::simpleAsset: {
-                simpleAsset = detail::allocateObject<SimpleAsset>();
-                break;
-            }
-
-            case ObjectValueT::asset: {
-                asset = detail::allocateObject<Asset>();
-                break;
-            }
-
-            case ObjectValueT::domain: {
-                domain = detail::allocateObject<Domain>();
-                break;
-            }
-
-            case ObjectValueT::account: {
-                account = detail::allocateObject<Account>();
-                break;
-            }
-
-            case ObjectValueT::message: {
-                message = detail::allocateObject<Message>();
-                break;
-            }
-            case ObjectValueT::peer: {
-                peer = detail::allocateObject<Peer>();
-            	break;
-            }
-            case ObjectValueT::null: {
-                break;
-            }
-
-            default: {
-               	logger::fatal("model object") << "Unexpected ValueT: " << static_cast<std::uint8_t>(t);
-               	exit(EXIT_FAILURE);
-            }
-        }
+    Object::Object(SimpleAsset&& rhs):
+			type(ObjectValueT::simpleAsset)
+		{
+        simpleAsset = new SimpleAsset(rhs);
     }
 
-    Object::Object(const SimpleAsset& rhs) {
-        simpleAsset = detail::allocateObject<SimpleAsset>(rhs);
+    Object::Object(const Asset& rhs):
+			type(ObjectValueT::asset)
+		{
+        asset = new Asset(&rhs);
     }
 
-    Object::Object(const Asset& rhs) {
-        asset = detail::allocateObject<Asset>(rhs);
+    Object::Object(const Domain& rhs):
+			type(ObjectValueT::domain)
+		{
+      	domain = new Domain(rhs);
     }
 
-    Object::Object(const Domain& rhs) {
-        domain = detail::allocateObject<Domain>(rhs);
+    Object::Object(const Account& rhs):
+			type(ObjectValueT::account)
+		{
+      account = new Account(rhs);
     }
 
-    Object::Object(const Account& rhs) {
-        account = detail::allocateObject<Account>(rhs);
+    Object::Object(const Message& rhs):
+			type(ObjectValueT::message)
+		{
+        message = new Message(rhs);
+    }
+    Object::Object(const Peer& rhs):
+			type(ObjectValueT::peer)
+		{
+        peer = new Peer(rhs);
     }
 
-    Object::Object(const Message& rhs) {
-        message = detail::allocateObject<Message>(rhs);
-    }
-    Object::Object(const Peer& rhs) {
-        peer = detail::allocateObject<Peer>(rhs);
-    }
-
-		SimpleAsset* AsSimpleAsset(){
+		SimpleAsset* Object::AsSimpleAsset(){
 			return type == ObjectValueT::simpleAsset?
 				simpleAsset : nullptr;
 		}
-		Asset*       AsAsset(){
+		Asset*       Object::AsAsset(){
 			return type == ObjectValueT::asset?
 				asset : nullptr;
 		}
-		Domain*      AsDomain(){
+		Domain*      Object::AsDomain(){
 			return type == ObjectValueT::domain?
 				domain : nullptr;
 		}
-		Account*     AsAccount(){
-			return type == ObjectValueT::account
+		Account*     Object::AsAccount(){
+			return type == ObjectValueT::account?
 				account : nullptr;
 		}
-		Message*     AsMessage(){
+		Message*     Object::AsMessage(){
 			return type == ObjectValueT::message?
 				message : nullptr;
 		}
-		Peer*        AsPeer(){
+		Peer*        Object::AsPeer(){
 			return type == ObjectValueT::peer?
 				peer : nullptr;
 		}

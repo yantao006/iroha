@@ -20,6 +20,7 @@ limitations under the License.
 
 namespace object {
 
+
 SimpleAsset::SimpleAsset(
     std::string         domain,
     std::string         name,

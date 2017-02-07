@@ -38,6 +38,8 @@ public:
 
     Asset() = default;
 
+    explicit Asset(const Asset* as);
+
     explicit Asset(
         std::string     domain,
         std::string     name,

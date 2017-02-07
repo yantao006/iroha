@@ -32,6 +32,14 @@ Asset::Asset(
 
 
 Asset::Asset(
+  const Asset* a
+):
+  domain(a->domain),
+  name(a->name),
+  value(a->value)
+{}
+
+Asset::Asset(
     std::string     name,
     AssetValueT     value
 ):

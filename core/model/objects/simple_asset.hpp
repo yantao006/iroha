@@ -15,16 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef CORE_DOMAIN_OBJECTS_ASSET_HPP_
-#define CORE_DOMAIN_OBJECTS_ASSET_HPP_
+#ifndef CORE_DOMAIN_OBJECTS_SIMPLE_ASSET_HPP_
+#define CORE_DOMAIN_OBJECTS_SIMPLE_ASSET_HPP_
 
 #include <string>
 #include <memory>
 #include <unordered_map>
 
-namespace object {
+#include "base_object.hpp"
 
-using SimpleAssetValueT = ObjectT;
+namespace object {
 
 class SimpleAsset {
 
