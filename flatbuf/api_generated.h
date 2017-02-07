@@ -118,6 +118,7 @@ struct ObjectUnion {
 
   ObjectUnion() : type(Object_NONE), table(nullptr) {}
   ObjectUnion(const ObjectUnion &);
+  ObjectUnion(ObjectUnion &&) = default;
   ObjectUnion &operator=(const ObjectUnion &);
   ~ObjectUnion() { Reset(); }
 
@@ -864,6 +865,10 @@ struct TransferT : public flatbuffers::NativeTable {
   ObjectUnion object;
   TransferT() {
   }
+  TransferT(TransferT&& t):
+    object(std::move(t.object)),
+    receiver(std::move(t.receiver))
+  {}
 };
 
 struct Transfer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
