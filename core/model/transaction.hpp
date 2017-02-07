@@ -47,11 +47,11 @@ class Transaction {
     std::string     senderPublicKey;
     std::string     ownerPublicKey; // okay?
 
-    std::unique_ptr<command::Command> command;
+    command::Command command;
 
     Transaction(
       std::string senderPublicKey,
-      std::unique_ptr<command::Command>&& cmd
+      command::Command&& cmd
     ):
         timestamp(datetime::unixtime()),
         senderPublicKey(senderPublicKey),
@@ -64,11 +64,11 @@ class Transaction {
 
     void execution(){
       Executor executor;
-      command->execute(executor);
+      command.execute(executor);
     }
 
     auto getHash() {
-        return hash::sha3_256_hex( command->getHash() + std::to_string(timestamp) + senderPublicKey);
+        return hash::sha3_256_hex( command.getHash() + std::to_string(timestamp) + senderPublicKey);
     }
 
     std::vector<TxSignature> txSignatures() const{
