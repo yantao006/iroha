@@ -207,7 +207,7 @@ namespace sumeragi {
             // this returns std::future<void> object
             // (std::future).get() method locks processing until result of processTransaction will be available
             // but processTransaction returns void, so we don't have to call it and wait
-            std::function<void()> &&task = std::bind(processTransaction, event);
+            std::function<void()>&& task = std::bind(processTransaction, event);
             pool.process(std::move(task));
         });
 
@@ -240,22 +240,25 @@ namespace sumeragi {
         logger::info("sumeragi")    <<  "valid";
         logger::info("sumeragi")    <<  "Add my signature...";
 
-        logger::info("sumeragi")    <<  "hash:" <<  event.transaction().hash();
+        // Currently, one consensus event has one consensus event.
+        auto hash = event.transactions.at(0).getHash();
+        logger::info("sumeragi")    <<  "hash:" <<  hash;
         logger::info("sumeragi")    <<  "pub:"  <<  config::PeerServiceConfig::getInstance().getMyPublicKey();
         logger::info("sumeragi")    <<  "pro:"  <<  config::PeerServiceConfig::getInstance().getPrivateKey();
         logger::info("sumeragi")    <<  "sog:"  <<  signature::sign(
-                                                    event.transaction().hash(),
+                                                    hash,
                                                     config::PeerServiceConfig::getInstance().getMyPublicKey(),
                                                     config::PeerServiceConfig::getInstance().getPrivateKey()
                                                 );
 
         //detail::printIsSumeragi(context->isSumeragi);
         // Really need? blow "if statement" will be false anytime.
-        detail::addSignature(event,
+        event.addEventSignature(
             config::PeerServiceConfig::getInstance().getMyPublicKey(),
-            signature::sign(event.transaction().hash(),
-                            config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                            config::PeerServiceConfig::getInstance().getPrivateKey())
+            signature::sign(
+              hash,
+              config::PeerServiceConfig::getInstance().getMyPublicKey(),
+              config::PeerServiceConfig::getInstance().getPrivateKey())
         );
         // TODO Create add event signature.
         // event.addEventSignature( peer::getMyPublicKey(), signature::sign( hash, peer::getMyPublicKey(), peer::getPrivateKey()));
@@ -344,11 +347,14 @@ namespace sumeragi {
             } else {
                 // This is a new event, so we should verify, sign, and broadcast it
 
-                detail::addSignature(event,
-                                     config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                                     signature::sign(event.transaction().hash(),
-                                                     config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                                                     config::PeerServiceConfig::getInstance().getPrivateKey()).c_str());
+                event.addEventSignature(
+                   config::PeerServiceConfig::getInstance().getMyPublicKey(),
+                   signature::sign(
+                     hash,
+                     config::PeerServiceConfig::getInstance().getMyPublicKey(),
+                     config::PeerServiceConfig::getInstance().getPrivateKey()
+                   ).c_str()
+                  );
 
                 logger::info("sumeragi")        <<  "tail public key is "   <<  context->validatingPeers.at(context->proxyTailNdx)->getPublicKey();
                 logger::info("sumeragi")        <<  "tail is "              <<  context->proxyTailNdx;
