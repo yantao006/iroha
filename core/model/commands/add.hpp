@@ -17,37 +17,18 @@ limitations under the License.
 #ifndef CORE_DOMAIN_COMMANDS_ADD_HPP_
 #define CORE_DOMAIN_COMMANDS_ADD_HPP_
 
-#include "command.hpp"
 #include "../objects/object.hpp"
-
 
 namespace command {
 
-class Add: public Command {
+struct Add {
     object::Object object;
-  public:
 
     Add(
-        Object o
+        object::Object o
     ):
         object(o)
     {}
-
-    CommandType getCommandName() const{
-      return CommandType::ADD;
-    }
-
-    std::string getHash() const{
-      return "WIP:Hash";
-    }
-
-    void execute(Executor& e){
-      e.execute(this);
-    }
-
-    Object getObject() const{
-      return object;
-    }
 };
 
 };  // namespace command

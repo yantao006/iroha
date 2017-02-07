@@ -18,30 +18,15 @@ limitations under the License.
 #ifndef CORE_DOMAIN_UNBATCH_HPP_
 #define CORE_DOMAIN_UNBATCH_HPP_
 
-#include "command.hpp"
-
 #include <string>
+#include "../objects/object.hpp"
+
 
 namespace command {
 
-    class Unbatch: public Command {
-      Unbatch(){}
-
-      CommandType getCommandName() const{
-        return CommandType::UNBATCH;
-      }
-
-      std::string getHash() const{
-        return "WIP:Hash";
-      }
-
-      void execute(Executor& e){
-        e.execute(this);
-      }
-
-      Object getObject() const{
-        return Object(object::ObjectValueT::null);
-      }
-    };  // namespace command
+struct Unbatch {
+  Unbatch(){}
 };
+
+};// namespace command
 #endif  // CORE_DOMAIN_UNBATCH_HPP_

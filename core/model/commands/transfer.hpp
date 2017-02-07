@@ -20,40 +20,25 @@ limitations under the License.
 
 #include <string>
 
+#include "../objects/object.hpp"
+
 namespace command {
 
-    class Transfer : public Command {
-        object::Object object;
-        std::string senderPublicKey;
-        std::string receiverPublicKey;
-      public:
+struct Transfer {
+    object::Object object;
+    std::string senderPublicKey;
+    std::string receiverPublicKey;
 
-        Transfer(
-            Object o,
-            std::string sender,
-            std::string receiver
-        ):
-            object(o),
-            senderPublicKey(sender),
-            receiverPublicKey(receiver)
-        {}
+    Transfer(
+        object::Object o,
+        std::string sender,
+        std::string receiver
+    ):
+        object(o),
+        senderPublicKey(sender),
+        receiverPublicKey(receiver)
+    {}
 
-        CommandType getCommandName() const{
-          return CommandType::TRANSFER;
-        }
-
-        std::string getHash() const{
-          return "WIP:Hash";
-        }
-
-        void execute(Executor& e){
-          e.execute(this);
-        }
-
-        Object getObject() const{
-          return object;
-        }
-
-    };  // namespace command
+};  // namespace command
 };
 #endif  // CORE_DOMAIN_TRANSACTIONS_TRANSFERTRANSACTION_HPP_

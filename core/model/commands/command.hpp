@@ -18,33 +18,68 @@ limitations under the License.
 #ifndef IROHA_COMMAND_HPP
 #define IROHA_COMMAND_HPP
 
-#include "../../service/executor.hpp"
 #include "../objects/object.hpp"
+#include "../../service/executor.hpp"
+
+#include "add.hpp"
+#include "batch.hpp"
+#include "contract.hpp"
+#include "remove.hpp"
+#include "transfer.hpp"
+#include "unbatch.hpp"
+#include "update.hpp"
 
 namespace command {
 
   using object::Object;
-  // Entity
-  class Command {
-  public:
 
-    enum class CommandType{
-      ADD,
-      TRANSFER,
-      UPDATE,
-      REMOVE,
-      BATCH,
-      UNBATCH,
-      CONTRACT
-    };
 
-    virtual ~Command() {}
-    virtual void execute(Executor&) = 0;
-    virtual CommandType getCommandName() const = 0;
-    virtual std::string getHash() const = 0;
-    virtual Object getObject() const = 0;
+  enum class CommandValueT : std::uint8_t {
+      null,
+      add,
+      batch,
+      contract,
+      remove,
+      transfer,
+      unbatch,
+      update
   };
 
+  // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
+  union Command {
+          Add*            add;
+          Batch*          batch;
+          Contract*       contract;
+          Remove*         remove;
+          Transfer*       transfer;
+          Unbatch*        unbatch;
+          Update*         update;
+
+          CommandValueT type;
+
+          Command();
+          Command(CommandValueT t);
+          Command(const Add& rhs);
+          Command(const Batch& rhs);
+          Command(const Contract& rhs);
+          Command(const Remove& rhs);
+          Command(const Transfer& rhs);
+          Command(const Unbatch& rhs);
+          Command(const Update& rhs);
+
+          void execute(Executor&);
+          CommandValueT getCommandType();
+          std::string getHash();
+          Object getObject() const;
+
+          Add*            AsAdd();
+          Batch*          AsBatch();
+          Contract*       AsContract();
+          Remove*         AsRemove();
+          Transfer*       AsTransfer();
+          Unbatch*        AsUnbatch();
+          Update*         AsUpdate();
+    };
 };
 
 #endif //IROHA_COMMAND_H

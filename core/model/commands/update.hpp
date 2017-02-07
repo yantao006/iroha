@@ -18,38 +18,19 @@ limitations under the License.
 #ifndef CORE_DOMAIN_UPDATE_HPP_
 #define CORE_DOMAIN_UPDATE_HPP_
 
-#include "command.hpp"
-
 #include <string>
+#include "../objects/object.hpp"
 
 namespace command {
 
-  class Update: public Command {
-      object::Object object;
-    public:
-
-      Update(
-          Object o
-      ):
-          object(o)
-      {}
-
-      CommandType getCommandName() const{
-        return CommandType::UPDATE;
-      }
-
-      std::string getHash() const{
-        return "WIP:Hash";
-      }
-
-      void execute(Executor& e){
-        e.execute(this);
-      }
-
-      Object getObject() const{
-        return object;
-      }
-  };
+struct Update {
+    object::Object object;
+    Update(
+        object::Object o
+    ):
+        object(o)
+    {}
+};
 
 };  // namespace command
 

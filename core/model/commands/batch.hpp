@@ -17,30 +17,13 @@ limitations under the License.
 #ifndef CORE_DOMAIN_BATCH_HPP_
 #define CORE_DOMAIN_BATCH_HPP_
 
-#include "command.hpp"
-
 #include <string>
 
 namespace command {
 
-    class Batch: public Command {
-        Batch(){}
+struct Batch {
+    Batch(){}
+};  // namespace command
 
-        CommandType getCommandName() const{
-          return CommandType::BATCH;
-        }
-
-        std::string getHash() const{
-          return "WIP:Hash";
-        }
-
-        void execute(Executor& e){
-          e.execute(this);
-        }
-
-        Object getObject() const{
-          return Object(object::ObjectValueT::null);
-        }
-    };  // namespace command
 };
 #endif  // CORE_DOMAIN_BATCH_HPP_

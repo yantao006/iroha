@@ -18,36 +18,19 @@ limitations under the License.
 #ifndef CORE_DOMAIN_REMOVE_HPP_
 #define CORE_DOMAIN_REMOVE_HPP_
 
-#include "command.hpp"
+#include "../objects/object.hpp"
 
 namespace command {
 
-  class Remove: public Command {
-      object::Object object;
-      public:
+struct Remove {
+    object::Object object;
 
-        Remove(
-            Object o
-        ):
-            object(o)
-        {}
-
-        CommandType getCommandName() const{
-          return CommandType::REMOVE;
-        }
-
-        std::string getHash() const{
-          return "WIP:Hash";
-        }
-
-        void execute(Executor& e){
-          e.execute(this);
-        }
-
-        Object getObject() const{
-          return object;
-        }
-  };
+    Remove(
+        object::Object o
+    ):
+        object(o)
+    {}
+};
 
 };
 #endif  // CORE_DOMAIN_REMOVE_HPP_

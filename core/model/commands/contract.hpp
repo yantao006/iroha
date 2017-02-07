@@ -17,35 +17,23 @@ limitations under the License.
 #ifndef CORE_DOMAIN_COMMANDS_CONTRACT_HPP_
 #define CORE_DOMAIN_COMMANDS_CONTRACT_HPP_
 
-#include "command.hpp"
+#include "../objects/object.hpp"
+#include <string>
 
 namespace command {
 
-class Contract: public Command {
-    object::Object object;
-  public:
+struct Contract {
+    object::Object  object;
+    std::string     name;
 
     Contract(
-        Object o
+        object::Object o,
+        std::string name
     ):
-        object(o)
+        object(o),
+        name(name)
     {}
 
-    CommandType getCommandName() const{
-      return CommandType::CONTRACT;
-    }
-
-    std::string getHash() const{
-      return "WIP:Hash";
-    }
-
-    void execute(Executor& e){
-      e.execute(this);
-    }
-
-    Object getObject() const{
-      return object;
-    }
 };
 
 };  // namespace command
