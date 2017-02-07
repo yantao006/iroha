@@ -50,7 +50,6 @@ namespace connection {
           return 0;
     });
 
-
     class IrohaServiceImpl final : public Sumeragi::Service {
         flatbuffers::FlatBufferBuilder fbb_;
     public:
@@ -91,7 +90,6 @@ namespace connection {
 
     template<typename In,typename Out>
     std::unique_ptr<Out> encodeFlatbufferT(In input){}
-
 
     std::unique_ptr<iroha::BaseObjectT> encodeFlatbufferT(const object::BaseObject& obj){
       std::unique_ptr<iroha::BaseObjectT> res;
@@ -148,32 +146,138 @@ namespace connection {
       return res;
     }
 
-    CommandUnion encodeFlatbufferUnionT(const std::unique_ptr<command::Command>& command){
+    CommandUnion encodeFlatbufferUnionT(const command::Command& command){
       CommandUnion res;
-      if(command->getCommandName() == command::Command::CommandType::ADD){
-        auto addT = AddT();
-        addT.object = encodeFlatbufferUnionT(command->getObject());
-        res.Set(std::move(addT));
-      }else if(command->getCommandName() == command::Command::CommandType::TRANSFER){
-        auto transferT = TransferT();
-        transferT.object = encodeFlatbufferUnionT(command->getObject());
-        res.Set(std::move(transferT));
-      }else if(command->getCommandName() == command::Command::CommandType::UPDATE){
-        auto updateT = UpdateT();
-        updateT.object = encodeFlatbufferUnionT(command->getObject());
-        res.Set(std::move(updateT));
-      }else if(command->getCommandName() == command::Command::CommandType::REMOVE){
+      if(command.type == command::CommandValueT::add){
+
+          auto addT = AddT();
+          ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+          if(obj.AsAsset() == nullptr){
+            if(obj.AsDomain() == nullptr){
+              if(obj.AsAccount() == nullptr){
+                if(obj.AsPeer() == nullptr){
+                  throw exception::NotImplementedException(
+                    "This object is not supported.",__FILE__
+                  );
+                }else{
+                  addT.object.Set(std::move(*obj.AsPeer()));
+                }
+              }else{
+                addT.object.Set(std::move(*obj.AsAccount()));
+              }
+            }else{
+              addT.object.Set(std::move(*obj.AsDomain()));
+            }
+          }else{
+            addT.object.Set(std::move(*obj.AsAsset()));
+          }
+          res.Set(std::move(addT));
+
+      }else if(command.type == command::CommandValueT::transfer){
+
+          auto transferT = TransferT();
+          ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+          if(obj.AsAsset() == nullptr){
+            if(obj.AsDomain() == nullptr){
+              if(obj.AsAccount() == nullptr){
+                if(obj.AsPeer() == nullptr){
+                  throw exception::NotImplementedException(
+                    "This object is not supported.",__FILE__
+                  );
+                }else{
+                  transferT.object.Set(std::move(*obj.AsPeer()));
+                }
+              }else{
+                transferT.object.Set(std::move(*obj.AsAccount()));
+              }
+            }else{
+              transferT.object.Set(std::move(*obj.AsDomain()));
+            }
+          }else{
+            transferT.object.Set(std::move(*obj.AsAsset()));
+          }
+          res.Set(std::move(transferT));
+
+      }else if(command.type == command::CommandValueT::update){
+          auto updateT = UpdateT();
+
+          ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+          if(obj.AsAsset() == nullptr){
+            if(obj.AsDomain() == nullptr){
+              if(obj.AsAccount() == nullptr){
+                if(obj.AsPeer() == nullptr){
+                  throw exception::NotImplementedException(
+                    "This object is not supported.",__FILE__
+                  );
+                }else{
+                  updateT.object.Set(std::move(*obj.AsPeer()));
+                }
+              }else{
+                updateT.object.Set(std::move(*obj.AsAccount()));
+              }
+            }else{
+              updateT.object.Set(std::move(*obj.AsDomain()));
+            }
+          }else{
+            updateT.object.Set(std::move(*obj.AsAsset()));
+          }
+
+          //res.Set(std::move(updateT));
+
+      }else if(command.type == command::CommandValueT::remove){
         auto removeT = RemoveT();
-        removeT.object = encodeFlatbufferUnionT(command->getObject());
+
+        ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+        if(obj.AsAsset() == nullptr){
+          if(obj.AsDomain() == nullptr){
+            if(obj.AsAccount() == nullptr){
+              if(obj.AsPeer() == nullptr){
+                throw exception::NotImplementedException(
+                  "This object is not supported.",__FILE__
+                );
+              }else{
+                removeT.object.Set(std::move(*obj.AsPeer()));
+              }
+            }else{
+              removeT.object.Set(std::move(*obj.AsAccount()));
+            }
+          }else{
+            removeT.object.Set(std::move(*obj.AsDomain()));
+          }
+        }else{
+          removeT.object.Set(std::move(*obj.AsAsset()));
+        }
+
         res.Set(std::move(removeT));
-      }else if(command->getCommandName() == command::Command::CommandType::CONTRACT){
+      }else if(command.type == command::CommandValueT::contract){
         auto contractT = ContractT();
-        contractT.object = encodeFlatbufferUnionT(command->getObject());
+
+        ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+        if(obj.AsAsset() == nullptr){
+          if(obj.AsDomain() == nullptr){
+            if(obj.AsAccount() == nullptr){
+              if(obj.AsPeer() == nullptr){
+                throw exception::NotImplementedException(
+                  "This object is not supported.",__FILE__
+                );
+              }else{
+                contractT.object.Set(std::move(*obj.AsPeer()));
+              }
+            }else{
+              contractT.object.Set(std::move(*obj.AsAccount()));
+            }
+          }else{
+            contractT.object.Set(std::move(*obj.AsDomain()));
+          }
+        }else{
+          contractT.object.Set(std::move(*obj.AsAsset()));
+        }
+
         res.Set(std::move(contractT));
-      }else if(command->getCommandName() == command::Command::CommandType::BATCH){
+      }else if(command.type == command::CommandValueT::batch){
         auto batchT = BatchT();
         res.Set(std::move(batchT));
-      }else if(command->getCommandName() == command::Command::CommandType::UNBATCH){
+      }else if(command.type == command::CommandValueT::unbatch){
         auto unbatchT = UnbatchT();
         res.Set(std::move(unbatchT));
       }else{
@@ -189,7 +293,7 @@ namespace connection {
     bool boolean;
     float decimal;
 
-    std::unique_ptr<iroha::TransactionT> encodeFlatbufferT(const event::Transaction& tx){
+    std::unique_ptr<iroha::TransactionT>&& encodeFlatbufferT(const event::Transaction& tx){
       std::unique_ptr<iroha::TransactionT> res;
       res->sender = tx.senderPublicKey;
       res->hash   = tx.hash;
@@ -200,7 +304,40 @@ namespace connection {
         ts->signature = t.signature;
         tsTv.push_back( std::move(ts) );
       }
-      res->command = encodeFlatbufferUnionT(tx.command);
+      {
+        auto command = encodeFlatbufferUnionT(tx.command);
+        if(command.AsAdd() == nullptr){
+          if(command.AsBatch() == nullptr){
+            if(command.AsContract() == nullptr){
+              if(command.AsRemove() == nullptr){
+                if(command.AsTransfer() == nullptr){
+                  if(command.AsUnbatch() == nullptr){
+                    if(command.AsUpdate() == nullptr){
+                      throw exception::NotImplementedException(
+                        "This object is not implemented.",__FILE__
+                      );
+                    }else{
+                      res->command.Set(std::move(*command.AsUpdate()));
+                    }
+                  }else{
+                    res->command.Set(std::move(*command.AsUnbatch()));
+                  }
+                }else{
+                  res->command.Set(std::move(*command.AsTransfer()));
+                }
+              }else{
+                res->command.Set(std::move(*command.AsRemove()));
+              }
+            }else{
+              res->command.Set(std::move(*command.AsContract()));
+            }
+          }else{
+            res->command.Set(std::move(*command.AsBatch()));
+          }
+        }else{
+          res->command.Set(std::move(*command.AsAdd()));
+        }
+      }
       res->txSignatures = std::move(tsTv);
       return std::move(res);
     }
@@ -294,7 +431,7 @@ namespace connection {
         const std::string&,
         event::ConsensusEvent&
       )>& callback) {
-        receivers.push_back(callback);
+        receivers.push_back(std::move(callback));
         return true;
     }
 
