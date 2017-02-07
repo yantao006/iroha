@@ -21,7 +21,7 @@ limitations under the License.
 #include "../../consensus/consensus_event.hpp"
 #include "../../util/logger.hpp"
 #include "../../util/exception.hpp"
-#include "../../service/peer_service.hpp"
+#include "../config/peer_service_with_json.hpp"
 
 #include <thread>
 
@@ -173,57 +173,55 @@ namespace connection {
           }
           res.Set(std::move(addT));
 
-      }else if(command.type == command::CommandValueT::transfer){
-
-          auto transferT = TransferT();
-          ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
-          if(obj.AsAsset() == nullptr){
-            if(obj.AsDomain() == nullptr){
-              if(obj.AsAccount() == nullptr){
-                if(obj.AsPeer() == nullptr){
-                  throw exception::NotImplementedException(
-                    "This object is not supported.",__FILE__
-                  );
+        }else if(command.type == command::CommandValueT::transfer){
+            auto transferT = std::make_unique<TransferT>();
+            ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+            if(obj.AsAsset() == nullptr){
+              if(obj.AsDomain() == nullptr){
+                if(obj.AsAccount() == nullptr){
+                  if(obj.AsPeer() == nullptr){
+                    throw exception::NotImplementedException(
+                      "This object is not supported.",__FILE__
+                    );
+                  }else{
+                    transferT->object.Set(std::move(*obj.AsPeer()));
+                  }
                 }else{
-                  transferT.object.Set(std::move(*obj.AsPeer()));
+                  transferT->object.Set(std::move(*obj.AsAccount()));
                 }
               }else{
-                transferT.object.Set(std::move(*obj.AsAccount()));
+                transferT->object.Set(std::move(*obj.AsDomain()));
               }
             }else{
-              transferT.object.Set(std::move(*obj.AsDomain()));
+              transferT->object.Set(std::move(*obj.AsAsset()));
             }
-          }else{
-            transferT.object.Set(std::move(*obj.AsAsset()));
-          }
-          res.Set(std::move(transferT));
+            res.Set(std::move(*transferT));
 
-      }else if(command.type == command::CommandValueT::update){
-          auto updateT = UpdateT();
+        }else if(command.type == command::CommandValueT::update){
+            auto updateT = UpdateT();
 
-          ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
-          if(obj.AsAsset() == nullptr){
-            if(obj.AsDomain() == nullptr){
-              if(obj.AsAccount() == nullptr){
-                if(obj.AsPeer() == nullptr){
-                  throw exception::NotImplementedException(
-                    "This object is not supported.",__FILE__
-                  );
+            ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
+            if(obj.AsAsset() == nullptr){
+              if(obj.AsDomain() == nullptr){
+                if(obj.AsAccount() == nullptr){
+                  if(obj.AsPeer() == nullptr){
+                    throw exception::NotImplementedException(
+                      "This object is not supported.",__FILE__
+                    );
+                  }else{
+                    updateT.object.Set(std::move(*obj.AsPeer()));
+                  }
                 }else{
-                  updateT.object.Set(std::move(*obj.AsPeer()));
+                  updateT.object.Set(std::move(*obj.AsAccount()));
                 }
               }else{
-                updateT.object.Set(std::move(*obj.AsAccount()));
+                updateT.object.Set(std::move(*obj.AsDomain()));
               }
             }else{
-              updateT.object.Set(std::move(*obj.AsDomain()));
+              updateT.object.Set(std::move(*obj.AsAsset()));
             }
-          }else{
-            updateT.object.Set(std::move(*obj.AsAsset()));
-          }
 
-          //res.Set(std::move(updateT));
-
+            res.Set(std::move(updateT));
       }else if(command.type == command::CommandValueT::remove){
         auto removeT = RemoveT();
 
@@ -247,7 +245,6 @@ namespace connection {
         }else{
           removeT.object.Set(std::move(*obj.AsAsset()));
         }
-
         res.Set(std::move(removeT));
       }else if(command.type == command::CommandValueT::contract){
         auto contractT = ContractT();
@@ -323,7 +320,7 @@ namespace connection {
                     res->command.Set(std::move(*command.AsUnbatch()));
                   }
                 }else{
-                  res->command.Set(std::move(*command.AsTransfer()));
+                  //res->command.Set(std::move(*command.AsTransfer()));
                 }
               }else{
                 res->command.Set(std::move(*command.AsRemove()));
@@ -419,7 +416,7 @@ namespace connection {
         const event::ConsensusEvent& event
     ) {
         for (auto& ip : receiver_ips){
-            if (ip != peer::getMyIp()){
+            if (ip != config::PeerServiceConfig::getInstance().getMyIp()){
                 send( ip, event);
             }
         }
