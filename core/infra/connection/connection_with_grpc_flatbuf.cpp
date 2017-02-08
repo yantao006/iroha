@@ -87,9 +87,122 @@ namespace connection {
         builder.RegisterService(&service);
     }
 
+    template<typename In,typename Out>
+    Out decodeFlatbufferT(In&& input){}
+
+    std::pair<std::string, object::BaseObject> decodeFlatbufferT(iroha::BaseObjectT&& obj){
+      switch (obj.type) {
+        case BaseObjectType::BaseObjectType_Text:{
+          return std::make_pair( obj.name, object::BaseObject(obj.text));
+        }
+        case BaseObjectType::BaseObjectType_Integer:{
+          return std::make_pair( obj.name, object::BaseObject(obj.integer));
+        }
+        case BaseObjectType::BaseObjectType_Boolean: {
+          return std::make_pair( obj.name, object::BaseObject(obj.boolean));
+        }
+        case BaseObjectType::BaseObjectType_Decimal: {
+          return std::make_pair( obj.name, object::BaseObject(obj.decimal));
+        }
+        default:{
+          throw exception::NotImplementedException(
+            "This BaseObject type is not implemented.",__FILE__
+          );
+        }
+      }
+    }
+
+    object::Object decodeFlatbufferT(ObjectUnion&& u){
+      switch(u.type){
+        case Object::Object_Asset:{
+          auto asset = object::Asset();
+          asset.domain = u.AsAsset()->domain;
+          asset.name   = u.AsAsset()->name;
+          for(auto&& o: u.AsAsset()->objects){
+            asset.value.insert( decodeFlatbufferT(std::move(*o)) );
+          }
+          return object::Object(asset);
+        }
+        case Object::Object_Domain:{
+            throw exception::NotImplementedException(
+              "This Object type is not implemented.",__FILE__
+            );
+        }
+        case Object::Object_Account:{
+            throw exception::NotImplementedException(
+              "This Object type is not implemented.",__FILE__
+            );
+        }
+        case Object::Object_Peer:{
+            throw exception::NotImplementedException(
+              "This Object type is not implemented.",__FILE__
+            );
+        }
+        default:{
+          throw exception::NotImplementedException(
+            "This Object type is not implemented.",__FILE__
+          );
+        }
+      }
+    }
+
+    command::Command decodeFlatbufferT(CommandUnion&& u){
+      switch(u.type){
+        case Command::Command_Add:{
+          auto object = decodeFlatbufferT(std::move(u.AsAdd()->object));
+          return command::Command(command::Add(object));
+        }
+        case Command::Command_Transfer:{
+          auto object = decodeFlatbufferT(std::move(u.AsTransfer()->object));
+          return command::Command(command::Transfer(object,u.AsTransfer()->receiver));
+        }
+        case Command::Command_Contract:{
+          auto object = decodeFlatbufferT(std::move(u.AsContract()->object));
+          return command::Command(command::Contract(object,u.AsContract()->contractName));
+        }
+        case Command::Command_Remove:{
+          auto object = decodeFlatbufferT(std::move(u.AsRemove()->object));
+          return command::Command(command::Remove(object));
+        }
+        case Command::Command_Batch:{
+          return command::Command(command::Batch());
+        }
+        case Command::Command_Unbatch:{
+          return command::Command(command::Unbatch());
+        }
+        case Command::Command_Update:{
+          auto object = decodeFlatbufferT(std::move(u.AsUpdate()->object));
+          return command::Command(command::Update(object));
+        }
+        default:{
+        }
+      }
+    }
+
+    event::Transaction decodeFlatbufferT(TransactionT&& u){
+      event::Transaction res;
+
+      return res;
+    }
+
+    event::ConsensusEvent decodeFlatbufferT(ConsensusEventT&& u){
+      if(u.transaction.empty()){
+        throw exception::NotImplementedException(
+          "Multi transaction supporting is not implemented.",__FILE__
+        );
+      }
+      event::ConsensusEvent res( std::move(decodeFlatbufferT(std::move(*u.transaction.at(0)))) );
+      for(auto&& esig: u.eventSignatures){
+        res.addEventSignature(std::move(esig->publicKey),std::move(esig->signature));
+      }
+      return res;
+    }
 
     template<typename In,typename Out>
     std::unique_ptr<Out> encodeFlatbufferT(In input){}
+
+    template<typename In,typename Out>
+    Out encodeFlatbufferUnionT(In input){}
 
     std::unique_ptr<iroha::BaseObjectT> encodeFlatbufferT(const object::BaseObject& obj){
       std::unique_ptr<iroha::BaseObjectT> res;
@@ -109,11 +222,7 @@ namespace connection {
       return std::move(res);
     }
 
-
-    template<typename In,typename Out>
-    Out encodeFlatbufferUnionT(In input){}
-
-    ObjectUnion encodeFlatbufferUnionT(const object::Object& obj){
+    ObjectUnion  encodeFlatbufferUnionT(const object::Object& obj){
       ObjectUnion res;
       if(obj.type == object::ObjectValueT::asset){
         auto assetT = AssetT();
@@ -131,12 +240,21 @@ namespace connection {
         res.Set(std::move(assetT));
       }else if(obj.type == object::ObjectValueT::domain){
         auto domainT = DomainT();
+        throw exception::NotImplementedException(
+          "This domain is not implemented.",__FILE__
+        );
         res.Set(std::move(domainT));
       }else if(obj.type == object::ObjectValueT::account){
         auto accountT = AccountT();
+        throw exception::NotImplementedException(
+          "This domain is not implemented.",__FILE__
+        );
         res.Set(std::move(accountT));
       }else if(obj.type == object::ObjectValueT::peer){
         auto peerT = PeerT();
+        throw exception::NotImplementedException(
+          "This domain is not implemented.",__FILE__
+        );
         res.Set(std::move(peerT));
       }else{
         throw exception::NotImplementedException(
@@ -285,12 +403,7 @@ namespace connection {
       return res;
     }
 
-    std::string text;
-    int32_t integer;
-    bool boolean;
-    float decimal;
-
-    std::unique_ptr<iroha::TransactionT>&& encodeFlatbufferT(const event::Transaction& tx){
+    std::unique_ptr<iroha::TransactionT>    encodeFlatbufferT(const event::Transaction& tx){
       std::unique_ptr<iroha::TransactionT> res;
       res->sender = tx.senderPublicKey;
       res->hash   = tx.hash;
@@ -320,7 +433,7 @@ namespace connection {
                     res->command.Set(std::move(*command.AsUnbatch()));
                   }
                 }else{
-                  //res->command.Set(std::move(*command.AsTransfer()));
+                  res->command.Set(std::move(*command.AsTransfer()));
                 }
               }else{
                 res->command.Set(std::move(*command.AsRemove()));
@@ -374,22 +487,13 @@ namespace connection {
             grpc::ClientContext context;
 
             iroha::ConsensusEventT eventT;
-/*
-            struct ConsensusEventT : public flatbuffers::NativeTable {
-              typedef ConsensusEvent TableType;
-              std::vector<std::unique_ptr<TransactionT>> transaction;
-              std::vector<std::unique_ptr<EventSignatureT>> eventSignatures;
-              State state;
-              ConsensusEventT()
-                  : state(State_Undetermined) {
-              }
-*/
+
 //            ConsensusEventT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
 //            void UnPackTo(ConsensusEventT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
 //            static flatbuffers::Offset<ConsensusEvent> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ConsensusEventT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);          flatbuffers::FlatBufferBuilder fbb;
-/*
+
             flatbuffers::FlatBufferBuilder fbb;
-            fbb.Finish(iroha::ConsensusEvent::Pack( fbb, &event));
+            fbb.Finish(iroha::ConsensusEvent::Pack( fbb, encodeFlatbufferT(event).get()));
             auto request = flatbuffers::BufferRef<iroha::ConsensusEvent>(
               fbb.GetBufferPointer(),
               fbb.GetSize()
@@ -404,7 +508,6 @@ namespace connection {
             } else {
               logger::error("connection sumeragi response error");
             }
-*/
             return true;
         }else{
             logger::error("connection") <<  "not found";
