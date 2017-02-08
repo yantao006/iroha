@@ -29,25 +29,39 @@ namespace command {
     // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
     Command::Command() = default;	// ctor for ValueT::null
 
-    Command::Command(const Add& rhs) {
+    Command::Command(const Add& rhs):
+      type(CommandValueT::add)
+    {
         add = new Add(rhs);
     }
-    Command::Command(const Batch& rhs) {
+    Command::Command(const Batch& rhs):
+      type(CommandValueT::batch)
+    {
         batch = new Batch(rhs);
     }
-    Command::Command(const Contract& rhs) {
+    Command::Command(const Contract& rhs):
+      type(CommandValueT::contract)
+    {
         contract = new Contract(rhs);
     }
-    Command::Command(const Remove& rhs) {
+    Command::Command(const Remove& rhs):
+      type(CommandValueT::remove)
+    {
         remove = new Remove(rhs);
     }
-    Command::Command(const Transfer& rhs) {
+    Command::Command(const Transfer& rhs):
+      type(CommandValueT::transfer)
+    {
         transfer = new Transfer(rhs);
     }
-    Command::Command(const Unbatch& rhs) {
+    Command::Command(const Unbatch& rhs):
+      type(CommandValueT::unbatch)
+    {
         unbatch = new Unbatch(rhs);
     }
-    Command::Command(const Update& rhs) {
+    Command::Command(const Update& rhs):
+      type(CommandValueT::update)
+    {
         update = new Update(rhs);
     }
 
@@ -60,7 +74,7 @@ namespace command {
         batch : nullptr;
     }
     Contract*   Command::AsContract(){
-      return type == CommandValueT::add?
+      return type == CommandValueT::contract?
         contract : nullptr;
     }
     Remove*     Command::AsRemove(){

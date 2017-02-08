@@ -26,16 +26,13 @@ namespace command {
 
 struct Transfer {
     object::Object object;
-    std::string senderPublicKey;
     std::string receiverPublicKey;
 
     Transfer(
         object::Object o,
-        std::string sender,
         std::string receiver
     ):
         object(o),
-        senderPublicKey(sender),
         receiverPublicKey(receiver)
     {}
 
