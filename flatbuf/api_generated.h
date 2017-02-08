@@ -65,6 +65,33 @@ struct EventSignatureT;
 struct ConsensusEvent;
 struct ConsensusEventT;
 
+enum BaseObjectType {
+  BaseObjectType_Text = 1,
+  BaseObjectType_Integer = 2,
+  BaseObjectType_Boolean = 3,
+  BaseObjectType_Decimal = 4,
+  BaseObjectType_None = 5,
+  BaseObjectType_MIN = BaseObjectType_Text,
+  BaseObjectType_MAX = BaseObjectType_None
+};
+
+inline const char **EnumNamesBaseObjectType() {
+  static const char *names[] = {
+    "Text",
+    "Integer",
+    "Boolean",
+    "Decimal",
+    "None",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameBaseObjectType(BaseObjectType e) {
+  const size_t index = static_cast<int>(e) - static_cast<int>(BaseObjectType_Text);
+  return EnumNamesBaseObjectType()[index];
+}
+
 enum Object {
   Object_NONE = 0,
   Object_Asset = 1,
@@ -118,7 +145,7 @@ struct ObjectUnion {
 
   ObjectUnion() : type(Object_NONE), table(nullptr) {}
   ObjectUnion(const ObjectUnion &);
-  ObjectUnion(ObjectUnion &&) = default;
+  ObjectUnion(ObjectUnion&&) = default;  
   ObjectUnion &operator=(const ObjectUnion &);
   ~ObjectUnion() { Reset(); }
 
@@ -330,11 +357,13 @@ struct BaseObjectT : public flatbuffers::NativeTable {
   int32_t integer;
   bool boolean;
   float decimal;
+  BaseObjectType type;
   std::string name;
   BaseObjectT()
       : integer(0),
         boolean(false),
-        decimal(0.0f) {
+        decimal(0.0f),
+        type(BaseObjectType_None) {
   }
 };
 
@@ -345,7 +374,8 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_INTEGER = 6,
     VT_BOOLEAN = 8,
     VT_DECIMAL = 10,
-    VT_NAME = 12
+    VT_TYPE = 12,
+    VT_NAME = 14
   };
   const flatbuffers::String *text() const {
     return GetPointer<const flatbuffers::String *>(VT_TEXT);
@@ -359,6 +389,9 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   float decimal() const {
     return GetField<float>(VT_DECIMAL, 0.0f);
   }
+  BaseObjectType type() const {
+    return static_cast<BaseObjectType>(GetField<int8_t>(VT_TYPE, 5));
+  }
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
@@ -369,6 +402,7 @@ struct BaseObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_INTEGER) &&
            VerifyField<uint8_t>(verifier, VT_BOOLEAN) &&
            VerifyField<float>(verifier, VT_DECIMAL) &&
+           VerifyField<int8_t>(verifier, VT_TYPE) &&
            VerifyFieldRequired<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            verifier.EndTable();
@@ -393,6 +427,9 @@ struct BaseObjectBuilder {
   void add_decimal(float decimal) {
     fbb_.AddElement<float>(BaseObject::VT_DECIMAL, decimal, 0.0f);
   }
+  void add_type(BaseObjectType type) {
+    fbb_.AddElement<int8_t>(BaseObject::VT_TYPE, static_cast<int8_t>(type), 5);
+  }
   void add_name(flatbuffers::Offset<flatbuffers::String> name) {
     fbb_.AddOffset(BaseObject::VT_NAME, name);
   }
@@ -402,7 +439,7 @@ struct BaseObjectBuilder {
   }
   BaseObjectBuilder &operator=(const BaseObjectBuilder &);
   flatbuffers::Offset<BaseObject> Finish() {
-    const auto end = fbb_.EndTable(start_, 5);
+    const auto end = fbb_.EndTable(start_, 6);
     auto o = flatbuffers::Offset<BaseObject>(end);
     fbb_.Required(o, BaseObject::VT_NAME);
     return o;
@@ -415,12 +452,14 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObject(
     int32_t integer = 0,
     bool boolean = false,
     float decimal = 0.0f,
+    BaseObjectType type = BaseObjectType_None,
     flatbuffers::Offset<flatbuffers::String> name = 0) {
   BaseObjectBuilder builder_(_fbb);
   builder_.add_name(name);
   builder_.add_decimal(decimal);
   builder_.add_integer(integer);
   builder_.add_text(text);
+  builder_.add_type(type);
   builder_.add_boolean(boolean);
   return builder_.Finish();
 }
@@ -431,6 +470,7 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObjectDirect(
     int32_t integer = 0,
     bool boolean = false,
     float decimal = 0.0f,
+    BaseObjectType type = BaseObjectType_None,
     const char *name = nullptr) {
   return CreateBaseObject(
       _fbb,
@@ -438,6 +478,7 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObjectDirect(
       integer,
       boolean,
       decimal,
+      type,
       name ? _fbb.CreateString(name) : 0);
 }
 
@@ -865,10 +906,6 @@ struct TransferT : public flatbuffers::NativeTable {
   ObjectUnion object;
   TransferT() {
   }
-  TransferT(TransferT&& t):
-    object(std::move(t.object)),
-    receiver(std::move(t.receiver))
-  {}
 };
 
 struct Transfer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -1968,6 +2005,7 @@ inline void BaseObject::UnPackTo(BaseObjectT *_o, const flatbuffers::resolver_fu
   { auto _e = integer(); _o->integer = _e; };
   { auto _e = boolean(); _o->boolean = _e; };
   { auto _e = decimal(); _o->decimal = _e; };
+  { auto _e = type(); _o->type = _e; };
   { auto _e = name(); if (_e) _o->name = _e->str(); };
 }
 
@@ -1982,6 +2020,7 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObject(flatbuffers::FlatBufferB
   auto _integer = _o->integer;
   auto _boolean = _o->boolean;
   auto _decimal = _o->decimal;
+  auto _type = _o->type;
   auto _name = _fbb.CreateString(_o->name);
   return CreateBaseObject(
       _fbb,
@@ -1989,6 +2028,7 @@ inline flatbuffers::Offset<BaseObject> CreateBaseObject(flatbuffers::FlatBufferB
       _integer,
       _boolean,
       _decimal,
+      _type,
       _name);
 }
 
