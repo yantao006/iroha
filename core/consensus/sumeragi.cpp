@@ -199,7 +199,7 @@ namespace sumeragi {
 
         context->isSumeragi = context->validatingPeers.at(0)->getPublicKey() == context->myPublicKey;
 
-        connection::receive([](const std::string& from, ConsensusEvent& event) {
+        connection::receive([](const std::string& from,ConsensusEvent& event) {
             logger::info("sumeragi") << "receive!";
             logger::info("sumeragi") << "received message! sig:[" << event.numberOfValidSignatures() << "]";
 
