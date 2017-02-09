@@ -50,47 +50,10 @@ namespace connection {
           return 0;
     });
 
-    class IrohaServiceImpl final : public Sumeragi::Service {
-        flatbuffers::FlatBufferBuilder fbb_;
-    public:
-
-      ::grpc::Status Torii(::grpc::ClientContext* context, const flatbuffers::BufferRef<Request>& request, flatbuffers::BufferRef<Response>* response){
-
-          // ToDo convertor
-
-          fbb_.Clear();
-          auto stat_offset = CreateResponse(fbb_,
-              200,
-              fbb_.CreateString("Hello, Ok")
-          );
-          fbb_.Finish(stat_offset);
-          *response = flatbuffers::BufferRef<Response>(fbb_.GetBufferPointer(),
-                                                   fbb_.GetSize());
-          return grpc::Status::OK;
-      }
-
-      ::grpc::Status Verify(::grpc::ClientContext* context, const flatbuffers::BufferRef<ConsensusEvent>& request, flatbuffers::BufferRef<Response>* response){
-
-      }
-
-    };
-
-    grpc::Server *server_instance = nullptr;
-    std::mutex wait_for_server;
-    std::condition_variable server_instance_cv;
-    IrohaServiceImpl service;
-    grpc::ServerBuilder builder;
-
-    void initialize_peer() {
-        std::string server_address("0.0.0.0:50051");
-        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-        builder.RegisterService(&service);
-    }
-
     template<typename In,typename Out>
-    Out decodeFlatbufferT(In&& input){}
+    Out decodeFlatbufferT(In& input){}
 
-    std::pair<std::string, object::BaseObject> decodeFlatbufferT(iroha::BaseObjectT&& obj){
+    std::pair<std::string, object::BaseObject> decodeFlatbufferT(iroha::BaseObjectT& obj){
       switch (obj.type) {
         case BaseObjectType::BaseObjectType_Text:{
           return std::make_pair( obj.name, object::BaseObject(obj.text));
@@ -112,14 +75,14 @@ namespace connection {
       }
     }
 
-    object::Object decodeFlatbufferT(ObjectUnion&& u){
+    object::Object decodeFlatbufferT(ObjectUnion& u){
       switch(u.type){
         case Object::Object_Asset:{
           auto asset = object::Asset();
           asset.domain = u.AsAsset()->domain;
           asset.name   = u.AsAsset()->name;
           for(auto&& o: u.AsAsset()->objects){
-            asset.value.insert( decodeFlatbufferT(std::move(*o)) );
+            asset.value.insert( decodeFlatbufferT(*o) );
           }
           return object::Object(asset);
         }
@@ -146,22 +109,22 @@ namespace connection {
       }
     }
 
-    command::Command decodeFlatbufferT(CommandUnion&& u){
+    command::Command decodeFlatbufferT(CommandUnion& u){
       switch(u.type){
         case Command::Command_Add:{
-          auto object = decodeFlatbufferT(std::move(u.AsAdd()->object));
+          auto object = decodeFlatbufferT(u.AsAdd()->object);
           return command::Command(command::Add(object));
         }
         case Command::Command_Transfer:{
-          auto object = decodeFlatbufferT(std::move(u.AsTransfer()->object));
+          auto object = decodeFlatbufferT(u.AsTransfer()->object);
           return command::Command(command::Transfer(object,u.AsTransfer()->receiver));
         }
         case Command::Command_Contract:{
-          auto object = decodeFlatbufferT(std::move(u.AsContract()->object));
+          auto object = decodeFlatbufferT(u.AsContract()->object);
           return command::Command(command::Contract(object,u.AsContract()->contractName));
         }
         case Command::Command_Remove:{
-          auto object = decodeFlatbufferT(std::move(u.AsRemove()->object));
+          auto object = decodeFlatbufferT(u.AsRemove()->object);
           return command::Command(command::Remove(object));
         }
         case Command::Command_Batch:{
@@ -171,7 +134,7 @@ namespace connection {
           return command::Command(command::Unbatch());
         }
         case Command::Command_Update:{
-          auto object = decodeFlatbufferT(std::move(u.AsUpdate()->object));
+          auto object = decodeFlatbufferT(u.AsUpdate()->object);
           return command::Command(command::Update(object));
         }
         default:{
@@ -179,19 +142,19 @@ namespace connection {
       }
     }
 
-    event::Transaction decodeFlatbufferT(TransactionT&& u){
+    event::Transaction decodeFlatbufferT(TransactionT& u){
       event::Transaction res;
 
       return res;
     }
 
-    event::ConsensusEvent decodeFlatbufferT(ConsensusEventT&& u){
+    event::ConsensusEvent decodeFlatbufferT(ConsensusEventT& u){
       if(u.transaction.empty()){
         throw exception::NotImplementedException(
           "Multi transaction supporting is not implemented.",__FILE__
         );
       }
-      event::ConsensusEvent res( std::move(decodeFlatbufferT(std::move(*u.transaction.at(0)))) );
+      event::ConsensusEvent res( std::move(decodeFlatbufferT(*u.transaction.at(0))) );
       for(auto&& esig: u.eventSignatures){
         res.addEventSignature(std::move(esig->publicKey),std::move(esig->signature));
       }
@@ -199,10 +162,10 @@ namespace connection {
     }
 
     template<typename In,typename Out>
-    std::unique_ptr<Out> encodeFlatbufferT(In input){}
+    std::unique_ptr<Out> encodeFlatbufferT(const In& input){}
 
     template<typename In,typename Out>
-    Out encodeFlatbufferUnionT(In input){}
+    Out encodeFlatbufferUnionT(In&& input){}
 
     std::unique_ptr<iroha::BaseObjectT> encodeFlatbufferT(const object::BaseObject& obj){
       std::unique_ptr<iroha::BaseObjectT> res;
@@ -230,8 +193,8 @@ namespace connection {
         assetT.name     = obj.asset->name;
 
         std::vector<std::unique_ptr<BaseObjectT>> objects;
-        for(const auto o: obj.asset->value){
-          auto baseObj = encodeFlatbufferT(o.second);
+        for(auto&& o: obj.asset->value){
+          auto baseObj = encodeFlatbufferT(std::move(o.second));
           baseObj->name = o.first;
           objects.push_back(std::move(baseObj));
         }
@@ -456,7 +419,7 @@ namespace connection {
         std::unique_ptr<iroha::ConsensusEventT> res;
         std::vector<std::unique_ptr<TransactionT>> txTv;
         for(auto&& tx: event.transactions){
-          txTv.push_back(std::move(encodeFlatbufferT(tx)));
+          txTv.push_back(std::move(encodeFlatbufferT(std::move(tx))));
         }
         std::vector<std::unique_ptr<EventSignatureT>> esTv;
         for(auto&& e: event.eventSignatures()){
@@ -470,6 +433,63 @@ namespace connection {
         res->state = State::State_Undetermined;
         return std::move(res);
     }
+
+
+    class IrohaServiceImpl final : public Sumeragi::Service {
+        flatbuffers::FlatBufferBuilder fbb_;
+    public:
+
+      ::grpc::Status Torii(::grpc::ClientContext* context, const flatbuffers::BufferRef<Request>& request, flatbuffers::BufferRef<Response>* response){
+
+          // ToDo convertor
+          fbb_.Clear();
+          auto stat_offset = CreateResponse(fbb_,
+              200,
+              fbb_.CreateString("Hello, Ok")
+          );
+          fbb_.Finish(stat_offset);
+          *response = flatbuffers::BufferRef<Response>(
+              fbb_.GetBufferPointer(),
+              fbb_.GetSize()
+          );
+          return grpc::Status::OK;
+      }
+
+      ::grpc::Status Verify(::grpc::ClientContext* context, const flatbuffers::BufferRef<iroha::ConsensusEvent>& request, flatbuffers::BufferRef<Response>* response){
+
+        //ConsensusEventT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+        //void UnPackTo(ConsensusEventT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+
+        auto event = decodeFlatbufferT(*request.GetRoot()->UnPack());
+
+
+        fbb_.Clear();
+        auto stat_offset = CreateResponse(fbb_,
+            200,
+            fbb_.CreateString("Hello, Ok")
+        );
+        fbb_.Finish(stat_offset);
+        *response = flatbuffers::BufferRef<Response>(fbb_.GetBufferPointer(),
+                                                 fbb_.GetSize());
+        return grpc::Status::OK;
+      }
+
+    };
+
+    grpc::Server *server_instance = nullptr;
+    std::mutex wait_for_server;
+    std::condition_variable server_instance_cv;
+    IrohaServiceImpl service;
+    grpc::ServerBuilder builder;
+
+    void initialize_peer() {
+        std::string server_address("0.0.0.0:50051");
+        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+        builder.RegisterService(&service);
+    }
+
+
+
 
     bool send(
         const std::string& ip,

@@ -45,55 +45,8 @@ int main(int argc, char* argv[]){
         return 1;
     }
     logger::setLogLevel(logger::LogLevel::DEBUG);
-
     connection::initialize_peer();
 
-    if (std::string(argv[1]) == "sender") {
-        logger::debug("main") << "I'm sender.";
-        connection::addSubscriber(argv[2]);
-        logger::debug("main") << "Add subscribed";
-        while(1){
-            auto event = ConsensusEvent<Transaction<Add<object::Asset>>>(
-                    "sender",
-                    "domain",
-                    "Dummy transaction",
-                    100,
-                    0
-            );
-
-            logger::debug("main") << "issued event";
-            event.addSignature(
-                    config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                    signature::sign(event.getHash(),
-                                    config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                                    config::PeerServiceConfig::getInstance().getPrivateKey()).c_str()
-            );
-
-            event.addSignature(
-                    config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                    signature::sign(event.getHash(),
-                                    config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                                    config::PeerServiceConfig::getInstance().getPrivateKey()).c_str()
-            );
-
-
-            logger::debug("main") << "Add signatured";
-            logger::debug("main") << "start send";
-            std::cout << " sig:" << event.eventSignatures().size() << "\n";
-            connection::sendAll(convertor::encode(event));
-        }
-    } else if (std::string(argv[1]) == "receive") {
-        connection::receive([](const std::string& from,Event::ConsensusEvent& event) {
-            std::cout <<" receive : order:" << event.order() << "\n";
-            std::cout <<" receive : sig size:" << event.eventsignatures_size() << "\n";
-            //std::cout <<" receive : value:" << event.transaction().asset().value() << "\n";
-            std::cout <<" receive : name:" << event.transaction().asset().name() <<"\n";
-            std::cout <<" type:"<<  event.transaction().type()  << "\n";
-        });
-        connection::run();
-    }
-
-    while(1){}
     connection::finish();
     return 0;
 }
