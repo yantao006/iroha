@@ -17,7 +17,10 @@ target_link_libraries(connection_with_grpc_flatbuf
   grpc++
   gpr
   pthread
-peer_service_with_json
+
+  exception
+
+  peer_service_with_json
   peer_service_with_json
   transaction
 )

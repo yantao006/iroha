@@ -488,8 +488,12 @@ namespace connection {
         builder.RegisterService(&service);
     }
 
-
-
+    void finish(){
+      if(server_instance != nullptr){
+        server_instance->Shutdown();
+        delete server_instance;
+      }
+    }
 
     bool send(
         const std::string& ip,
@@ -507,11 +511,6 @@ namespace connection {
             grpc::ClientContext context;
 
             iroha::ConsensusEventT eventT;
-
-//            ConsensusEventT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-//            void UnPackTo(ConsensusEventT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-//            static flatbuffers::Offset<ConsensusEvent> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ConsensusEventT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);          flatbuffers::FlatBufferBuilder fbb;
-
             flatbuffers::FlatBufferBuilder fbb;
             fbb.Finish(iroha::ConsensusEvent::Pack( fbb, encodeFlatbufferT(event).get()));
             auto request = flatbuffers::BufferRef<iroha::ConsensusEvent>(
