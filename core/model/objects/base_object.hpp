@@ -18,6 +18,7 @@ limitations under the License.
 #ifndef IROHA_BASE_OBJECT_HPP
 #define IROHA_BASE_OBJECT_HPP
 
+#include <iostream>
 #include <string>
 #include <cstdint>
 #include "../../util/exception.hpp"
@@ -51,9 +52,16 @@ namespace object {
           }
         }
 
-        BaseObject() = default;
+        BaseObject() {
+          object_type = Object_type::NONE;
+        }
 
         explicit BaseObject(std::string s):
+          str_(s),
+          object_type(Object_type::STRING)
+        {}
+
+        explicit BaseObject(const char* s):
           str_(s),
           object_type(Object_type::STRING)
         {}
