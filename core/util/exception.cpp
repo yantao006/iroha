@@ -57,14 +57,8 @@ namespace exception {
   namespace transaction {
     UnsetBuildMembersException::UnsetBuildMembersException(
       const std::string& buildTarget,
-      const std::vector<std::string>& unsetMembers
-    ): std::domain_error("") {
-      std::string s;
-      for (std::size_t i=0; i<buildTarget.size(); i++) {
-        if (i) s += ", ";
-        s += buildTarget[i];
-      }
-      UnsetBuildMembersException::domain_error("UnsetBuildMembersException while building " + buildTarget + ". Unset members: " + s);
+      const std::string& unsetMembers
+    ) : std::domain_error(unsetMembers) {
     }
   }  // namespace transaction
 }  // namespace exception

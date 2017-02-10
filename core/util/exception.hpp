@@ -60,7 +60,7 @@ namespace exception {
   namespace transaction {
     class UnsetBuildMembersException : public std::domain_error {
     public:
-      UnsetBuildMembersException(const std::string&, const std::vector<std::string>&);
+      UnsetBuildMembersException(const std::string&, const std::string&);
     };
   }
 
