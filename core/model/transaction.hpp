@@ -53,10 +53,16 @@ class Transaction {
       std::string senderPublicKey,
       command::Command&& cmd
     ):
-        timestamp(datetime::unixtime()),
-        senderPublicKey(senderPublicKey),
-        command(std::move(cmd))
-    {}
+        timestamp(datetime::unixtime())
+        ,senderPublicKey(senderPublicKey)
+        ,command(std::move(cmd))
+    {
+      std::cout <<"-----------\n";
+      std::cout <<"tx constructor\n";
+      std::cout <<"tx command "<< \
+        command::EnumNamesCommandValue(command.getCommandType()) << " ... "<< std::endl;
+      std::cout <<"-----------\n";
+    }
 
     Transaction():
         timestamp(datetime::unixtime())

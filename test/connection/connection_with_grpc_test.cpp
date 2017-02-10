@@ -52,20 +52,28 @@ int main(int argc, char* argv[]){
         logger::info("sumeragi") << "received message! sig:[" << event.numberOfValidSignatures() << "]";
     });
 
+    std::cout << "Make Transaction\n";
     std::string senderPublicKey = "senderPublicKey";
     std::unordered_map<std::string, object::BaseObject> values;
     values.insert(std::make_pair("asset1", object::BaseObject("value")));
+    std::cout << "Make BaseObject\n";
     object::Asset asset(
        "domain",
        "name",
        values
     );
-
+    std::cout << "Make Asset\n";
     auto add = command::Add(object::Object(asset));
-    event::ConsensusEvent event(transaction::Transaction(
+    std::cout << "Make Add ["<< (int)command::Command(add).getCommandType()<< "]\n";
+    auto tx = transaction::Transaction(
       senderPublicKey,
       command::Command(add)
-    ));
+    );
+    std::cout << "Make Add "<< (int)command::Command(add).type << "\n";
+    std::cout << "Make Tx\n";
+    event::ConsensusEvent event(std::move(tx));
+    std::cout << "Make Event\n";
+    std::cout << "Start send\n";
     connection::send( config::PeerServiceConfig::getInstance().getMyIp(), event);
 
     usleep(3);

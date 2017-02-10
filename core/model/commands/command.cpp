@@ -32,6 +32,8 @@ namespace command {
     Command::Command(const Add& rhs):
       type(CommandValueT::add)
     {
+        std::cout << EnumNamesCommandValue(type) << std::endl;
+        this->type = CommandValueT::add;
         add = new Add(rhs);
     }
     Command::Command(const Batch& rhs):
@@ -69,6 +71,7 @@ namespace command {
         return type == CommandValueT::add?
           add : nullptr;
     }
+
     Batch*      Command::AsBatch(){
       return type == CommandValueT::batch?
         batch : nullptr;
@@ -134,6 +137,10 @@ namespace command {
 
     void Command::execute(Executor& e){
 
+    }
+
+    CommandValueT Command::getCommandType(){
+      return this->type;
     }
 
     std::string Command::getHash(){

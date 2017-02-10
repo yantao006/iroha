@@ -168,7 +168,7 @@ namespace connection {
     Out encodeFlatbufferUnionT(In&& input){}
 
     std::unique_ptr<iroha::BaseObjectT> encodeFlatbufferT(const object::BaseObject& obj){
-      std::unique_ptr<iroha::BaseObjectT> res;
+      std::unique_ptr<iroha::BaseObjectT> res(new iroha::BaseObjectT());
       if(obj.object_type == object::BaseObject::Object_type::STRING){
         res->text     = (std::string)obj;
       }else if(obj.object_type == object::BaseObject::Object_type::INTEGER){
@@ -230,7 +230,6 @@ namespace connection {
     CommandUnion encodeFlatbufferUnionT(const command::Command& command){
       CommandUnion res;
       if(command.type == command::CommandValueT::add){
-
           auto addT = AddT();
           ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
           if(obj.AsAsset() == nullptr){
@@ -254,7 +253,7 @@ namespace connection {
           }
           res.Set(std::move(addT));
 
-        }else if(command.type == command::CommandValueT::transfer){
+      }else if(command.type == command::CommandValueT::transfer){
             auto transferT = std::make_unique<TransferT>();
             ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
             if(obj.AsAsset() == nullptr){
@@ -305,7 +304,6 @@ namespace connection {
             res.Set(std::move(updateT));
       }else if(command.type == command::CommandValueT::remove){
         auto removeT = RemoveT();
-
         ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
         if(obj.AsAsset() == nullptr){
           if(obj.AsDomain() == nullptr){
@@ -329,7 +327,6 @@ namespace connection {
         res.Set(std::move(removeT));
       }else if(command.type == command::CommandValueT::contract){
         auto contractT = ContractT();
-
         ObjectUnion obj = encodeFlatbufferUnionT(command.getObject());
         if(obj.AsAsset() == nullptr){
           if(obj.AsDomain() == nullptr){
@@ -350,7 +347,6 @@ namespace connection {
         }else{
           contractT.object.Set(std::move(*obj.AsAsset()));
         }
-
         res.Set(std::move(contractT));
       }else if(command.type == command::CommandValueT::batch){
         auto batchT = BatchT();
@@ -359,23 +355,32 @@ namespace connection {
         auto unbatchT = UnbatchT();
         res.Set(std::move(unbatchT));
       }else{
+        std::cout <<"comd "<< command::EnumNamesCommandValue(command.type) << " ... "<< std::endl;
         throw exception::NotImplementedException(
-          "This command is not implemented.",__FILE__
+          "This command is not implemented!",__FILE__
         );
       }
       return res;
     }
 
     std::unique_ptr<iroha::TransactionT>    encodeFlatbufferT(const event::Transaction& tx){
-      std::unique_ptr<iroha::TransactionT> res;
+      std::cout << "encodeFlatbufferT()\n";
+      std::unique_ptr<iroha::TransactionT> res(new iroha::TransactionT());
+      std::cout << "-=----\n";
+      std::cout << "senderPublicKey "<< tx.senderPublicKey << std::endl;
       res->sender = tx.senderPublicKey;
       res->hash   = tx.hash;
+      std::cout << "hash "<< tx.senderPublicKey << std::endl;
+      std::cout <<"tx command "<< command::EnumNamesCommandValue(tx.command.type) << " ... "<< std::endl;
+
       std::vector<std::unique_ptr<TxSignatureT>> tsTv;
       for(auto&& t: tx.txSignatures()){
-        std::unique_ptr<TxSignatureT> ts;
+        std::unique_ptr<TxSignatureT> ts(new TxSignatureT());
         ts->publicKey = t.publicKey;
         ts->signature = t.signature;
         tsTv.push_back( std::move(ts) );
+        res->txSignatures = std::move(tsTv);
+        std::cout << "loop txSignatures\n";
       }
       {
         auto command = encodeFlatbufferUnionT(tx.command);
@@ -410,16 +415,21 @@ namespace connection {
         }else{
           res->command.Set(std::move(*command.AsAdd()));
         }
+        std::cout << "Move command\n";
       }
-      res->txSignatures = std::move(tsTv);
       return std::move(res);
     }
 
     std::unique_ptr<iroha::ConsensusEventT> encodeFlatbufferT(const event::ConsensusEvent& event){
         std::unique_ptr<iroha::ConsensusEventT> res;
         std::vector<std::unique_ptr<TransactionT>> txTv;
+
+        std::cout <<"consensus command "<< \
+          command::EnumNamesCommandValue(event.transactions.at(0).command.type) << " ... "<< std::endl;
+
         for(auto&& tx: event.transactions){
-          txTv.push_back(std::move(encodeFlatbufferT(std::move(tx))));
+          std::cout << "se "<< tx.senderPublicKey << std::endl;
+          txTv.push_back(std::move(encodeFlatbufferT(tx)));
         }
         std::vector<std::unique_ptr<EventSignatureT>> esTv;
         for(auto&& e: event.eventSignatures()){
@@ -461,7 +471,6 @@ namespace connection {
         //void UnPackTo(ConsensusEventT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
 
         auto event = decodeFlatbufferT(*request.GetRoot()->UnPack());
-
 
         fbb_.Clear();
         auto stat_offset = CreateResponse(fbb_,
@@ -507,9 +516,13 @@ namespace connection {
               "localhost:50051",
               grpc::InsecureChannelCredentials()
             );
+
+            std::cout <<"send consensus command "<< \
+              command::EnumNamesCommandValue(event.transactions.at(0).command.type) << " ... "<< std::endl;
+
+
             auto stub = Sumeragi::NewStub(channel);
             grpc::ClientContext context;
-
             iroha::ConsensusEventT eventT;
             flatbuffers::FlatBufferBuilder fbb;
             fbb.Finish(iroha::ConsensusEvent::Pack( fbb, encodeFlatbufferT(event).get()));
