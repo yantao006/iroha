@@ -62,24 +62,6 @@ TEST(transaction_builder, create_domain_unset_members) {
   }, exception::transaction::UnsetBuildMembersException);
 }
 
-
-/***************************************************************************
-  Account
- ***************************************************************************/
-TEST(transaction_builder, create_account) {
-
-  const std::string ownerPublicKey = "ownerPublicKey";
-  const std::string name = "karin";
-
-  auto account = TransactionBuilder<object::Account>()
-    .setOwnerPublicKey(ownerPublicKey)
-    .setName(name)
-    .build();
-
-  ASSERT_STREQ(ownerPublicKey.c_str(), account.ownerPublicKey.c_str());
-  ASSERT_STREQ(name.c_str(), account.name.c_str());
-}
-
 /***************************************************************************
   Asset
  ***************************************************************************/
@@ -160,6 +142,52 @@ TEST(transaction_builder, create_asset_unset_members) {
     TransactionBuilder<object::Asset>()
       .build();
     }, exception::transaction::UnsetBuildMembersException);
+}
+
+
+/***************************************************************************
+  Account
+ ***************************************************************************/
+TEST(transaction_builder, create_account) {
+
+  const std::string ownerPublicKey = "ownerPublicKey";
+  const std::string name = "karin";
+
+  auto createDomain = [](std::vector<std::string>&& pubkeys, std::string&& name) {
+    std::cout << "1234567\n";
+    return TransactionBuilder<object::Domain>()
+      .setOwnerPublicKey(std::move(pubkeys))
+      .setName(std::move(name))
+      .build();
+  };
+
+  std::vector<object::Domain> assets = {
+    createDomain({"publicKey1", "publicKey2"}, "My domain"),
+    createDomain({"abcdefg"}, "domain name"),
+  };
+
+  auto account = TransactionBuilder<object::Account>()
+    .setOwnerPublicKey(ownerPublicKey)
+    .setName(name)
+    .setAssets(assets)
+    .build();
+
+  ASSERT_STREQ(ownerPublicKey.c_str(), account.ownerPublicKey.c_str());
+  ASSERT_STREQ(name.c_str(), account.name.c_str());
+
+  {
+    ASSERT_TRUE(account.assets[0].ownerPublicKey.size() == 2);
+    ASSERT_STREQ(account.assets[0].ownerPublicKey[0].c_str(), "publicKey1");
+    ASSERT_STREQ(account.assets[0].ownerPublicKey[1].c_str(), "publicKey2");
+    ASSERT_STREQ(account.assets[0].name.c_str(), "My domain");
+  }
+
+  {
+    ASSERT_TRUE(account.assets[1].ownerPublicKey.size() == 1);
+    ASSERT_STREQ(account.assets[1].ownerPublicKey[0].c_str(), "abcdefg");
+    ASSERT_STREQ(account.assets[1].name.c_str(), "domain name");
+  }
+
 }
 
 
