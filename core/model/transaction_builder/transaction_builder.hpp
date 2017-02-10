@@ -68,7 +68,7 @@ private:
   std::vector<std::string> enumerateUnsetMembers() {    
     std::vector<std::string> ret;
     if (_ownerPublicKey.empty()) ret.push_back("domain");
-    if (_name.empty())            ret.push_back("name");
+    if (_name.empty())           ret.push_back("name");
     return ret;
   }
 
@@ -215,6 +215,8 @@ class TransactionBuilder<object::SimpleAsset> {
 public:
 
   TransactionBuilder() = default;
+  TransactionBuilder(const TransactionBuilder&) = default;
+  TransactionBuilder(TransactionBuilder&&) = default;
 
   TransactionBuilder& setDomain(std::string domain) {
     _domain = std::move(domain);
@@ -267,7 +269,7 @@ public:
   TransactionBuilder(const TransactionBuilder&) = default;
   TransactionBuilder(TransactionBuilder&&) = default;
 
-  TransactionBuilder& setIp(std::string ip) {
+  TransactionBuilder& setIP(std::string ip) {
     _ip = ip;
     return *this;
   }
@@ -304,7 +306,7 @@ private:
 
   std::string _ip;
   std::string _publicKey;
-  double      _trustScore = -1;
+  double      _trustScore = -1; // what is the best way to use defaut value?
 };
 
 }
