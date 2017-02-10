@@ -50,16 +50,16 @@ TEST(transaction_builder, create_domain_unset_members) {
   ASSERT_THROW({TransactionBuilder<object::Domain>()
       .setOwnerPublicKey(ownerPublicKey)
       .build();
-  }, exception::transaction::UnsetBuildMembersException);
+  }, exception::transaction::UnsetBuildArgmentsException);
   
   ASSERT_THROW({TransactionBuilder<object::Domain>()
       .setName(name)
       .build();
-  }, exception::transaction::UnsetBuildMembersException);
+  }, exception::transaction::UnsetBuildArgmentsException);
   
   ASSERT_THROW({TransactionBuilder<object::Domain>()
       .build();
-  }, exception::transaction::UnsetBuildMembersException);
+  }, exception::transaction::UnsetBuildArgmentsException);
 }
 
 /***************************************************************************
@@ -111,37 +111,36 @@ TEST(transaction_builder, create_asset_unset_members) {
   ASSERT_THROW({TransactionBuilder<object::Asset>()
       .setName(name).setValue(value)
       .build();
-  }, exception::transaction::UnsetBuildMembersException);
+  }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::Asset>()
       .setDomain(domainId).setValue(value)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::Asset>()
       .setDomain(domainId).setName(name)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::Asset>()
       .setDomain(domainId)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::Asset>()
       .setName(name)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::Asset>()
       .setValue(value)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Asset>()
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 }
 
 
@@ -154,7 +153,6 @@ TEST(transaction_builder, create_account) {
   const std::string name = "karin";
 
   auto createDomain = [](std::vector<std::string>&& pubkeys, std::string&& name) {
-    std::cout << "1234567\n";
     return TransactionBuilder<object::Domain>()
       .setOwnerPublicKey(std::move(pubkeys))
       .setName(std::move(name))
@@ -212,7 +210,7 @@ TEST(transaction_builder, create_message_unset_members) {
   
   ASSERT_THROW({TransactionBuilder<object::Message>()
       .build();
-  }, exception::transaction::UnsetBuildMembersException);
+  }, exception::transaction::UnsetBuildArgmentsException);
 }
 
 /***************************************************************************
@@ -246,37 +244,36 @@ TEST(transaction_builder, create_simpleAsset_unset_members) {
   ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .setName(name).setValue(value)
       .build();
-  }, exception::transaction::UnsetBuildMembersException);
+  }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .setDomain(domainId).setValue(value)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .setDomain(domainId).setName(name)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .setDomain(domainId)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .setName(name)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
   ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .setValue(value)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::SimpleAsset>()
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 }
 
 
@@ -312,44 +309,37 @@ TEST(transaction_builder, create_peer_unset_members) {
     .setTrustScore(trustScore)
     .build();
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .setPublicKey(publicKey).setTrustScore(trustScore)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .setIP(ip).setTrustScore(trustScore)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .setIP(ip).setPublicKey(publicKey)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .setIP(ip)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .setPublicKey(publicKey)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .setTrustScore(trustScore)
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 
-  ASSERT_THROW({
-    TransactionBuilder<object::Peer>()
+  ASSERT_THROW({TransactionBuilder<object::Peer>()
       .build();
-    }, exception::transaction::UnsetBuildMembersException);
+    }, exception::transaction::UnsetBuildArgmentsException);
 }

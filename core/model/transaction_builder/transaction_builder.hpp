@@ -57,7 +57,7 @@ public:
   object::Domain build() {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
-      throw exception::transaction::UnsetBuildMembersException("object::Domain", unsetMembers);
+      throw exception::transaction::UnsetBuildArgmentsException("object::Domain", unsetMembers);
     }
 
     return object::Domain(_ownerPublicKey, _name);
@@ -106,7 +106,7 @@ public:
   object::Account build() {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
-      throw exception::transaction::UnsetBuildMembersException("object::Account", unsetMembers);
+      throw exception::transaction::UnsetBuildArgmentsException("object::Account", unsetMembers);
     }
     return object::Account(_ownerPublicKey, _name, _assets);
   }
@@ -156,7 +156,7 @@ public:
 
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
-      throw exception::transaction::UnsetBuildMembersException("object::Asset", unsetMembers);
+      throw exception::transaction::UnsetBuildArgmentsException("object::Asset", unsetMembers);
     }
 
     return object::Asset(_domain, _name, _value);
@@ -197,7 +197,7 @@ public:
 
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
-      throw exception::transaction::UnsetBuildMembersException("object::Message", unsetMembers);
+      throw exception::transaction::UnsetBuildArgmentsException("object::Message", unsetMembers);
     }
 
     return object::Message(_text);
@@ -244,7 +244,7 @@ public:
 
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
-      throw exception::transaction::UnsetBuildMembersException("object::SimpleAsset", unsetMembers);
+      throw exception::transaction::UnsetBuildArgmentsException("object::SimpleAsset", unsetMembers);
     }
 
     return object::SimpleAsset(_domain, _name, _value);
@@ -295,7 +295,7 @@ public:
 
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
-      throw exception::transaction::UnsetBuildMembersException("object::Peer", unsetMembers);
+      throw exception::transaction::UnsetBuildArgmentsException("object::Peer", unsetMembers);
     }
 
     return object::Peer(_ip, _publicKey, _trustScore);

@@ -55,10 +55,8 @@ namespace exception {
   }  // namespace crypto
 
   namespace transaction {
-    UnsetBuildMembersException::UnsetBuildMembersException(
-      const std::string& buildTarget,
-      const std::string& unsetMembers
-    ) : std::domain_error(unsetMembers) {
+    UnsetBuildArgmentsException::UnsetBuildArgmentsException(const std::string& buildTarget, const std::string& unsetMembers):
+      std::domain_error("UnsetBuildArgmentsException: argments " + unsetMembers) {
     }
   }  // namespace transaction
 }  // namespace exception

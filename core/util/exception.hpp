@@ -58,9 +58,9 @@ namespace exception {
   }
 
   namespace transaction {
-    class UnsetBuildMembersException : public std::domain_error {
+    class UnsetBuildArgmentsException : public std::domain_error {
     public:
-      UnsetBuildMembersException(const std::string&, const std::string&);
+      UnsetBuildArgmentsException(const std::string&, const std::string&);
     };
   }
 
