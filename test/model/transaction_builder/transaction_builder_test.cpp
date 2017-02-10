@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 #include "../../../core/model/transaction_builder/transaction_builder.hpp"
+#include "../../../core/util/exception.hpp"
 
 using transaction::TransactionBuilder;
 
@@ -40,17 +41,27 @@ TEST(transaction_builder, create_domain) {
 
   ASSERT_STREQ(name.c_str(), domain.name.c_str());
 }
-/*
+
 TEST(transaction_builder, create_domain_unset_members) {
   
   const std::vector<std::string> ownerPublicKey = {"publicKey1", "publicKey2"};
-  ASSERT_THROW(
-    auto domain = TransactionBuilder<object::Domain>()
+  const std::string name = "My domain";
+
+  ASSERT_THROW({TransactionBuilder<object::Domain>()
       .setOwnerPublicKey(ownerPublicKey)
       .build();
-  );
+  }, exception::transaction::UnsetBuildMembersException);
+  
+  ASSERT_THROW({TransactionBuilder<object::Domain>()
+      .setName(name)
+      .build();
+  }, exception::transaction::UnsetBuildMembersException);
+  
+  ASSERT_THROW({TransactionBuilder<object::Domain>()
+      .build();
+  }, exception::transaction::UnsetBuildMembersException);
 }
-*/
+
 
 /***************************************************************************
   Account
@@ -76,7 +87,11 @@ TEST(transaction_builder, create_asset) {
 
   const std::string domainId = "domainId";
   const std::string name = "karin";
-  const object::AssetValueT value({{"key1", object::BaseObject("val1")}, {"key2", object::BaseObject(123.456f)}});
+
+  object::AssetValueT value({{"key1", object::BaseObject("val1")}, {"key2", object::BaseObject(123.456f)}});
+
+  ASSERT_TRUE(static_cast<std::string>(value["key1"]) == static_cast<std::string>("val1"));
+  ASSERT_TRUE(static_cast<float>(value["key2"]) == 123.456f);
 
   auto asset = TransactionBuilder<object::Asset>()
     .setDomain(domainId)
@@ -104,6 +119,49 @@ TEST(transaction_builder, create_asset) {
   }
 }
 
+TEST(transaction_builder, create_asset_unset_members) {
+
+  const std::string domainId = "domainId";
+  const std::string name = "karin";
+
+  object::AssetValueT value({{"key1", object::BaseObject("val1")}, {"key2", object::BaseObject(123.456f)}});
+
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
+      .setName(name).setValue(value)
+      .build();
+  }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
+      .setDomain(domainId).setValue(value)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
+      .setDomain(domainId).setName(name)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
+      .setDomain(domainId)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
+      .setName(name)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::Asset>()
+      .setValue(value)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Asset>()
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+}
+
 
 /***************************************************************************
   Message
@@ -119,6 +177,15 @@ TEST(transaction_builder, create_message) {
   ASSERT_STREQ(text.c_str(), message.text.c_str());
 }
 
+TEST(transaction_builder, create_message_unset_members) {
+
+  const std::string domainId = "domainId";
+  const std::string name = "karin";
+  
+  ASSERT_THROW({TransactionBuilder<object::Message>()
+      .build();
+  }, exception::transaction::UnsetBuildMembersException);
+}
 
 /***************************************************************************
   SimpleAsset
@@ -129,6 +196,8 @@ TEST(transaction_builder, create_simpleAsset) {
   const std::string name = "karin";
   const object::BaseObject value(12345);
 
+  ASSERT_TRUE(static_cast<int>(value) == 12345);
+  
   auto simpleAsset = TransactionBuilder<object::SimpleAsset>()
     .setDomain(domainId)
     .setName(name)
@@ -138,6 +207,48 @@ TEST(transaction_builder, create_simpleAsset) {
   ASSERT_STREQ(domainId.c_str(), simpleAsset.domain.c_str());
   ASSERT_STREQ(name.c_str(), simpleAsset.name.c_str());
   ASSERT_TRUE(static_cast<int>(value) == static_cast<int>(simpleAsset.value));
+}
+
+TEST(transaction_builder, create_simpleAsset_unset_members) {
+
+  const std::string domainId = "domainId";
+  const std::string name = "karin";
+  const object::BaseObject value(12345);
+
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
+      .setName(name).setValue(value)
+      .build();
+  }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
+      .setDomain(domainId).setValue(value)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
+      .setDomain(domainId).setName(name)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
+      .setDomain(domainId)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
+      .setName(name)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({TransactionBuilder<object::SimpleAsset>()
+      .setValue(value)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::SimpleAsset>()
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
 }
 
 
@@ -159,4 +270,58 @@ TEST(transaction_builder, create_peer) {
   ASSERT_STREQ(ip.c_str(), peer.getIP().c_str());
   ASSERT_STREQ(publicKey.c_str(), peer.getPublicKey().c_str());
   ASSERT_TRUE(trustScore == peer.getTrustScore());
+}
+
+TEST(transaction_builder, create_peer_unset_members) {
+
+  const std::string ip = "111.111.111.111";
+  const std::string publicKey = "publicKey";
+  const double trustScore = 123.123456;
+
+  auto peer = TransactionBuilder<object::Peer>()
+    .setIP(ip)
+    .setPublicKey(publicKey)
+    .setTrustScore(trustScore)
+    .build();
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .setPublicKey(publicKey).setTrustScore(trustScore)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .setIP(ip).setTrustScore(trustScore)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .setIP(ip).setPublicKey(publicKey)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .setIP(ip)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .setPublicKey(publicKey)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .setTrustScore(trustScore)
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
+
+  ASSERT_THROW({
+    TransactionBuilder<object::Peer>()
+      .build();
+    }, exception::transaction::UnsetBuildMembersException);
 }
