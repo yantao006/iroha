@@ -19,26 +19,24 @@ limitations under the License.
 #define CORE_DOMAIN_OBJECTS_DOMAIN_HPP_
 
 #include <string>
+#include <vector>
 
 namespace object {
 
 class Domain{
 public:
-    std::string ownerPublicKey;
+    std::vector<std::string> ownerPublicKey;
     std::string name;
 
     explicit Domain(
-        std::string&& ownerPublicKey,
-        std::string&& name
+        std::vector<std::string> ownerPublicKey,
+        std::string name
     ):
-        ownerPublicKey(ownerPublicKey),
-        name(name)
+        ownerPublicKey(std::move(ownerPublicKey)),
+        name(std::move(name))
     {}
 
-    explicit Domain():
-        ownerPublicKey(""),
-        name("")
-    {}
+    Domain() = default;
 };
 
 };  // namespace domain

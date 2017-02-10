@@ -20,13 +20,15 @@ limitations under the License.
 
 #include <string>
 #include <cstdint>
+#include <vector>
+#include <tuple>
 
 namespace object {
 
     class Account {
 
     public:
-        std::string publicKey;
+        std::string ownerPublicKey;
         std::string name;
 
         std::vector<
@@ -34,28 +36,28 @@ namespace object {
         > assets;
 
         explicit Account():
-            publicKey(""),
+            ownerPublicKey(""),
             name("")
         {}
 
         explicit Account(
-            std::string publicKey,
+            std::string ownerPublicKey,
             std::string name,
             std::vector<
                 std::tuple<std::string, std::int64_t>
             > assets
         ):
-            publicKey(std::move(publicKey)),
+            ownerPublicKey(std::move(ownerPublicKey)),
             name(std::move(name)),
             assets(std::move(assets))
         {}
 
         explicit Account(
-            std::string publicKey,
+            std::string ownerPublicKey,
             std::string name,
             std::tuple<std::string, std::int64_t> asset
         ):
-            publicKey(std::move(publicKey)),
+            ownerPublicKey(std::move(ownerPublicKey)),
             name(std::move(name))
         {
             assets.push_back(std::move(asset));
@@ -63,10 +65,10 @@ namespace object {
 
 
         explicit Account(
-            std::string publicKey,
+            std::string ownerPublicKey,
             std::string name
         ):
-            publicKey(std::move(publicKey)),
+            ownerPublicKey(std::move(ownerPublicKey)),
             name(std::move(name))
         {}
 
