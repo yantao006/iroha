@@ -22,6 +22,7 @@ limitations under the License.
 #include <cstdint>
 #include <vector>
 #include <tuple>
+#include "domain.hpp"
 
 namespace object {
 
@@ -31,15 +32,17 @@ namespace object {
         std::string ownerPublicKey;
         std::string name;
 
+        std::vector<object::Domain> assets;
+/*
         std::vector<
             std::tuple<std::string, std::int64_t>
         > assets;
-
+*/
         explicit Account():
             ownerPublicKey(""),
             name("")
         {}
-
+/*
         explicit Account(
             std::string ownerPublicKey,
             std::string name,
@@ -62,8 +65,7 @@ namespace object {
         {
             assets.push_back(std::move(asset));
         }
-
-
+*/
         explicit Account(
             std::string ownerPublicKey,
             std::string name
@@ -72,7 +74,15 @@ namespace object {
             name(std::move(name))
         {}
 
-
+        explicit Account(
+            std::string ownerPublicKey,
+            std::string name,
+            std::vector<object::Domain> assets
+        ):
+            ownerPublicKey(std::move(ownerPublicKey)),
+            name(std::move(name)),
+            assets(std::move(assets))
+        {}
 
 
     };
