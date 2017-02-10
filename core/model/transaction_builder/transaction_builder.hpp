@@ -65,10 +65,10 @@ public:
 
 private:
 
-  std::vector<std::string> enumerateUnsetMembers() {    
-    std::vector<std::string> ret;
-    if (_ownerPublicKey.empty()) ret.push_back("domain");
-    if (_name.empty())           ret.push_back("name");
+  std::string enumerateUnsetMembers() {    
+    std::string ret;
+    if (_ownerPublicKey.empty()) ret += " ownerPublicKey";
+    if (_name.empty())           ret += " name";
     return ret;
   }
 
@@ -98,25 +98,32 @@ public:
     return *this;
   }
 
+  TransactionBuilder& setAssets(std::vector<object::Domain> assets) {
+    _assets = std::move(assets);
+    return *this;
+  }
+
   object::Account build() {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
       throw exception::transaction::UnsetBuildMembersException("object::Account", unsetMembers);
     }
-    return object::Account(_ownerPublicKey, _name);
+    return object::Account(_ownerPublicKey, _name, _assets);
   }
 
 private:
 
-  std::vector<std::string> enumerateUnsetMembers() {
-    std::vector<std::string> ret;
-    if (_ownerPublicKey.empty())  ret.push_back("ownerPublicKey");
-    if (_name.empty())            ret.push_back("name");
+  std::string enumerateUnsetMembers() {
+    std::string ret;
+    if (_ownerPublicKey.empty())  ret += " ownerPublicKey";
+    if (_name.empty())            ret += " name";
+    if (_assets.empty())          ret += " assets";
     return ret;
   }
 
   std::string _ownerPublicKey;
   std::string _name;
+  std::vector<object::Domain> _assets;
 };
 
 /*****************************************************************************
@@ -157,11 +164,11 @@ public:
 
 private:
 
-  std::vector<std::string> enumerateUnsetMembers() {
-    std::vector<std::string> ret;
-    if (_domain.empty())  ret.push_back("domain");
-    if (_name.empty())    ret.push_back("name");
-    if (_value.empty())   ret.push_back("value");
+  std::string enumerateUnsetMembers() {
+    std::string ret;
+    if (_domain.empty())  ret += " domain";
+    if (_name.empty())    ret += " name";
+    if (_value.empty())   ret += " value";
     return ret;
   }
 
@@ -198,9 +205,9 @@ public:
 
 private:
 
-  std::vector<std::string> enumerateUnsetMembers() {
-    std::vector<std::string> ret;
-    if (_text.empty()) ret.push_back("text");
+  std::string enumerateUnsetMembers() {
+    std::string ret;
+    if (_text.empty()) ret += " text";
     return ret;
   }
 
@@ -245,11 +252,11 @@ public:
 
 private:
 
-  std::vector<std::string> enumerateUnsetMembers() {
-    std::vector<std::string> ret;
-    if (_domain.empty())  ret.push_back("domain");
-    if (_name.empty())    ret.push_back("name");
-    if (_value.type() == object::BaseObject::Object_type::NONE) ret.push_back("value");
+  std::string enumerateUnsetMembers() {
+    std::string ret;
+    if (_domain.empty())  ret += " domain";
+    if (_name.empty())    ret += " name";
+    if (_value.type() == object::BaseObject::Object_type::NONE) ret += " value";
     return ret;
   }
 
@@ -296,11 +303,11 @@ public:
 
 private:
 
-  std::vector<std::string> enumerateUnsetMembers() {
-    std::vector<std::string> ret;
-    if (_ip.empty())        ret.push_back("ip");
-    if (_publicKey.empty()) ret.push_back("publicKey");
-    if (_trustScore < 0)    ret.push_back("trustScore");
+  std::string enumerateUnsetMembers() {
+    std::string ret;
+    if (_ip.empty())        ret += " ip";
+    if (_publicKey.empty()) ret += " publicKey";
+    if (_trustScore < 0)    ret += " trustScore";
     return ret;
   }
 
