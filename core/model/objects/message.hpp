@@ -28,6 +28,8 @@ class Message{
 public:
     std::string text;
 
+    Message() = default;
+    explicit Message(const char* text): text(text) {}
     explicit Message(std::string text): text(text) {}
 };
 

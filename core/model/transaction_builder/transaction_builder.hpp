@@ -24,4 +24,32 @@ limitations under the License.
 #include "add/add_peer_builder.hpp"
 #include "add/add_simple_asset_builder.hpp"
 
+#include "transfer/transfer_domain_builder.hpp"
+#include "transfer/transfer_account_builder.hpp"
+#include "transfer/transfer_asset_builder.hpp"
+#include "transfer/transfer_message_builder.hpp"
+#include "transfer/transfer_peer_builder.hpp"
+#include "transfer/transfer_simple_asset_builder.hpp"
+
+#include "update/update_domain_builder.hpp"
+#include "update/update_account_builder.hpp"
+#include "update/update_asset_builder.hpp"
+#include "update/update_message_builder.hpp"
+#include "update/update_peer_builder.hpp"
+#include "update/update_simple_asset_builder.hpp"
+
+#include "remove/remove_domain_builder.hpp"
+#include "remove/remove_account_builder.hpp"
+#include "remove/remove_asset_builder.hpp"
+#include "remove/remove_message_builder.hpp"
+#include "remove/remove_peer_builder.hpp"
+#include "remove/remove_simple_asset_builder.hpp"
+
+#include "../objects/account.hpp"
+#include "../objects/asset.hpp"
+#include "../objects/domain.hpp"
+#include "../objects/message.hpp"
+#include "../objects/peer.hpp"
+#include "../objects/simple_asset.hpp"
+
 #endif

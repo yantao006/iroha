@@ -13,20 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef CORE_MODEL_TRANSACTION_BUILDER_ADD_DOMAIN_HPP
-#define CORE_MODEL_TRANSACTION_BUILDER_ADD_DOMAIN_HPP
+#ifndef CORE_MODEL_TRANSACTION_BUILDER_REMOVE_SIMPLE_ASSET_HPP
+#define CORE_MODEL_TRANSACTION_BUILDER_REMOVE_SIMPLE_ASSET_HPP
 
 #include "../transaction_builder_base.hpp"
 #include "../../transaction.hpp"
-#include "../../commands/add.hpp"
-#include "../../type_signatures/add.hpp"
-#include "../../objects/domain.hpp"
-#include <iostream>
+#include "../../type_signatures/remove.hpp"
+#include "../../objects/simple_asset.hpp"
 
 namespace transaction {
 
 template <>
-class TransactionBuilder<type_signatures::Add<object::Domain>> {
+class TransactionBuilder<type_signatures::Remove<object::SimpleAsset>> {
  public:
   TransactionBuilder() = default;
   TransactionBuilder(const TransactionBuilder&) = default;
@@ -34,21 +32,23 @@ class TransactionBuilder<type_signatures::Add<object::Domain>> {
 
   TransactionBuilder& setSender(std::string sender) {
     if (_isSetSender) {
-      throw std::domain_error(std::string("Duplicate sender in ") +
-                              "add/add_domain_builder_template.hpp");
+      throw std::domain_error(
+          std::string("Duplicate sender in ") +
+          "remove/remove_simple_asset_builder_template.hpp");
     }
     _isSetSender = true;
     _sender = std::move(sender);
     return *this;
   }
 
-  TransactionBuilder& setDomain(object::Domain object) {
-    if (_isSetDomain) {
-      throw std::domain_error(std::string("Duplicate ") + "Domain" + " in " +
-                              "add/add_domain_builder_template.hpp");
+  TransactionBuilder& setSimpleAsset(object::SimpleAsset object) {
+    if (_isSetSimpleAsset) {
+      throw std::domain_error(
+          std::string("Duplicate ") + "SimpleAsset" + " in " +
+          "remove/remove_simple_asset_builder_template.hpp");
     }
-    _isSetDomain = true;
-    _domain = std::move(object);
+    _isSetSimpleAsset = true;
+    _simpleAsset = std::move(object);
     return *this;
   }
 
@@ -56,24 +56,24 @@ class TransactionBuilder<type_signatures::Add<object::Domain>> {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
       throw exception::transaction::UnsetBuildArgmentsException(
-          "Add<object::Domain>", unsetMembers);
+          "Remove<object::SimpleAsset>", unsetMembers);
     }
-    return transaction::Transaction(_sender, command::Add(_domain));
+    return transaction::Transaction(_sender, command::Remove(_simpleAsset));
   }
 
  private:
   std::string enumerateUnsetMembers() {
     std::string ret;
     if (not _isSetSender) ret += std::string(" ") + "sender";
-    if (not _isSetDomain) ret += std::string(" ") + "Domain";
+    if (not _isSetSimpleAsset) ret += std::string(" ") + "SimpleAsset";
     return ret;
   }
 
   std::string _sender;
-  object::Domain _domain;
+  object::SimpleAsset _simpleAsset;
 
   bool _isSetSender = false;
-  bool _isSetDomain = false;
+  bool _isSetSimpleAsset = false;
 };
 }
 

@@ -5,13 +5,6 @@
 
 namespace type_signatures {
 
-namespace detail {
-template <class T, class... Rest>
-struct head {
-  using type = T;
-};
-}
-
 template <class... Ts>
 struct Add {
   using type = typename detail::head< Ts... >::type;

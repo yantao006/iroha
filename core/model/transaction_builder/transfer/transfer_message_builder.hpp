@@ -13,20 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef CORE_MODEL_TRANSACTION_BUILDER_ADD_DOMAIN_HPP
-#define CORE_MODEL_TRANSACTION_BUILDER_ADD_DOMAIN_HPP
+#ifndef CORE_MODEL_TRANSACTION_BUILDER_TRANSFER_MESSAGE_HPP
+#define CORE_MODEL_TRANSACTION_BUILDER_TRANSFER_MESSAGE_HPP
 
 #include "../transaction_builder_base.hpp"
 #include "../../transaction.hpp"
-#include "../../commands/add.hpp"
-#include "../../type_signatures/add.hpp"
-#include "../../objects/domain.hpp"
-#include <iostream>
+#include "../../type_signatures/transfer.hpp"
+#include "../../objects/message.hpp"
 
 namespace transaction {
 
 template <>
-class TransactionBuilder<type_signatures::Add<object::Domain>> {
+class TransactionBuilder<type_signatures::Transfer<object::Message>> {
  public:
   TransactionBuilder() = default;
   TransactionBuilder(const TransactionBuilder&) = default;
@@ -35,20 +33,30 @@ class TransactionBuilder<type_signatures::Add<object::Domain>> {
   TransactionBuilder& setSender(std::string sender) {
     if (_isSetSender) {
       throw std::domain_error(std::string("Duplicate sender in ") +
-                              "add/add_domain_builder_template.hpp");
+                              "transfer/transfer_message_builder_template.hpp");
     }
     _isSetSender = true;
     _sender = std::move(sender);
     return *this;
   }
 
-  TransactionBuilder& setDomain(object::Domain object) {
-    if (_isSetDomain) {
-      throw std::domain_error(std::string("Duplicate ") + "Domain" + " in " +
-                              "add/add_domain_builder_template.hpp");
+  TransactionBuilder& setReceiverPublicKey(std::string receiverPublicKey) {
+    if (_isSetReceiverPublicKey) {
+      throw std::domain_error(std::string("Duplicate receiverPublicKey in ") +
+                              "transfer/transfer_message_builder_template.hpp");
     }
-    _isSetDomain = true;
-    _domain = std::move(object);
+    _isSetReceiverPublicKey = true;
+    _receiverPublicKey = std::move(receiverPublicKey);
+    return *this;
+  }
+
+  TransactionBuilder& setMessage(object::Message object) {
+    if (_isSetMessage) {
+      throw std::domain_error(std::string("Duplicate ") + "Message" + " in " +
+                              "transfer/transfer_message_builder_template.hpp");
+    }
+    _isSetMessage = true;
+    _message = std::move(object);
     return *this;
   }
 
@@ -56,24 +64,29 @@ class TransactionBuilder<type_signatures::Add<object::Domain>> {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
       throw exception::transaction::UnsetBuildArgmentsException(
-          "Add<object::Domain>", unsetMembers);
+          "Transfer<object::Message>", unsetMembers);
     }
-    return transaction::Transaction(_sender, command::Add(_domain));
+    return transaction::Transaction(
+        _sender, command::Transfer(_message, _receiverPublicKey));
   }
 
  private:
   std::string enumerateUnsetMembers() {
     std::string ret;
     if (not _isSetSender) ret += std::string(" ") + "sender";
-    if (not _isSetDomain) ret += std::string(" ") + "Domain";
+    if (not _isSetReceiverPublicKey)
+      ret += std::string(" ") + "receiverPublicKey";
+    if (not _isSetMessage) ret += std::string(" ") + "Message";
     return ret;
   }
 
   std::string _sender;
-  object::Domain _domain;
+  std::string _receiverPublicKey;
+  object::Message _message;
 
   bool _isSetSender = false;
-  bool _isSetDomain = false;
+  bool _isSetReceiverPublicKey = false;
+  bool _isSetMessage = false;
 };
 }
 
