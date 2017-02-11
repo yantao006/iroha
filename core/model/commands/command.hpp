@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "../objects/object.hpp"
 #include "../../service/executor.hpp"
+#include "../../util/exception.hpp"
 
 #include "add.hpp"
 #include "batch.hpp"
@@ -35,7 +36,7 @@ namespace command {
 
 
   enum class CommandValueT : std::uint8_t {
-      null,
+      null = 0,
       add,
       batch,
       contract,
@@ -44,6 +45,24 @@ namespace command {
       unbatch,
       update
   };
+
+  inline const char *EnumNamesCommandValue(CommandValueT type) {
+    std::cout <<"EnumNamesCommandValue type: "<< (int)type << std::endl;
+    switch(type){
+      case CommandValueT::null:    return "Null";
+      case CommandValueT::add :    return "Add";
+      case CommandValueT::batch:   return "Batch";
+      case CommandValueT::contract:return "Contract";
+      case CommandValueT::remove:  return "Remove";
+      case CommandValueT::transfer:return "Transfer";
+      case CommandValueT::unbatch: return "Unbatch";
+      case CommandValueT::update:  return "Update";
+      default:
+      throw exception::NotImplementedException(
+        "Unknown value in EnumNamesCommandValue!",__FILE__
+      );
+    };
+  }
 
   // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
   struct Command {
@@ -55,10 +74,9 @@ namespace command {
           Unbatch*        unbatch;
           Update*         update;
 
-          CommandValueT type;
+          const CommandValueT commandType;
 
           Command();
-          Command(CommandValueT t);
           Command(const Add& rhs);
           Command(const Batch& rhs);
           Command(const Contract& rhs);
@@ -68,7 +86,7 @@ namespace command {
           Command(const Update& rhs);
 
           void execute(Executor&);
-          CommandValueT getCommandType();
+          CommandValueT getCommandType() const;
           std::string getHash();
           Object getObject() const;
 
