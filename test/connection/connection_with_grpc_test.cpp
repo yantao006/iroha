@@ -64,12 +64,14 @@ int main(int argc, char* argv[]){
     );
     std::cout << "Make Asset\n";
     auto add = command::Add(object::Object(asset));
-    std::cout << "Make Add ["<< (int)command::Command(add).getCommandType()<< "]\n";
+    std::cout << "Make Add [";
+    std::cout << command::EnumNamesCommandValue(command::Command(add).getCommandType());
+    std::cout << "]\n";
     auto tx = transaction::Transaction(
       senderPublicKey,
       command::Command(add)
     );
-    std::cout << "Make Add "<< (int)command::Command(add).type << "\n";
+    std::cout << "Make Add "<< (int)command::Command(add).getCommandType() << "\n";
     std::cout << "Make Tx\n";
     event::ConsensusEvent event(std::move(tx));
     std::cout << "Make Event\n";
