@@ -3,7 +3,7 @@
 
 #ifndef FLATBUFFERS_GENERATED_API_IROHA_H_
 #define FLATBUFFERS_GENERATED_API_IROHA_H_
-
+#include <iostream>
 #include "flatbuffers/flatbuffers.h"
 
 namespace iroha {
@@ -144,8 +144,17 @@ struct ObjectUnion {
   flatbuffers::NativeTable *table;
 
   ObjectUnion() : type(Object_NONE), table(nullptr) {}
+
+  template <typename T>
+  ObjectUnion(T&& value) : type(ObjectTraits<typename T::TableType>::enum_value) {
+    if (type != Object_NONE) {
+      table = new T(std::forward<T>(value));
+    }
+  }
+
   ObjectUnion(const ObjectUnion &);
-  ObjectUnion(ObjectUnion&&) = default;  
+  ObjectUnion(ObjectUnion&&) = default;
+  ObjectUnion &operator=(ObjectUnion&&) = default;
   ObjectUnion &operator=(const ObjectUnion &);
   ~ObjectUnion() { Reset(); }
 
@@ -254,7 +263,17 @@ struct CommandUnion {
   flatbuffers::NativeTable *table;
 
   CommandUnion() : type(Command_NONE), table(nullptr) {}
+
+  template <typename T>
+  CommandUnion(T&& value) : type(CommandTraits<typename T::TableType>::enum_value) {
+    if (type != Command_NONE) {
+      table = new T(std::forward<T>(value));
+    }
+  }
+
   CommandUnion(const CommandUnion &);
+  CommandUnion(CommandUnion&&) = default;
+  CommandUnion &operator=(CommandUnion&&) = default;
   CommandUnion &operator=(const CommandUnion &);
   ~CommandUnion() { Reset(); }
 
@@ -360,10 +379,12 @@ struct BaseObjectT : public flatbuffers::NativeTable {
   BaseObjectType type;
   std::string name;
   BaseObjectT()
-      : integer(0),
+      : text(""),
+        integer(0),
         boolean(false),
         decimal(0.0f),
-        type(BaseObjectType_None) {
+        type(BaseObjectType_None),
+        name("") {
   }
 };
 
@@ -578,6 +599,7 @@ inline flatbuffers::Offset<Asset> CreateAsset(
     bool isSingleAsset = false,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<BaseObject>>> objects = 0,
     flatbuffers::Offset<flatbuffers::String> smartContractName = 0) {
+  std::cout << "\033[1m\033[92m ---- CreateAsset -------- \033[0m\n";
   AssetBuilder builder_(_fbb);
   builder_.add_smartContractName(smartContractName);
   builder_.add_objects(objects);
@@ -594,6 +616,9 @@ inline flatbuffers::Offset<Asset> CreateAssetDirect(
     bool isSingleAsset = false,
     const std::vector<flatbuffers::Offset<BaseObject>> *objects = nullptr,
     const char *smartContractName = nullptr) {
+  std::cout << "\033[1m\033[92m ---- CreateAssetDirect -------- \033[0m\n";
+  if(objects == nullptr )
+    std::cout << "\033[1m\033[92m ---- yurushite -------- \033[0m\n";
   return CreateAsset(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
@@ -2055,11 +2080,17 @@ inline flatbuffers::Offset<Asset> Asset::Pack(flatbuffers::FlatBufferBuilder &_f
 inline flatbuffers::Offset<Asset> CreateAsset(flatbuffers::FlatBufferBuilder &_fbb, const AssetT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
+  std::cout << "\033[1m\033[92m ---- CreateAsset! -------- \033[0m\n";
   auto _name = _fbb.CreateString(_o->name);
+  std::cout << "\033[1m\033[92m ---- CreateAsset! name created -------- \033[0m\n";
   auto _domain = _fbb.CreateString(_o->domain);
+  std::cout << "\033[1m\033[92m ---- CreateAsset! domain created -------- \033[0m\n";
   auto _isSingleAsset = _o->isSingleAsset;
+  std::cout << "\033[1m\033[92m ---- CreateAsset! isSingle Asset created -------- \033[0m\n";
   auto _objects = _o->objects.size() ? _fbb.CreateVector<flatbuffers::Offset<BaseObject>>(_o->objects.size(), [&](size_t i) { return CreateBaseObject(_fbb, _o->objects[i].get(), _rehasher); }) : 0;
+  std::cout << "\033[1m\033[92m ---- CreateAsset! objects created -------- \033[0m\n";
   auto _smartContractName = _o->smartContractName.size() ? _fbb.CreateString(_o->smartContractName) : 0;
+  std::cout << "\033[1m\033[92m ---- CreateAsset! smartContract created -------- \033[0m\n";
   return CreateAsset(
       _fbb,
       _name,
