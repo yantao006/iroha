@@ -76,6 +76,7 @@ int main(int argc, char* argv[]){
     event::ConsensusEvent event(std::move(tx));
     std::cout << "Make Event\n";
     std::cout << "Start send\n";
+
     connection::send( config::PeerServiceConfig::getInstance().getMyIp(), event);
 
     usleep(3);

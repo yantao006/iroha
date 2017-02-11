@@ -162,14 +162,17 @@ namespace connection {
     }
 
     template<typename In,typename Out>
-    std::unique_ptr<Out>&& encodeFlatbufferT(const In& input){}
+    std::unique_ptr<Out> encodeFlatbufferT(const In& input){}
 
     template<typename In,typename Out>
     Out encodeFlatbufferUnionT(In&& input){}
 
-    std::unique_ptr<iroha::BaseObjectT>&& encodeFlatbufferT(const object::BaseObject& obj){
+    std::unique_ptr<iroha::BaseObjectT> encodeBaseObjectFlatbufferT(const std::string& name, const object::BaseObject& obj){
       std::unique_ptr<iroha::BaseObjectT> res(new iroha::BaseObjectT());
-      res->text = "default";
+
+      res->name = name;
+      res->text = "";res->integer = 0;res->boolean = false;res->decimal = 0.0f;
+
       if(obj.object_type == object::BaseObject::Object_type::STRING){
         res->text     = (std::string)obj;
       }else if(obj.object_type == object::BaseObject::Object_type::INTEGER){
@@ -189,18 +192,13 @@ namespace connection {
     ObjectUnion  encodeFlatbufferUnionT(const object::Object& obj){
       ObjectUnion res;
       if(obj.type == object::ObjectValueT::asset){
-        auto assetT = std::make_unique<AssetT>();
-        assetT->domain = "";
-        assetT->name   = "";
-        assetT->domain.assign(std::move(obj.asset->domain));
-        assetT->name.assign(std::move(obj.asset->name));
+        auto assetT = AssetT();
+        assetT.domain = obj.asset->domain;
+        assetT.name = obj.asset->name;
         for(auto&& o: obj.asset->value){
-          auto baseObj = encodeFlatbufferT(std::move(o.second));
-          baseObj->name   = "";
-          baseObj->name.assign(std::move(o.first));
-          assetT->objects.emplace_back(std::move(baseObj));
+          assetT.objects.emplace_back(encodeBaseObjectFlatbufferT( o.first, o.second));
         }
-        res.Set(std::move(*assetT));
+        res.Set(std::move(assetT));
       }else if(obj.type == object::ObjectValueT::domain){
         auto domainT = DomainT();
         throw exception::NotImplementedException(
@@ -363,11 +361,12 @@ namespace connection {
       return res;
     }
 
-    std::unique_ptr<iroha::TransactionT>&&   encodeFlatbufferT(const event::Transaction& tx){
+    std::unique_ptr<iroha::TransactionT>   encodeFlatbufferT(const event::Transaction& tx){
       std::cout << "\033[95m Tx event::Transaction \033[0m "<< tx.senderPublicKey << std::endl;
       std::unique_ptr<iroha::TransactionT> res(new iroha::TransactionT());
       res->sender = tx.senderPublicKey;
       res->hash   = tx.hash;
+
       std::vector<std::unique_ptr<TxSignatureT>> tsTv;
       for(auto&& t: tx.txSignatures()){
         auto ts = std::make_unique<TxSignatureT>();
@@ -378,44 +377,33 @@ namespace connection {
       }
       {
         auto command = encodeFlatbufferUnionT(tx.command);
-        if(command.AsAdd() == nullptr){
-          if(command.AsBatch() == nullptr){
-            if(command.AsContract() == nullptr){
-              if(command.AsRemove() == nullptr){
-                if(command.AsTransfer() == nullptr){
-                  if(command.AsUnbatch() == nullptr){
-                    if(command.AsUpdate() == nullptr){
-                      throw exception::NotImplementedException(
-                        "This object is not implemented.",__FILE__
-                      );
-                    }else{
-                      res->command.Set(std::move(*command.AsUpdate()));
-                    }
-                  }else{
-                    res->command.Set(std::move(*command.AsUnbatch()));
-                  }
-                }else{
-                  res->command.Set(std::move(*command.AsTransfer()));
-                }
-              }else{
-                res->command.Set(std::move(*command.AsRemove()));
-              }
-            }else{
-              res->command.Set(std::move(*command.AsContract()));
-            }
-          }else{
-            res->command.Set(std::move(*command.AsBatch()));
-          }
-        }else{
+        if(command.AsAdd()             != nullptr){
+          std::cout << "+++++++++++++++++++ Move Add\n";
           res->command.Set(std::move(*command.AsAdd()));
+          std::cout << "+++++++++++++++++++ Moved Add\n";
+        }else if(command.AsBatch()     != nullptr){
+          res->command.Set(std::move(*command.AsBatch()));
+        }else if(command.AsContract()  != nullptr){
+          res->command.Set(std::move(*command.AsContract()));
+        }else if(command.AsRemove()    != nullptr){
+          res->command.Set(std::move(*command.AsRemove()));
+        }else if(command.AsTransfer()  != nullptr){
+          res->command.Set(std::move(*command.AsTransfer()));
+        }else if(command.AsUnbatch()   != nullptr){
+          res->command.Set(std::move(*command.AsUnbatch()));
+        }else if(command.AsUpdate()    != nullptr){
+          res->command.Set(std::move(*command.AsUpdate()));
+        }else{
+          throw exception::NotImplementedException(
+            "This object is not implemented.",__FILE__
+          );
         }
-        std::cout << "Move command\n";
       }
       return std::move(res);
     }
 
-    std::unique_ptr<iroha::ConsensusEventT>&& encodeFlatbufferT(const event::ConsensusEvent& event){
-        std::unique_ptr<iroha::ConsensusEventT> res;
+    std::unique_ptr<iroha::ConsensusEventT> encodeFlatbufferT(const event::ConsensusEvent& event){
+        std::unique_ptr<iroha::ConsensusEventT> res(new iroha::ConsensusEventT());
 
         std::cout <<"consensus command ";
         for(auto&& tx: event.transactions){
@@ -426,12 +414,11 @@ namespace connection {
 
         std::cout <<"event.eventSignatures start\n";
         for(auto&& e: event.eventSignatures()){
-          std::unique_ptr<EventSignatureT> es;
+          std::unique_ptr<EventSignatureT> es(new EventSignatureT());
           es->publicKey = e.publicKey;
           es->signature = e.signature;
           res->eventSignatures.emplace_back( std::move(es) );
         }
-
         std::cout <<"event.eventSignatures end\n";
         std::cout <<"moved\n";
         res->state = State::State_Undetermined;
@@ -444,7 +431,6 @@ namespace connection {
     public:
 
       ::grpc::Status Torii(::grpc::ClientContext* context, const flatbuffers::BufferRef<Request>& request, flatbuffers::BufferRef<Response>* response){
-
           // ToDo convertor
           fbb_.Clear();
           auto stat_offset = CreateResponse(fbb_,
