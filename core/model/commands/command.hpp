@@ -65,7 +65,7 @@ namespace command {
   }
 
   // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
-  union Command {
+  struct Command {
           Add*            add;
           Batch*          batch;
           Contract*       contract;
@@ -74,10 +74,9 @@ namespace command {
           Unbatch*        unbatch;
           Update*         update;
 
-          CommandValueT type;
+          const CommandValueT commandType;
 
           Command();
-          Command(CommandValueT t);
           Command(const Add& rhs);
           Command(const Batch& rhs);
           Command(const Contract& rhs);
@@ -87,7 +86,7 @@ namespace command {
           Command(const Update& rhs);
 
           void execute(Executor&);
-          CommandValueT getCommandType();
+          CommandValueT getCommandType() const;
           std::string getHash();
           Object getObject() const;
 

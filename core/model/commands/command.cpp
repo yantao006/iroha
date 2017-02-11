@@ -27,78 +27,78 @@ limitations under the License.
 namespace command {
 
     // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
-    Command::Command() = default;	// ctor for ValueT::null
+    Command::Command():
+      commandType(CommandValueT::null)
+    {};	// ctor for ValueT::null
 
     Command::Command(const Add& rhs):
-      type(CommandValueT::add)
+      commandType(CommandValueT::add)
     {
-        std::cout << EnumNamesCommandValue(type) << std::endl;
-        this->type = CommandValueT::add;
         add = new Add(rhs);
     }
     Command::Command(const Batch& rhs):
-      type(CommandValueT::batch)
+      commandType(CommandValueT::batch)
     {
         batch = new Batch(rhs);
     }
     Command::Command(const Contract& rhs):
-      type(CommandValueT::contract)
+      commandType(CommandValueT::contract)
     {
         contract = new Contract(rhs);
     }
     Command::Command(const Remove& rhs):
-      type(CommandValueT::remove)
+      commandType(CommandValueT::remove)
     {
         remove = new Remove(rhs);
     }
     Command::Command(const Transfer& rhs):
-      type(CommandValueT::transfer)
+      commandType(CommandValueT::transfer)
     {
         transfer = new Transfer(rhs);
     }
     Command::Command(const Unbatch& rhs):
-      type(CommandValueT::unbatch)
+      commandType(CommandValueT::unbatch)
     {
         unbatch = new Unbatch(rhs);
     }
     Command::Command(const Update& rhs):
-      type(CommandValueT::update)
+      commandType(CommandValueT::update)
     {
         update = new Update(rhs);
     }
 
     Add*        Command::AsAdd(){
-        return type == CommandValueT::add?
+        return commandType == CommandValueT::add?
           add : nullptr;
     }
 
     Batch*      Command::AsBatch(){
-      return type == CommandValueT::batch?
+      return commandType == CommandValueT::batch?
         batch : nullptr;
     }
     Contract*   Command::AsContract(){
-      return type == CommandValueT::contract?
+      return commandType == CommandValueT::contract?
         contract : nullptr;
     }
     Remove*     Command::AsRemove(){
-      return type == CommandValueT::remove?
+      return commandType == CommandValueT::remove?
         remove : nullptr;
     }
     Transfer*   Command::AsTransfer(){
-      return type == CommandValueT::transfer?
+      return commandType == CommandValueT::transfer?
         transfer : nullptr;
     }
     Unbatch*    Command::AsUnbatch(){
-      return type == CommandValueT::unbatch?
+      return commandType == CommandValueT::unbatch?
         unbatch : nullptr;
     }
     Update*     Command::AsUpdate(){
-      return type == CommandValueT::update?
+      return commandType == CommandValueT::update?
         update : nullptr;
     }
 
     Object Command::getObject() const{
-      switch (type) {
+      switch (commandType) {
           case CommandValueT::add: {
               return add->object;
           }
@@ -129,7 +129,7 @@ namespace command {
           }
 
           default: {
-              logger::fatal("model object") << "Unexpected ValueT: " << static_cast<std::uint8_t>(type);
+              logger::fatal("model object") << "Unexpected ValueT: " << static_cast<std::uint8_t>(commandType);
               exit(EXIT_FAILURE);
           }
       }
@@ -139,8 +139,8 @@ namespace command {
 
     }
 
-    CommandValueT Command::getCommandType(){
-      return this->type;
+    CommandValueT Command::getCommandType() const {
+      return this->commandType;
     }
 
     std::string Command::getHash(){
