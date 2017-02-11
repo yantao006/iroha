@@ -12,7 +12,9 @@ link_directories(
 )
 
 add_executable(transaction_builder_test
-    transaction_builder_test.cpp
+    transaction_builder_add_test.cpp
+    transaction_builder_transfer_test.cpp
+    transaction_builder_update_remove_test.cpp
 )
 target_link_libraries(transaction_builder_test
     transaction
