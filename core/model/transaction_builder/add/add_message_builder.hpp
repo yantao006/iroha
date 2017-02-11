@@ -13,39 +13,66 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "../../commands/add.hpp"
+#ifndef CORE_MODEL_TRANSACTION_BUILDER_ADD_MESSAGE_HPP
+#define CORE_MODEL_TRANSACTION_BUILDER_ADD_MESSAGE_HPP
+
+#include "../transaction_builder_base.hpp"
+#include "../../transaction.hpp"
+#include "../../type_signatures/add.hpp"
 #include "../../objects/message.hpp"
 
+namespace transaction {
+
 template <>
-class TransactionBuilder<Add<object::Message>> {
+class TransactionBuilder<type_signatures::Add<object::Message>> {
  public:
   TransactionBuilder() = default;
   TransactionBuilder(const TransactionBuilder&) = default;
   TransactionBuilder(TransactionBuilder&&) = default;
+
   TransactionBuilder& setSender(std::string sender) {
+    if (_isSetSender) {
+      throw std::domain_error(std::string("Duplicate sender in ") +
+                              "add/add_message_builder_template.hpp");
+    }
+    _isSetSender = true;
     _sender = std::move(sender);
     return *this;
   }
+
   TransactionBuilder& setMessage(object::Message object) {
-    _object = std::move(object);
+    if (_isSetMessage) {
+      throw std::domain_error(std::string("Duplicate ") + "Message" + " in " +
+                              "add/add_message_builder_template.hpp");
+    }
+    _isSetMessage = true;
+    _message = std::move(object);
     return *this;
   }
-  object::Message build() {
+
+  transaction::Transaction build() {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
       throw exception::transaction::UnsetBuildArgmentsException(
           "Add<object::Message>", unsetMembers);
     }
-    return _object;
+    return transaction::Transaction(_sender, command::Add(_message));
   }
 
  private:
   std::string enumerateUnsetMembers() {
     std::string ret;
-    if (_sender.empty()) ret += " " + "sender";
-    if (_object.empty()) ret += " " + "object";
+    if (not _isSetSender) ret += std::string(" ") + "sender";
+    if (not _isSetMessage) ret += std::string(" ") + "Message";
     return ret;
   }
+
   std::string _sender;
-  object::Message _object;
+  object::Message _message;
+
+  bool _isSetSender = false;
+  bool _isSetMessage = false;
 };
+}
+
+#endif

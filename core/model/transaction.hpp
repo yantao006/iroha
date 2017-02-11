@@ -56,7 +56,9 @@ class Transaction {
         timestamp(datetime::unixtime()),
         senderPublicKey(senderPublicKey),
         command(std::move(cmd))
-    {}
+    {
+        cmd.AsAdd()->object.type;
+    }
 
     Transaction():
         timestamp(datetime::unixtime())

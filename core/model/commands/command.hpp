@@ -46,7 +46,7 @@ namespace command {
   };
 
   // There is kind of Currency, Asset,Domain,Account,Message and Peer. Associate SmartContract with Asset.
-  union Command {
+  struct Command {
           Add*            add;
           Batch*          batch;
           Contract*       contract;

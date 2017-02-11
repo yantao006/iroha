@@ -14,14 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef CORE_MODEL_TRANSACTION_BUILDER_HPP
-#define CORE_MODEL_TRANSACTION_BUILDER_HPP
+#ifndef CORE_MODEL_TRANSACTION_BUILDER_BASE_HPP
+#define CORE_MODEL_TRANSACTION_BUILDER_BASE_HPP
 
-#include "add/add_domain_builder.hpp"
-#include "add/add_account_builder.hpp"
-#include "add/add_asset_builder.hpp"
-#include "add/add_message_builder.hpp"
-#include "add/add_peer_builder.hpp"
-#include "add/add_simple_asset_builder.hpp"
+namespace transaction {
+
+/*
+template <template<class> class CommandT>
+class TransactionBuilder {};
+*/
+
+template <typename CommandT>
+class TransactionBuilder {};
+
+}
 
 #endif

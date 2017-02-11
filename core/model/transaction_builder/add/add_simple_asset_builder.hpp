@@ -13,39 +13,67 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "../../commands/add.hpp"
+#ifndef CORE_MODEL_TRANSACTION_BUILDER_ADD_SIMPLE_ASSET_HPP
+#define CORE_MODEL_TRANSACTION_BUILDER_ADD_SIMPLE_ASSET_HPP
+
+#include "../transaction_builder_base.hpp"
+#include "../../transaction.hpp"
+#include "../../type_signatures/add.hpp"
 #include "../../objects/simple_asset.hpp"
 
+namespace transaction {
+
 template <>
-class TransactionBuilder<Add<object::SimpleAsset>> {
+class TransactionBuilder<type_signatures::Add<object::SimpleAsset>> {
  public:
   TransactionBuilder() = default;
   TransactionBuilder(const TransactionBuilder&) = default;
   TransactionBuilder(TransactionBuilder&&) = default;
+
   TransactionBuilder& setSender(std::string sender) {
+    if (_isSetSender) {
+      throw std::domain_error(std::string("Duplicate sender in ") +
+                              "add/add_simple_asset_builder_template.hpp");
+    }
+    _isSetSender = true;
     _sender = std::move(sender);
     return *this;
   }
+
   TransactionBuilder& setSimpleAsset(object::SimpleAsset object) {
-    _object = std::move(object);
+    if (_isSetSimpleAsset) {
+      throw std::domain_error(std::string("Duplicate ") + "SimpleAsset" +
+                              " in " +
+                              "add/add_simple_asset_builder_template.hpp");
+    }
+    _isSetSimpleAsset = true;
+    _simpleAsset = std::move(object);
     return *this;
   }
-  object::SimpleAsset build() {
+
+  transaction::Transaction build() {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
       throw exception::transaction::UnsetBuildArgmentsException(
           "Add<object::SimpleAsset>", unsetMembers);
     }
-    return _object;
+    return transaction::Transaction(_sender, command::Add(_simpleAsset));
   }
 
  private:
   std::string enumerateUnsetMembers() {
     std::string ret;
-    if (_sender.empty()) ret += " " + "sender";
-    if (_object.empty()) ret += " " + "object";
+    if (not _isSetSender) ret += std::string(" ") + "sender";
+    if (not _isSetSimpleAsset) ret += std::string(" ") + "SimpleAsset";
     return ret;
   }
+
   std::string _sender;
-  object::SimpleAsset _object;
+  object::SimpleAsset _simpleAsset;
+
+  bool _isSetSender = false;
+  bool _isSetSimpleAsset = false;
 };
+}
+
+#endif

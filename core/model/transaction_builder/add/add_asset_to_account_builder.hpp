@@ -13,18 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef CORE_MODEL_TRANSACTION_BUILDER_ADD_PEER_HPP
-#define CORE_MODEL_TRANSACTION_BUILDER_ADD_PEER_HPP
+#ifndef CORE_MODEL_TRANSACTION_BUILDER_ADD_ASSET_TO_ACCOUNT_HPP
+#define CORE_MODEL_TRANSACTION_BUILDER_ADD_ASSET_TO_ACCOUNT_HPP
 
 #include "../transaction_builder_base.hpp"
 #include "../../transaction.hpp"
 #include "../../type_signatures/add.hpp"
-#include "../../objects/peer.hpp"
+#include "../../type_signatures/tags.hpp"
+#include "../../objects/asset.hpp"
+#include "../../objects/account.hpp"
+
+using type_signatures::To;
 
 namespace transaction {
 
 template <>
-class TransactionBuilder<type_signatures::Add<object::Peer>> {
+class TransactionBuilder<type_signatures::Add<object::Asset, To<object::Account>>> {
  public:
   TransactionBuilder() = default;
   TransactionBuilder(const TransactionBuilder&) = default;
@@ -33,20 +37,30 @@ class TransactionBuilder<type_signatures::Add<object::Peer>> {
   TransactionBuilder& setSender(std::string sender) {
     if (_isSetSender) {
       throw std::domain_error(std::string("Duplicate sender in ") +
-                              "add/add_peer_builder_template.hpp");
+                              "add/add_asset_builder_template.hpp");
     }
     _isSetSender = true;
     _sender = std::move(sender);
     return *this;
   }
 
-  TransactionBuilder& setPeer(object::Peer object) {
-    if (_isSetPeer) {
-      throw std::domain_error(std::string("Duplicate ") + "Peer" + " in " +
-                              "add/add_peer_builder_template.hpp");
+  TransactionBuilder& setAsset(object::Asset object) {
+    if (_isSetAsset) {
+      throw std::domain_error(std::string("Duplicate ") + "Asset" + " in " +
+                              "add/add_asset_builder_template.hpp");
     }
-    _isSetPeer = true;
-    _peer = std::move(object);
+    _isSetAsset = true;
+    _asset = std::move(object);
+    return *this;
+  }
+
+  TransactionBuilder& setToAccount(object::Account object) {
+    if (_isSetToAccount) {
+      throw std::domain_error(std::string("Duplicate ") + "Account" + " in " +
+                              "add/add_asset_builder_template.hpp");
+    }
+    _isSetToAccount = true;
+    _account = std::move(object);
     return *this;
   }
 
@@ -54,24 +68,30 @@ class TransactionBuilder<type_signatures::Add<object::Peer>> {
     const auto unsetMembers = enumerateUnsetMembers();
     if (not unsetMembers.empty()) {
       throw exception::transaction::UnsetBuildArgmentsException(
-          "Add<object::Peer>", unsetMembers);
+          "Add<object::Asset>", unsetMembers);
     }
-    return transaction::Transaction(_sender, command::Add(_peer));
+
+//    _account
+
+    return transaction::Transaction(_sender, command::Add(_account));
   }
 
  private:
   std::string enumerateUnsetMembers() {
     std::string ret;
     if (not _isSetSender) ret += std::string(" ") + "sender";
-    if (not _isSetPeer) ret += std::string(" ") + "Peer";
+    if (not _isSetAsset) ret += std::string(" ") + "Asset";
+    if (not _isSetToAccount) ret += std::string(" ") + "Account";
     return ret;
   }
 
   std::string _sender;
-  object::Peer _peer;
+  object::Asset _asset;
+  object::Account _account;
 
   bool _isSetSender = false;
-  bool _isSetPeer = false;
+  bool _isSetAsset = false;
+  bool _isSetToAccount = false;
 };
 }
 
