@@ -105,14 +105,16 @@ namespace http {
     }
 
     std::string getPeerIpPort() {
-        return config::PeerServiceConfig::getInstance().getMyIp() + ":" +
-                std::to_string(config::IrohaConfigManager::getInstance().getGrpcPortNumber(50051));
+        return ;
     }
 
     void server() {
         logger::info("server") << "initialize server!";
 
-        std::vector<std::string> params = {"", "-p", std::to_string(config::IrohaConfigManager::getInstance().getHttpPortNumber(1204))};
+        auto irohaConfigManager = config::IrohaConfigManager::getInstance();
+        auto peerServiceConfig = config::PeerServiceConfig::getInstance();
+
+        std::vector<std::string> params = {"", "-p", std::to_string(irohaConfigManager.getHttpPortNumber(1204))};
         std::vector<char*> argv;
         for (const auto& arg : params)
             argv.push_back((char*)arg.data());
@@ -134,7 +136,8 @@ namespace http {
 
             Torii(
                 Sumeragi::NewStub(grpc::CreateChannel(
-                        getPeerIpPort(),
+                        peerServiceConfig.getMyIp() + ":" +
+                        std::to_string(irohaConfigManager.getGrpcPortNumber(50051)),
                     grpc::InsecureChannelCredentials()
                 )),
                 txDomain
