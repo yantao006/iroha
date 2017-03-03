@@ -39,11 +39,13 @@ void setAwkTimer(int const sleepMillisecs, const std::function<void(void)>& acti
 int main(int argc, char *argv[]){
 
     try {
+        auto &peerConfigService = config::PeerServiceConfig::getInstance();
+
         std::string value;
         std::string senderPublicKey;
         std::string receiverPublicKey;
         std::string cmd;
-        std::vector <std::unique_ptr<peer::Node>> nodes = config::PeerServiceConfig::getInstance().getPeerList();
+        std::vector <std::unique_ptr<peer::Node>> nodes = peerConfigService.getPeerList();
 
         connection::initialize_peer();
 
@@ -56,7 +58,7 @@ int main(int argc, char *argv[]){
             connection::iroha::Sumeragi::Verify::addSubscriber(n->getIP());
         }
 
-        std::string pubKey = config::PeerServiceConfig::getInstance().getMyPublicKey();
+        std::string pubKey = peerConfigService.getMyPublicKey();
 
         sumeragi::initializeSumeragi(pubKey, std::move(nodes));
 

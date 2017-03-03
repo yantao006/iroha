@@ -37,7 +37,8 @@ void setAwkTimer(int const sleepMillisecs, std::function<void(void)> const &acti
 int main(){
     std::string senderPublicKey;
 
-    std::string pubKey = config::PeerServiceConfig::getInstance().getMyPublicKey();
+    auto &peerConfigService = config::PeerServiceConfig::getInstance();
+    std::string pubKey = peerConfigService.getMyPublicKey();
 
     while(1){
         setAwkTimer(3000, [&](){

@@ -51,15 +51,17 @@ int main() {
     logger::info("main") << "process is :" << getpid();
     logger::setLogLevel(logger::LogLevel::DEBUG);
 
-    std::vector<std::unique_ptr<peer::Node>> nodes = config::PeerServiceConfig::getInstance().getPeerList();
+    auto &peerServiceConfig = config::PeerServiceConfig::getInstance();
+
+    std::vector<std::unique_ptr<peer::Node>> nodes = peerServiceConfig.getPeerList();
     connection::initialize_peer();
     for (const auto& n : nodes){
         connection::iroha::Sumeragi::Verify::addSubscriber(n->getIP());
     }
   
     sumeragi::initializeSumeragi(
-                config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                config::PeerServiceConfig::getInstance().getPeerList());
+            peerServiceConfig.getMyPublicKey(),
+            peerServiceConfig.getPeerList());
 
     std::thread http_thread(server);
 

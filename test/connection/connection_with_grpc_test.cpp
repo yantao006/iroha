@@ -56,8 +56,10 @@ TEST(ConnectionWithGrpc, Transaction_Add_Domain){
 
     std::thread server_thread(server);
 
+    auto &peerServiceConfig = config::PeerServiceConfig::getInstance();
+
     connection::iroha::Sumeragi::Verify::addSubscriber(
-        config::PeerServiceConfig::getInstance().getMyIp()
+        peerServiceConfig.getMyIp()
     );
 
     Api::Domain domain;
@@ -72,7 +74,7 @@ TEST(ConnectionWithGrpc, Transaction_Add_Domain){
     sampleEvent.mutable_transaction()->CopyFrom(tx);
 
     connection::iroha::Sumeragi::Verify::send(
-        config::PeerServiceConfig::getInstance().getMyIp(),
+        peerServiceConfig.getMyIp(),
         sampleEvent
     );
 

@@ -41,7 +41,6 @@ using grpc::Status;
 namespace http {
 
     using namespace Api;
-    using namespace config;
 
     using txbuilder::TransactionBuilder;
     using type_signatures::Remove;
@@ -105,22 +104,20 @@ namespace http {
         }
     }
 
-    std::string getPeerIpPort() {
-        return PeerServiceConfig::getInstance().getMyIp() + ":" +
-                std::to_string(IrohaConfigManager::getInstance().getGrpcPortNumber(50051));
-    }
-
     void server() {
         logger::info("server") << "initialize server!";
 
-        std::vector<std::string> params = {"", "-p", std::to_string(IrohaConfigManager::getInstance().getHttpPortNumber(1204))};
+        auto &peerServiceConfig = config::PeerServiceConfig::getInstance();
+        auto &irohaConfigManager = config::IrohaConfigManager::getInstance();
+
+        std::vector<std::string> params = {"", "-p", std::to_string(irohaConfigManager.getHttpPortNumber(1204))};
         std::vector<char*> argv;
         for (const auto& arg : params)
             argv.push_back((char*)arg.data());
         argv.push_back(nullptr);
         Cappuccino::Cappuccino( argv.size() - 1, argv.data() );
 
-        Cappuccino::route<Cappuccino::Method::POST>("/account/register", [](std::shared_ptr<Request> request) -> Response {
+        Cappuccino::route<Cappuccino::Method::POST>("/account/register", [&peerServiceConfig, &irohaConfigManager](std::shared_ptr<Request> request) -> Response {
             auto res = Response(request);
             auto data = request->json();
             std::string uuid;
@@ -135,7 +132,8 @@ namespace http {
 
             Torii(
                 Sumeragi::NewStub(grpc::CreateChannel(
-                        getPeerIpPort(),
+                        peerServiceConfig.getMyIp() + ":" +
+                        std::to_string(irohaConfigManager.getGrpcPortNumber(50051)),
                     grpc::InsecureChannelCredentials()
                 )),
                 txDomain

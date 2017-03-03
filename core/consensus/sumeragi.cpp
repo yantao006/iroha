@@ -56,13 +56,12 @@ namespace sumeragi {
 
     std::map<std::string, std::string> txCache;
 
-    //thread pool and a storage of events 
+    auto &irohaConfigManager = config::IrohaConfigManager::getInstance();
+    //thread pool and a storage of events
     static ThreadPool pool(
         ThreadPoolOptions{
-            .threads_count = config::IrohaConfigManager::getInstance()
-                    .getConcurrency(0),
-            .worker_queue_size = config::IrohaConfigManager::getInstance()
-                    .getPoolWorkerQueueSize(1024),
+            .threads_count = irohaConfigManager.getConcurrency(0),
+            .worker_queue_size = irohaConfigManager.getPoolWorkerQueueSize(1024),
         }
     );
 
@@ -196,13 +195,16 @@ namespace sumeragi {
         context = std::make_unique<Context>(std::move(peers));
         peers.clear();
 
-        logger::info("sumeragi")    <<  "My key is " << config::PeerServiceConfig::getInstance().getMyIp();
+        auto &peerServiceConfig = config::PeerServiceConfig::getInstance();
+        auto &irohaConfigManager = config::IrohaConfigManager::getInstance();
+
+        logger::info("sumeragi")    <<  "My key is " << peerServiceConfig.getMyIp();
         logger::info("sumeragi")    <<  "Sumeragi setted";
         logger::info("sumeragi")    <<  "set number of validatingPeer";
 
         context->numValidatingPeers = context->validatingPeers.size();
         // maxFaulty = Default to approx. 1/3 of the network.
-        context->maxFaulty = config::IrohaConfigManager::getInstance()
+        context->maxFaulty = irohaConfigManager
                 .getMaxFaultyPeers(context->numValidatingPeers / 3);
         context->proxyTailNdx = context->maxFaulty * 2 + 1;
 
@@ -275,6 +277,8 @@ namespace sumeragi {
 
     void processTransaction(ConsensusEvent& event) {
 
+        auto &peerServiceConfig = config::PeerServiceConfig::getInstance();
+
         logger::info("sumeragi")    <<  "processTransaction";
         //if (!transaction_validator::isValid(event->getTx())) {
         //    return; //TODO-futurework: give bad trust rating to nodes that sent an invalid event
@@ -283,21 +287,21 @@ namespace sumeragi {
         logger::info("sumeragi")    <<  "Add my signature...";
 
         logger::info("sumeragi")    <<  "hash:" <<  detail::hash(event.transaction());
-        logger::info("sumeragi")    <<  "pub: "  <<  config::PeerServiceConfig::getInstance().getMyPublicKey();
-        logger::info("sumeragi")    <<  "priv:"  <<  config::PeerServiceConfig::getInstance().getMyPrivateKey();
+        logger::info("sumeragi")    <<  "pub: "  <<  peerServiceConfig.getMyPublicKey();
+        logger::info("sumeragi")    <<  "priv:"  <<  peerServiceConfig.getMyPrivateKey();
         logger::info("sumeragi")    <<  "sig: "  <<  signature::sign(
             detail::hash(event.transaction()),
-            config::PeerServiceConfig::getInstance().getMyPublicKey(),
-            config::PeerServiceConfig::getInstance().getMyPrivateKey()
+            peerServiceConfig.getMyPublicKey(),
+            peerServiceConfig.getMyPrivateKey()
         );
 
         //detail::printIsSumeragi(context->isSumeragi);
         // Really need? blow "if statement" will be false anytime.
         detail::addSignature(event,
-            config::PeerServiceConfig::getInstance().getMyPublicKey(),
+                             peerServiceConfig.getMyPublicKey(),
             signature::sign(detail::hash(event.transaction()),
-                            config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                            config::PeerServiceConfig::getInstance().getMyPrivateKey())
+                            peerServiceConfig.getMyPublicKey(),
+                            peerServiceConfig.getMyPrivateKey())
         );
 
         if (detail::eventSignatureIsEmpty(event) && context->isSumeragi) {
@@ -341,17 +345,17 @@ namespace sumeragi {
                 // This is a new event, so we should verify, sign, and broadcast it
                 detail::addSignature(
                    event,
-                   config::PeerServiceConfig::getInstance().getMyPublicKey(),
+                   peerServiceConfig.getMyPublicKey(),
                    signature::sign(detail::hash(event.transaction()),
-                   config::PeerServiceConfig::getInstance().getMyPublicKey(),
-                   config::PeerServiceConfig::getInstance().getMyPrivateKey()).c_str()
+                   peerServiceConfig.getMyPublicKey(),
+                   peerServiceConfig.getMyPrivateKey()).c_str()
                 );
 
                 logger::info("sumeragi")        <<  "tail public key is "   <<  context->validatingPeers.at(context->proxyTailNdx)->getPublicKey();
                 logger::info("sumeragi")        <<  "tail is "              <<  context->proxyTailNdx;
-                logger::info("sumeragi")        <<  "my public key is "     <<  config::PeerServiceConfig::getInstance().getMyPublicKey();
+                logger::info("sumeragi")        <<  "my public key is "     <<  peerServiceConfig.getMyPublicKey();
                 
-                if (context->validatingPeers.at(context->proxyTailNdx)->getPublicKey() == config::PeerServiceConfig::getInstance().getMyPublicKey()) {
+                if (context->validatingPeers.at(context->proxyTailNdx)->getPublicKey() == peerServiceConfig.getMyPublicKey()) {
                     logger::info("sumeragi")    <<  "I will send event to " <<  context->validatingPeers.at(context->proxyTailNdx)->getIP();
                     connection::iroha::Sumeragi::Verify::send(context->validatingPeers.at(context->proxyTailNdx)->getIP(), std::move(event)); // Think In Process
                 } else {
