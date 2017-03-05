@@ -18,20 +18,20 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 # IROHA_HOME here should be the same as IROHA_RELEASE in iroha-dev
 ENV IROHA_HOME=/usr/local/iroha
 
-# this copies iroha and unpacks its binaries
-ADD ./iroha.tar /
-ADD ./scripts /
-ADD ./config /usr/local/iroha/config
-
 RUN groupadd -g 168 iroha && \
     useradd -u 168 -c "IROHA Administrator" -s /bin/bash -m -d ${IROHA_HOME} -p $(perl -e "print(crypt('passw0rd', 'sa'));") -g iroha iroha && \
     usermod -G adm,sudo iroha && \
 
-    apt update && apt -y upgrade && apt -y install default-jdk netcat libsnappy-dev; \
+    apt-get update && apt-get -y upgrade && apt-get -y install default-jdk netcat libsnappy-dev; \
 
     echo /usr/local/lib >>/etc/ld.so.conf && \
     echo ${IROHA_HOME}/lib >>/etc/ld.so.conf && \
 
     ldconfig
+
+# this copies iroha and unpacks its binaries
+ADD ./iroha.tar /
+ADD ./scripts /
+ADD ./config /usr/local/iroha/config
 
 CMD ["/run.sh"]
