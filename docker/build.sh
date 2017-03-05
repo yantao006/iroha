@@ -20,12 +20,10 @@ printinfo() {
   echo "$(tput bold)$(tput setaf 5)[build.sh] "$*"$(tput sgr0)"
 }
 
-if ! docker images hyperledger/iroha-dev | grep -q hyperledger/iroha-dev; then
-  printinfo 'Building the Docker dev container (hyperledger/iroha-dev)'
-  docker build -t hyperledger/iroha-dev ${IROHA_HOME}/docker/dev 
-  if [ ! $? ]; then 
-    error "can not build iroha-dev; exit code: $?"
-  fi
+printinfo 'Building the Docker dev container (hyperledger/iroha-dev)'
+docker build -t hyperledger/iroha-dev ${IROHA_HOME}/docker/dev
+if [ ! $? ]; then
+  error "can not build iroha-dev; exit code: $?"
 fi
 
 printinfo 'Build the project inside the Docker dev container'

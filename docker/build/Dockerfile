@@ -17,6 +17,7 @@ LABEL RUN="docker run -d --name iroha hyperledger/iroha-docker"
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 # IROHA_HOME here should be the same as IROHA_RELEASE in iroha-dev
 ENV IROHA_HOME=/usr/local/iroha
+ENV LD_LIBRARY_PATH /usr/local/lib
 
 RUN groupadd -g 168 iroha && \
     useradd -u 168 -c "IROHA Administrator" -s /bin/bash -m -d ${IROHA_HOME} -p $(perl -e "print(crypt('passw0rd', 'sa'));") -g iroha iroha && \
