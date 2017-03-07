@@ -116,30 +116,9 @@ namespace http {
 
         Cappuccino::route<Cappuccino::Method::POST>("/account/register", [](std::shared_ptr<Request> request) -> Response {
             auto res = Response(request);
-            auto data = request->json();
-            std::string uuid;
-
-            Api::Domain domain;
-            domain.set_ownerpublickey("pubkey1");
-            domain.set_name("name");
-            auto txDomain = TransactionBuilder<Remove<Domain>>()
-                .setSenderPublicKey("karin")
-                .setDomain(domain)
-                .build();
-
-            Torii(
-                Sumeragi::NewStub(grpc::CreateChannel(
-                    config::PeerServiceConfig::getInstance().getMyIp() + ":" +
-                    std::to_string(config::IrohaConfigManager::getInstance().getGrpcPortNumber(50051)),
-                    grpc::InsecureChannelCredentials()
-                )),
-                txDomain
-            );
 
             res.json(json({
-              {"status",  200},
-              {"message", "successful"},
-              {"uuid",   uuid}
+              {"status",  200}
             }));
 
             return res;
