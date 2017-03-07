@@ -34,7 +34,7 @@ test:
   pre:
     # TESTS: 
     # first, run ctest inside a container
-    - docker run -p 1204:1204 hyperledger/iroha-docker /test.sh 
+    - docker run hyperledger/iroha-docker /test.sh
     # then, run iroha with dummy config (1 node) and print its output to stdout
     - docker run -it -d -p 1204:1204 hyperledger/iroha-docker /run.sh; curl -X POST http://127.0.0.1:1204/account/register -d '{"publicKey":"WdvM/DPabapmtA7ISbTYPywbHxk8gWu2221LzmcmAgw=","alias":"penguin","timestamp":1482053586}'
 
