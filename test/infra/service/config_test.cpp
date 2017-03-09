@@ -49,6 +49,7 @@ TEST(config, isSystemConfigValid) {
 
     json configData = json::parse(res);
     std::string myip = configData["me"]["ip"].dump();
+    myip = myip.substr(1, myip.size()-2);
     isIpValid(myip);
 
     ASSERT_FALSE(configData["me"]["name"].dump() == "\"\"") << "Your name is empty.";
@@ -59,17 +60,20 @@ TEST(config, isSystemConfigValid) {
     std::set<std::string> ips;
     for (auto peer: configData["group"]) {
         auto prevSize = ips.size();
-        ips.insert(peer["ip"].dump());
-        ASSERT_TRUE(ips.size() == prevSize+1) << "IP duplicate found: " << peer["ip"];
+        auto ip = peer["ip"].dump();
+        ip = ip.substr(1, ip.size()-2);
+        ips.insert(ip);
+        ASSERT_TRUE(ips.size() == prevSize+1) << "IP duplicate found: " << ip;
 
-        if (peer["ip"].dump() == myip) {
+        if (ip == myip) {
             ASSERT_TRUE(peer["name"] == configData["me"]["name"])
                     << "My name differs from a name of the node with same IP as me.";
             ASSERT_TRUE(peer["publicKey"] == configData["me"]["publicKey"])
                     << "My publicKey differs from a name of the node with same IP as me.";
         }
 
-        isIpValid(peer["ip"].dump());
+
+        isIpValid(ip);
         ASSERT_FALSE(peer["name"].dump() == "\"\"")
                 << "Name of node " << peer["ip"].dump() << " is empty";
         ASSERT_FALSE(peer["publicKey"].dump() == "\"\"")

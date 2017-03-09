@@ -19,7 +19,8 @@ limitations under the License.
 
 namespace ip_checker {
     bool isIpValid(const std::string &ip) {
-        std::regex ipRegex("\"((([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5]))).){3}(([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5])))\"");
-        return std::regex_match(ip, ipRegex);
+        std::regex ipRegex("((([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5]))).){3}(([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5])))");
+        bool res = std::regex_match(ip, ipRegex);
+        return res;
     }
 }
