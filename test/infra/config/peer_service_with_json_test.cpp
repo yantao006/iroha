@@ -41,7 +41,7 @@ TEST(peer_service_with_json_test, initialize_peer_test) {
 }
 
 TEST(peer_service_with_json_test, add_peer_test) {
-  int n = PEER.getPeerList().size();
+  auto n = PEER.getPeerList().size();
   peer::Node peer1 = peer::Node("ip_low", "publicKey1", 0.5);
   peer::Node peer2 = peer::Node("ip_high", "publicKey2", 1.5);
   peer::Node peer3 = peer::Node("ip_high", "publicKey1", 1.5);
@@ -64,7 +64,7 @@ TEST(peer_service_with_json_test, add_peer_test) {
 }
 
 TEST(peer_service_with_json_test, update_peer_test) {
-  int n = PEER.getPeerList().size();
+  auto n = PEER.getPeerList().size();
   const std::string upd_ip = "updated_ip";
   const std::string upd_key = "publicKey1";
   const std::string upd_ng_key = "dummy";
@@ -89,7 +89,7 @@ TEST(peer_service_with_json_test, update_peer_test) {
 }
 
 TEST(peer_service_with_json_test, remove_peer_test) {
-  int n = PEER.getPeerList().size();
+  auto n = PEER.getPeerList().size();
   const std::string rm_key = "publicKey1";
   ASSERT_TRUE(PEER.validate_removePeer(rm_key));
   ASSERT_TRUE(PEER.removePeer(rm_key));
@@ -120,5 +120,23 @@ TEST(peer_service_with_json_test, get_my_params_test) {
   ASSERT_FALSE(PEER.getMyPrivateKey().empty());
   ASSERT_FALSE(PEER.getMyIp().empty());
   ASSERT_TRUE(ip_checker::isIpValid(PEER.getMyIp()));
+
 }
 
+TEST(peer_service_with_json_test, get_max_trust_score_test) {
+  ASSERT_TRUE(PEER.getMaxTrustScore() >= 0.0 && PEER.getMaxTrustScore() <= 1.0);
+}
+
+TEST(peer_service_with_json_test, get_peer_list_test) {
+  auto peers = PEER.getPeerList();
+  ASSERT_TRUE(peers.size() >= 1);
+  auto myIp = PEER.getMyIp();
+  ASSERT_TRUE(std::find_if( peers.begin(), peers.end(), [&myIp]( auto &p ) { return p->getIP() == myIp; } ) != peers.end());
+}
+
+TEST(peer_service_with_json_test, get_ip_list_test) {
+  auto ips = PEER.getIpList();
+  for (auto &&ip: ips) {
+    ASSERT_TRUE(ip_checker::isIpValid(ip));
+  }
+}

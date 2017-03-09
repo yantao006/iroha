@@ -86,7 +86,7 @@ class PeerServiceConfig : config::AbstractConfigManager {
   // invoke when execute transaction
   bool addPeer( const peer::Node& );
   bool removePeer( const std::string &publicKey );
-  bool updatePeer( const std::string& publicKey, const peer::Node& peer );
+  bool updatePeer( const std::string &publicKey, const peer::Node &peer );
 
   //invoke next to addPeer
   bool sendAllTransactionToNewPeer( const peer::Node& );
@@ -94,9 +94,9 @@ class PeerServiceConfig : config::AbstractConfigManager {
   // invoke when validator transaction
   bool validate_addPeer( const peer::Node& );
   bool validate_removePeer( const std::string &publicKey );
-  bool validate_updatePeer( const std::string& publicKey, const peer::Node& peer );
+  bool validate_updatePeer( const std::string &publicKey, const peer::Node &peer );
 
-  // equatl to isSumeragi
+  // equal to isSumeragi
   bool isLeaderMyPeer();
   std::unique_ptr<peer::Node> leaderPeer();
 
