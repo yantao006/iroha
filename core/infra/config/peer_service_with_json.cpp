@@ -40,7 +40,7 @@ using nlohmann::json;
 std::vector<peer::Node> PeerServiceConfig::peerList;
 
 PeerServiceConfig::PeerServiceConfig() {
-    initialziePeerList_from_json();
+    initializePeerList_from_json();
 }
 
 PeerServiceConfig& PeerServiceConfig::getInstance() {
@@ -150,7 +150,7 @@ std::vector<json> PeerServiceConfig::getGroup() {
     });
 }
 
-void PeerServiceConfig::initialziePeerList_from_json(){
+void PeerServiceConfig::initializePeerList_from_json(){
   if (!peerList.empty()) return;
   for (const auto& peer : getGroup()) {
     peerList.emplace_back( peer["ip"].get<std::string>(),
@@ -178,7 +178,7 @@ std::vector<peer::Node>::iterator PeerServiceConfig::findPeerPublicKey( const st
 
 
 std::vector<std::unique_ptr<peer::Node>> PeerServiceConfig::getPeerList() {
-  initialziePeerList_from_json();
+  initializePeerList_from_json();
 
   std::vector<std::unique_ptr<peer::Node>> nodes;
   for( auto &&node : peerList )

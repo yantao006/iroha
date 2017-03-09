@@ -53,7 +53,7 @@ class PeerServiceConfig : config::AbstractConfigManager {
  private:
   static std::vector<peer::Node> peerList;
 
-  void initialziePeerList_from_json();
+  void initializePeerList_from_json();
 
   bool isExistIP( const std::string& );
   bool isExistPublicKey( const std::string& );
