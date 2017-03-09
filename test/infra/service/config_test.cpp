@@ -21,11 +21,12 @@ limitations under the License.
 
 #include <json.hpp>
 
+#include <util/ip_checker.hpp>
+
 using json = nlohmann::json;
 
 void isIpValid(const std::string &ip) {
-    std::regex ipRegex("\"((([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5]))).){3}(([0-1]?\\d\\d?)|((2[0-4]\\d)|(25[0-5])))\"");
-    ASSERT_TRUE(std::regex_match(ip, ipRegex)) << "IP " << ip << " looks like not a valid ip.";
+    ASSERT_TRUE(ip_checker::isIpValid(ip)) << "IP " << ip << " looks like not a valid ip.";
 }
 
 TEST(config, isSystemConfigValid) {

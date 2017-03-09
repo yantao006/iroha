@@ -21,6 +21,7 @@ target_link_libraries(peer_service_with_json_test
     gtest
     create_objects_helper
     transaction_repository
+    ip_checker
 )
 add_test(
     NAME peer_service_with_json_test

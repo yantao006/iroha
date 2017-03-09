@@ -22,6 +22,7 @@ limitations under the License.
 #include <infra/protobuf/api.pb.h>
 #include <infra/config/peer_service_with_json.hpp>
 #include <service/peer_service.hpp>
+#include <util/ip_checker.hpp>
 #include <vector>
 
 auto& PEER = config::PeerServiceConfig::getInstance();
@@ -113,3 +114,11 @@ TEST(peer_service_with_json_test, leader_peer_check_test) {
   }
   ASSERT_TRUE(PEER.isLeaderMyPeer());
 }
+
+TEST(peer_service_with_json_test, get_my_params_test) {
+  ASSERT_FALSE(PEER.getMyPublicKey().empty());
+  ASSERT_FALSE(PEER.getMyPrivateKey().empty());
+  ASSERT_FALSE(PEER.getMyIp().empty());
+  ASSERT_TRUE(ip_checker::isIpValid(PEER.getMyIp()));
+}
+
