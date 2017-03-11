@@ -4,7 +4,8 @@ ADD_LIBRARY(executor STATIC
 target_link_libraries(executor
     config_manager
     core_repository
-)
+    virtual_machine_with_java
+ )
 
 ADD_LIBRARY(izanami STATIC
     izanami.cpp
