@@ -43,4 +43,10 @@ limitations under the License.
 #include "remove/remove_peer_builder.hpp"
 #include "remove/remove_simple_asset_builder.hpp"
 
+#include "contract/contract_domain_builder.hpp"
+#include "contract/contract_account_builder.hpp"
+#include "contract/contract_asset_builder.hpp"
+#include "contract/contract_peer_builder.hpp"
+#include "contract/contract_simple_asset_builder.hpp"
+
 #endif

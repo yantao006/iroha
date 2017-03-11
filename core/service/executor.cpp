@@ -16,6 +16,8 @@ limitations under the License.
 #include <iostream>
 #include <infra/config/peer_service_with_json.hpp>
 
+#include <virtual_machine/virtual_machine.hpp>
+
 #include <repository/domain/asset_repository.hpp>
 #include <repository/domain/account_repository.hpp>
 #include <util/logger.hpp>
@@ -111,8 +113,75 @@ namespace executor{
     }
 
     void contract(const Transaction& tx){
+
+        // ここからJavaがinvoke出来ればいいだけの話
+        // Contractの場合はtxにname
+/*
+
+        if (tx.has_asset()) {
+            const auto asset = tx.asset();
+            repository::asset::add(tx.senderpubkey(),asset.name(),asset);
+        } else if (tx.has_domain()) {
+            const auto domain = tx.domain();
+        } else if (tx.has_account()) {
+            const auto account = tx.account();
+            repository::account::add(account.publickey(), account);
+            logger::info("executor") << "add account";
+        } else if( tx.has_peer() ) {
+            peer::Node query_peer(
+                    tx.peer().address(),
+                    tx.peer().publickey(),
+                    tx.peer().trust().value(),
+                    tx.peer().trust().isok()
+            );
+            if( tx.type() == "Add" ) {
+                config::PeerServiceConfig::getInstance().addPeer( query_peer );
+            } else if( tx.type() == "Remove" ) {
+                config::PeerServiceConfig::getInstance().removePeer( query_peer.getPublicKey() );
+            } else if( tx.type() == "Update" ) {
+                config::PeerServiceConfig::getInstance().updatePeer( query_peer.getPublicKey(), query_peer );
+            }
+        }
+*/
         if(tx.has_asset()){
             // Contract<Asset>
+            std::map<std::string, std::string> assetInfo;
+            {
+//                assetInfo["domain"] = tx.asset().domain();
+                assetInfo["name"] = tx.asset().name();
+                assetInfo["smartContractName"] = tx.asset().smartcontractname();
+            }
+
+            std::map<std::string, std::map<std::string, std::string>> assetValue;
+            {
+                for (auto e: tx.asset().value()) {
+                    auto& obj = e.second;
+                    std::string value_type;
+                    std::string value_content = [&](){
+                        switch (obj.value_case()) {
+                          case Api::BaseObject::ValueCase::kValueString:
+                            value_type = "string";
+                            return obj.valuestring();
+                          case Api::BaseObject::ValueCase::kValueInt:
+                            value_type = "int";
+                            return std::to_string(obj.valueint());
+                          case Api::BaseObject::ValueCase::kValueBoolean:
+                            value_type = "boolean";
+                            return obj.valueboolean() ? std::string("true") : "false";
+                          case Api::BaseObject::ValueCase::kValueDouble:
+                            value_type = "double";
+                            return std::to_string(obj.valuedouble());
+                          default:
+                            throw "invalid type exception";
+                        }
+                    }();
+
+                    assetValue[e.first][value_type] = value_content;
+                }
+            }
+
+            virtual_machine::invokeFunction("demo", "contract", "testAddAsset",
+                                            assetInfo, assetValue);
         }else if(tx.has_domain()){
             // Contract<Domain>
         }else if(tx.has_account()){
@@ -124,7 +193,7 @@ namespace executor{
 
     void execute(const Transaction& tx){
         logger::info("executor") << "Executor";
-        logger::info("executor")  << "DebugString:"<< tx.DebugString();
+        logger::info("executor") << "DebugString:"<< tx.DebugString();
         if(tx.type() == "add"){
             add(tx);
         }else if(tx.type() == "transfer"){

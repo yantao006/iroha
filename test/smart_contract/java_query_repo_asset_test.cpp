@@ -164,7 +164,7 @@ TEST(JavaQueryRepoAsset, invokeUpdateAssetQuery) {
 
   std::map<std::string, std::string> params;
   {
-    params[tag::Uuid] = "MPTt3ULszCLGQqAqRgHj2gQHVnxn/DuNlRXR/iLMAn4=";
+    params[tag::PublicKey] = "MPTt3ULszCLGQqAqRgHj2gQHVnxn/DuNlRXR/iLMAn4=";
   }
 
   assetValue["ownerName"] = {
@@ -231,7 +231,7 @@ TEST(JavaQueryRepoAsset, invokeRemoveAssetQuery) {
 
   std::map<std::string, std::string> params;
   {
-    params[tag::Uuid] = assetUuid;
+    params[tag::PublicKey] = assetUuid;
   }
 
   virtual_machine::invokeFunction(PackageName, ContractName, "testRemoveAsset",
@@ -298,7 +298,7 @@ TEST(JavaQueryRepoAsset, reinvokeAddAssetQuery) {
   const auto publicKey =
     "MPTt3ULszCLGQqAqRgHj2gQHVnxn/DuNlRXR/iLMAn4=";
 
-ASSERT_FALSE(repository::asset::exists(publicKey,"Currency"));
+  ASSERT_FALSE(repository::asset::exists(publicKey,"Currency"));
   ASSERT_TRUE(repository::asset::exists(publicKey,"Currency"));
 
   // Remove chache
