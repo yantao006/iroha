@@ -180,7 +180,7 @@ namespace executor{
                 }
             }
 
-            virtual_machine::invokeFunction("demo", "contract", "testAddAsset",
+            virtual_machine::invokeFunction("sample", "contract", "testAddAsset",
                                             assetInfo, assetValue);
         }else if(tx.has_domain()){
             // Contract<Domain>
