@@ -1,18 +1,20 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/iroha
+    working_directory: /opt/iroha
     docker:
       - image: warchantua/iroha-dev
-
     steps:
-      - checkout
+      - checkout:
+      - run: 
+          name: build directory
+          command: |
+            mkdir -p $IROHA_BUILD
+            cd $IROHA_BUILD
+
       - run:
           name: cmake
-          command: mkdir -p $IROHA_BUILD; cd $IROHA_BUILD; cmake $IROHA_HOME
+          command: cmake $IROHA_HOME
       - run:
           name: make
-          command: cd $IROHA_BUILD; make -j4
-      - run:
-          name: tests
-          command: cd $IROHA_BUILD; ctest
+          command: make -j4
