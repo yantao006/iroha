@@ -4,11 +4,10 @@ jobs:
     # must be IROHA_HOME:
     working_directory: /opt/iroha
     docker:
-      - image: warchantua/iroha-dev
+      - image: warchantua/iroha-dev:0.1
         environment:
           IROHA_HOME: /opt/iroha
           IROHA_BUILD: /tmp/build
-          IROHA_RELEASE: /usr/local/iroha
       - image: ubuntu:16.04
     steps:
       # if image has no git, this will fail
@@ -18,7 +17,6 @@ jobs:
           command: |
             mkdir -p $IROHA_HOME
             mkdir -p $IROHA_BUILD
-            mkdir -p $IROHA_RELEASE
       - run: 
           name: go to build directory
           command: cd $IROHA_BUILD
@@ -28,6 +26,9 @@ jobs:
       - run:
           name: make
           command: make -j4
+      - run:
+          name: tests
+          command: ctest
       - run:
           name: build hyperledger/iroha-docker image
           command: |
@@ -40,6 +41,7 @@ jobs:
             cp -H $LIBS $IROHA_DOCKER
             # build image
             docker build -t hyperledger/iroha-build $IROHA_HOME/docker/tiny/Dockefrile
+
 
 
         

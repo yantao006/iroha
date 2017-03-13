@@ -1,10 +1,10 @@
 # among tested images only with ubuntu works
-FROM ubuntu:latest
+FROM ubuntu:16.04
 
 COPY iroha /iroha
 
 ENV IROHA_HOME=/iroha
-ENV LD_LIBRARY_PATH=/iroha/libx86_64
+ENV LD_LIBRARY_PATH=/iroha/lib
 
 WORKDIR /iroha
 
