@@ -20,14 +20,18 @@ jobs:
       - run:
           name: cmake
           command: |
-            echo $PWD
+            cd $IROHA_BUILD
             cmake $IROHA_HOME
       - run:
           name: make
-          command: make -j4
+          command: |
+            cd $IROHA_BUILD
+            make -j4
       - run:
           name: tests
-          command: ctest
+          command: |
+            cd $IROHA_BUILD
+            ctest
       - run:
           name: build hyperledger/iroha-docker image
           command: |
