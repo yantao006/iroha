@@ -19,13 +19,16 @@ jobs:
             mkdir -p $IROHA_BUILD
       - run: 
           name: go to build directory
-          command: cd $IROHA_BUILD
+          command: 
       - run:
           name: cmake
-          command: cmake $IROHA_HOME
+          command: |
+            echo $PWD
+            cmake $IROHA_HOME
       - run:
           name: make
-          command: make -j4
+          command: |
+            make -j4
       - run:
           name: tests
           command: ctest
