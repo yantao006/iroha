@@ -65,10 +65,9 @@ jobs:
             # copy libraries (-H = follow links)
             cp -H $LIBS $IROHA_DOCKER/lib
 
-            ls $IROHA_HOME/docker/tiny
-            cat $IROHA_HOME/docker/tiny/Dockerfile
             # build image
-            docker build -t hyperledger/iroha-build:$TAG $IROHA_HOME/docker/tiny/Dockerfile
+            cd $IROHA_HOME/docker/tiny
+            docker build -t hyperledger/iroha-build:$TAG .
             # login and push
             docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
             docker push hyperledger/iroha-docker:$TAG
