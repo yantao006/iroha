@@ -13,6 +13,12 @@ jobs:
     steps:
       # if image has no git, this will fail
       - checkout
+      - run:
+          name: ensure, required folders created
+          command: |
+            mkdir -p $IROHA_HOME
+            mkdir -p $IROHA_BUILD
+            mkdir -p $IROHA_RELEASE
       - run: 
           name: go to build directory
           command: cd $IROHA_BUILD
