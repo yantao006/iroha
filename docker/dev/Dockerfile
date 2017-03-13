@@ -24,6 +24,7 @@ ENV IROHA_RELEASE /usr/local/iroha
 # install dependencies
 RUN apt-get update && apt-get -y upgrade; \
     apt-get -yqq install \
+        sudo \
         software-properties-common \
         python-software-properties \
         curl \

@@ -4,7 +4,7 @@ jobs:
     # must be IROHA_HOME:
     working_directory: /opt/iroha
     docker:
-      - image: warchantua/iroha-dev:0.1
+      - image: warchantua/iroha-dev
         environment:
           IROHA_HOME: /opt/iroha
           IROHA_BUILD: /tmp/build
@@ -69,7 +69,8 @@ jobs:
             cd $IROHA_HOME/docker/tiny
             docker build -t hyperledger/iroha-build:$TAG .
             # login and push
-            $IROHA_HOME/deploy.sh hyperledger/iroha-docker:$TAG
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PASS
+            docker push hyperledger/iroha-docker:$TAG
 
       ## At this step we have hyperledger/iroha-docker image, we can test it now
       # TODO
