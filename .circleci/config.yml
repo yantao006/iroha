@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: warchantua/iroha-dev
     steps:
-      - checkout:
+      - checkout
       - run: 
           name: build directory
           command: |
