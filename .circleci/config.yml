@@ -69,8 +69,7 @@ jobs:
             cd $IROHA_HOME/docker/tiny
             docker build -t hyperledger/iroha-build:$TAG .
             # login and push
-            docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-            docker push hyperledger/iroha-docker:$TAG
+            $IROHA_HOME/deploy.sh hyperledger/iroha-docker:$TAG
 
       ## At this step we have hyperledger/iroha-docker image, we can test it now
       # TODO
