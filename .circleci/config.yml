@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/iroha
+    docker:
+      - image: warchantua/iroha-dev
+
+    steps:
+      - checkout
+      - run:
+          name: cmake
+          command: mkdir -p $IROHA_BUILD; cd $IROHA_BUILD; cmake $IROHA_HOME
+      - run:
+          name: make
+          command: cd $IROHA_BUILD; make -j4
+      - run:
+          name: tests
+          command: cd $IROHA_BUILD; ctest

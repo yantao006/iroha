@@ -23,7 +23,7 @@ ENV IROHA_RELEASE /usr/local/iroha
 # we use single RUN instruction to reduce number of "layers" in docker image: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices
 # install dependencies
 RUN apt-get update && apt-get -y upgrade; \
-    apt-get -y install \
+    apt-get -yqq install \
         software-properties-common \
         python-software-properties \
         curl \
@@ -55,6 +55,7 @@ RUN apt-get update && apt-get -y upgrade; \
     curl -sSL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz | tar -xzC /opt; \
     ln -s /opt/cmake*/bin/c* /usr/local/bin; \
     mkdir -p ${IROHA_RELEASE}; \
+    mkdir -p ${IROHA_BUILD}; \
 
     # install protobuf v3.0.0
     cd /tmp; \
