@@ -1,20 +1,39 @@
 version: 2
 jobs:
   build:
+    # must be IROHA_HOME:
     working_directory: /opt/iroha
     docker:
       - image: warchantua/iroha-dev
+        environment:
+          IROHA_HOME: /opt/iroha
+          IROHA_BUILD: /tmp/build
+          IROHA_RELEASE: /usr/local/iroha
+      - image: ubuntu:16.04
     steps:
+      # if image has no git, this will fail
       - checkout
       - run: 
-          name: build directory
-          command: |
-            mkdir -p $IROHA_BUILD
-            cd $IROHA_BUILD
-
+          name: go to build directory
+          command: cd $IROHA_BUILD
       - run:
           name: cmake
           command: cmake $IROHA_HOME
       - run:
           name: make
           command: make -j4
+      - run:
+          name: build hyperledger/iroha-docker image
+          command: |
+            # directory, where iroha build files will reside
+            IROHA_DOCKER=$IROHA_HOME/docker/tiny/iroha
+            mkdir -p $IROHA_DOCKER
+            # extract all libraries which use iroha:
+            LIBS=$(ldd $IROHA_BUILD/bin/iroha-main | cut -f 2 | cut -d " " -f 3)
+            # copy libraries (-H = follow links)
+            cp -H $LIBS $IROHA_DOCKER
+            # build image
+            docker build -t hyperledger/iroha-build $IROHA_HOME/docker/tiny/Dockefrile
+
+
+        

@@ -56,6 +56,7 @@ RUN apt-get update && apt-get -y upgrade; \
     ln -s /opt/cmake*/bin/c* /usr/local/bin; \
     mkdir -p ${IROHA_RELEASE}; \
     mkdir -p ${IROHA_BUILD}; \
+    mkdir -p ${IROHA_HOME}; \
 
     # install protobuf v3.0.0
     cd /tmp; \
