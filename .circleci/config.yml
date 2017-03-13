@@ -76,8 +76,7 @@ jobs:
               send -- "$env(DOCKER_USER)\r"
               expect "Password:*"
               send -- "$env(DOCKER_PASS)\r"
-              expect "*WARNING:*Login Succeeded*"
-              expect eof' || (echo "Can not login && exit 1)
+              expect "*WARNING:*Login Succeeded*"' || (echo "Can not login && exit 1)
             fi
             # and push
             docker push hyperledger/iroha-docker:$TAG
