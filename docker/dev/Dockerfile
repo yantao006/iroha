@@ -28,6 +28,7 @@ RUN apt-get update && apt-get -y upgrade; \
         software-properties-common \
         python-software-properties \
         curl \
+        expect \
         git \
         make \
         build-essential \

