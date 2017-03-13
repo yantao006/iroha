@@ -4,7 +4,7 @@ jobs:
     # must be IROHA_HOME:
     working_directory: /opt/iroha
     docker:
-      - image: warchantua/iroha-dev
+      - image: warchantua/iroha-dev:0.1
         environment:
           IROHA_HOME: /opt/iroha
           IROHA_BUILD: /tmp/build
@@ -28,22 +28,50 @@ jobs:
             cd $IROHA_BUILD
             make -j4
       - run:
-          name: tests
+          name: run tests
           command: |
             cd $IROHA_BUILD
             ctest
+
+      # integrated into circle 2.0
+      - setup_docker_engine
+
+      ## At this step we have compiled and tested iroha. 
+      - run:
+          name: setup docker
+          command: |
+            set -ex
+            curl -L -o /tmp/docker.tgz https://get.docker.com/builds/Linux/x86_64/docker-17.03.0-ce.tgz
+            tar -xz -C /tmp -f /tmp/docker.tgz
+            mv /tmp/docker/* /usr/bin
+
+      - run:
+          name: setup docker-compose
+          command: |
+            set -ex
+            curl -L https://github.com/docker/compose/releases/download/1.11.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+
       - run:
           name: build hyperledger/iroha-docker image
           command: |
+            # iroha version is 0.8 now
+            TAG=0.8.$CIRCLE_BUILD_NUM
             # directory, where iroha build files will reside
             IROHA_DOCKER=$IROHA_HOME/docker/tiny/iroha
-            mkdir -p $IROHA_DOCKER
+            mkdir -p $IROHA_DOCKER/lib
             # extract all libraries which use iroha:
             LIBS=$(ldd $IROHA_BUILD/bin/iroha-main | cut -f 2 | cut -d " " -f 3)
             # copy libraries (-H = follow links)
-            cp -H $LIBS $IROHA_DOCKER
+            cp -H $LIBS $IROHA_DOCKER/lib
             # build image
-            docker build -t hyperledger/iroha-build $IROHA_HOME/docker/tiny/Dockefrile
+            docker build -t hyperledger/iroha-build:$TAG $IROHA_HOME/docker/tiny/Dockefrile
+            # login and push
+            docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+            docker push hyperledger/iroha-docker:$TAG
+
+      ## At this step we have hyperledger/iroha-docker image, we can test it now
+      # TODO
 
 
 
