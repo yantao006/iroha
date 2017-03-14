@@ -100,9 +100,13 @@ table ConsensusEvent {
   status:string;
 }
 
+table CommandOption {
+  optionList: [Api.KeyValueObject];
+}
 table Transaction {
   creatorPubKey: string(required);
   command: string(required);
+  commandOption: CommandOption;
   object:  Object;
 
   signatures: [Api.Signature];
