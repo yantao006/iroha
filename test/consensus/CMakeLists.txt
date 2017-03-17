@@ -13,7 +13,7 @@ target_link_libraries(sumeragi_test
     connection_with_grpc
     config_manager
     peer_service
-    transaction_builder
+    create_objects_helper
 )
 
 add_executable(transaction_test
@@ -28,5 +28,5 @@ target_link_libraries(transaction_test
     pthread
     config_manager
     peer_service
-    transaction_builder
+    create_objects_helper
 )

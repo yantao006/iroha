@@ -3,7 +3,7 @@ add_executable(java_data_structure_test
 )
 target_link_libraries(java_data_structure_test
   hash
-  transaction_builder
+  create_objects_helper
   virtual_machine_with_java
   gtest
 )

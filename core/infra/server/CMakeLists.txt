@@ -3,13 +3,13 @@ ADD_LIBRARY(http_server_with_cappuccino STATIC
 )
 
 target_link_libraries(http_server_with_cappuccino
-  json
-  hash
-  cappuccino
-  pthread
+  ssl
   logger
-  peer_service
-  config_manager
-  transaction_builder
-  event_with_grpc
+  datetime
+  base64
+  signature
+  connection_with_grpc
+  cappuccino
+  create_objects_helper
+  asio
 )
