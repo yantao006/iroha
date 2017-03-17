@@ -14,15 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <tuple>
-
-#include <infra/config/iroha_config_with_json.hpp>
 #include <repository/world_state_repository.hpp>
+#include <infra/config/iroha_config_with_json.hpp>
 #include <util/exception.hpp>
 #include <util/logger.hpp>
 
-#include <leveldb/db.h>
 #include <leveldb/write_batch.h>
+#include <leveldb/db.h>
+#include <tuple>
 
 // +------------------------------------------------+
 // | Repository should save string to any database. |

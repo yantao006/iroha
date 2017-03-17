@@ -25,6 +25,8 @@ limitations under the License.
 #include <algorithm>
 
 #include <crypto/signature.hpp>
+#include <util/logger.hpp>
+
 namespace event {
 
 template <typename T>
@@ -43,7 +45,7 @@ class ConsensusEvent: public T {
         {}
 
         // move constructor
-        eventSignature(eventSignature&& other){
+        eventSignature(const eventSignature&& other){
             publicKey = std::move(other.publicKey);
             signature = std::move(other.signature);
         }

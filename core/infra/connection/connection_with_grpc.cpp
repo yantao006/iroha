@@ -19,6 +19,7 @@ limitations under the License.
 #include <consensus/connection/connection.hpp>
 #include <util/logger.hpp>
 #include <util/datetime.hpp>
+#include <service/peer_service.hpp>
 
 #include <infra/config/peer_service_with_json.hpp>
 #include <service/peer_service.hpp>

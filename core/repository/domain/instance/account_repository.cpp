@@ -19,6 +19,7 @@ limitations under the License.
 #include <crypto/hash.hpp>
 #include <repository/world_state_repository.hpp>
 #include <transaction_builder/transaction_builder.hpp>
+#include <util/convert_string.hpp>
 #include <util/logger.hpp>
 
 namespace common = ::repository::common;

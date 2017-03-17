@@ -22,7 +22,7 @@ target_link_libraries(peer_service_with_json_test
     peer_service
     event_with_grpc
     gtest
-    transaction_builder
+    create_objects_helper
     transaction_repository
 )
 add_test(
